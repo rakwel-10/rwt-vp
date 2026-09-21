@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>overflow check</title>
+<style>body{font:13px monospace} iframe{width:390px;height:700px;border:0;position:absolute;left:-9999px}</style>
+</head><body>
+<script src="../data/funnel.js"></script>
+<pre id="out">running…</pre>
+<script>
+const WIDTHS = [390, 768];
+(async function () {
+  const funnel = window.FUNNEL;
+  const ids = Object.keys(funnel.slides);
+  const lines = [];
+  let bad = 0, unreadable = 0;
+
+  for (const w of WIDTHS) {
+    for (const id of ids) {
+      const f = document.createElement('iframe');
+      f.style.width = w + 'px';
+      document.body.appendChild(f);
+      f.src = '../index.html#/' + id;
+      await new Promise(r => { f.onload = r; setTimeout(r, 2500); });
+      await new Promise(r => setTimeout(r, 450));
+      const d = f.contentDocument;
+      const de = d && d.documentElement;
+      if (!de) { unreadable++; f.remove(); continue; }
+      const over = de.scrollWidth - de.clientWidth;
+      // find the widest offender when there is one
+      let culprit = '';
+      if (over > 1) {
+        let worst = 0;
+        d.querySelectorAll('.slide *').forEach(n => {
+          const r = n.getBoundingClientRect();
+          if (r.right > worst) { worst = r.right; culprit = n.className || n.tagName; }
+        });
+        bad++;
+        lines.push('OVER ' + w + 'px  ' + id + '  by ' + over + 'px  -> ' + culprit);
+      }
+      f.remove();
+    }
+  }
+  document.getElementById('out').textContent =
+    (unreadable
+      ? 'INCONCLUSIVE — ' + unreadable + ' of ' + (ids.length * WIDTHS.length) +
+        ' frames could not be read.\nBrowsers block iframe access on file:// URLs. ' +
+        'Run serve.cmd and open this page over http://localhost:8080 instead.'
+      : bad ? 'OVERFLOW ON ' + bad
+            : 'NO OVERFLOW — ' + (ids.length * WIDTHS.length) + ' checks clean') +
+    '\n' + lines.join('\n');
+  document.title = unreadable ? 'INCONCLUSIVE' : bad ? 'BAD ' + bad : 'CLEAN';
+})();
+</script>
+</body></html>

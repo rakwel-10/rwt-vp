@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>smoke</title></head>
+<body>
+<div id="log"></div>
+<script>
+  // Point the engine at a webhook we intercept, so handoff is exercised
+  // for real rather than falling through the no-webhook console branch.
+  window.IDECIDE_CONFIG = {
+    funnel: null,
+    handoff: { webhookUrl: 'http://localhost:9/collect', method: 'POST', timeoutMs: 3000, retry: false },
+    identity: { required: false },
+    debug: { validateOnLoad: true }
+  };
+  var SENT = null;
+  var realFetch = window.fetch;
+  window.fetch = function (url, opts) {
+    if (String(url).indexOf('/collect') !== -1) {
+      SENT = JSON.parse(opts.body);
+      return Promise.resolve({ ok: true, status: 200 });
+    }
+    return realFetch.apply(this, arguments);
+  };
+</script>
+<script src="../data/funnel.js"></script>
+<script src="../assets/js/blocks.js"></script>
+<script src="../assets/js/engine.js"></script>
+<script>
+const results = [];
+const ok = (name, cond, detail) => results.push((cond ? 'PASS' : 'FAIL') + '  ' + name + (detail ? '  [' + detail + ']' : ''));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const byText = (sel, text) =>
+  [...document.querySelectorAll(sel)].find(n => n.textContent.includes(text));
+
+(async function () {
+  try { sessionStorage.clear(); } catch (e) {}
+  IDecide.start();
+  await sleep(700);
+
+  ok('boots and renders a slide', !!document.querySelector('.slide'));
+  ok('starts on the welcome screen', !!document.querySelector('.slide--entry'));
+  ok('welcome is a two-column sign-in', !!document.querySelector('.slide--split .split__panel .form'));
+  ok('the floor plan is gone', !document.querySelector('svg.plan'));
+  ok('no step markers anywhere', !document.querySelector('.trail, .mark'));
+  ok('welcome is on the dark surface', document.body.classList.contains('is-dark'));
+  ok('welcome offers no way past the gate', !byText('.form .btn--quiet', 'Look around'));
+
+  // --- the gate holds --------------------------------------------
+  const first = document.querySelector('input[name="firstName"]');
+  const email = document.querySelector('input[name="email"]');
+  byText('.form .btn', 'Enter the Lounge').click();
+  await sleep(250);
+  ok('empty entry is refused', location.hash !== '#/S1' &&
+     document.querySelectorAll('.field--error').length === 2);
+
+  first.value = 'Dana'; email.value = 'dana@example.com';
+  byText('.form .btn', 'Enter the Lounge').click();
+  await sleep(400);
+  ok('identity recorded', IDecide.record.state.identity.firstName === 'Dana');
+  ok('welcome advances to the hook', location.hash === '#/S1');
+
+  // --- the sort --------------------------------------------------
+  location.hash = '/S3'; await sleep(400);
+  ok('sort slide offers five doors', document.querySelectorAll('.choice').length === 5,
+     document.querySelectorAll('.choice').length + ' found');
+  ok('sort slide steers nobody', document.querySelectorAll('.choice--primary').length === 0);
+  byText('.choice', 'in my own house').click();
+  await sleep(400);
+  ok('OWNER tag applied', IDecide.record.hasTag('OWNER'));
+  ok('sort routes to the owner branch', location.hash === '#/S4');
+  ok('light slides drop the dark surface', !document.body.classList.contains('is-dark'));
+
+  // --- the film ---------------------------------------------------
+  location.hash = '/S2'; await sleep(400);
+  ok('film slide is dark', document.body.classList.contains('is-dark'));
+  ok('film slide uses the cinema layout', !!document.querySelector('.slide--cinema'));
+  ok('film frame is full-bleed', !!document.querySelector('.reel--full'));
+
+  // --- focus tiles are tagged ------------------------------------
+  location.hash = '/S7'; await sleep(400);
+  const tile = byText('.tile', 'Mental');
+  tile.click(); await sleep(150);
+  ok('focus tap tagged', IDecide.record.hasTag('FOCUS_MENTAL'));
+  ok('focus tap shows as selected', tile.getAttribute('aria-pressed') === 'true');
+  tile.click(); await sleep(100);
+  ok('focus tap toggles off', !IDecide.record.hasTag('FOCUS_MENTAL'));
+  tile.click(); await sleep(100);
+
+  // --- offer selection -------------------------------------------
+  location.hash = '/S9'; await sleep(400);
+  ok('three-hour pack pre-selected', IDecide.record.state.offer.id === 'pack-3');
+  byText('.rung', 'Ten-hour pack').click(); await sleep(150);
+  ok('picking a rung changes the offer', IDecide.record.state.offer.id === 'pack-10');
+  ok('CTA names the chosen offer',
+     !!byText('.choice--primary', 'Ten-hour pack'),
+     (document.querySelector('.choice--primary') || {}).textContent);
+
+  // --- objection panel is recorded -------------------------------
+  location.hash = '/S12'; await sleep(400);
+  const panel = byText('.panel summary', 'a lot of money');
+  panel.click(); await sleep(150);
+  ok('opened objection recorded',
+     IDecide.record.state.notes.some(n => n.kind === 'opened' && /lot of money/.test(n.detail)));
+
+  // --- capture: validation, then handoff -------------------------
+  location.hash = '/S14'; await sleep(400);
+  ok('capture form confirms the selection', !!document.querySelector('.summary'));
+  ok('consent is not pre-checked', document.querySelector('.consent input').checked === false);
+
+  byText('.form .btn', 'Confirm my spot').click();
+  await sleep(250);
+  ok('empty required fields are blocked', document.querySelectorAll('.field--error').length > 0);
+  ok('nothing sent on a blocked submit', SENT === null);
+
+  document.querySelector('input[name="lastName"]').value = 'Whitlock';
+  document.querySelector('input[name="mobile"]').value = '8045551212';
+  document.querySelector('input[name="email"]').value = 'not-an-email';
+  byText('.form .btn', 'Confirm my spot').click();
+  await sleep(250);
+  ok('bad email is blocked', SENT === null && document.querySelectorAll('.field--error').length > 0);
+
+  document.querySelector('input[name="email"]').value = 'dana@example.com';
+  byText('.form .btn', 'Confirm my spot').click();
+  await sleep(250);
+  ok('unticked consent blocks submit', SENT === null);
+
+  document.querySelector('.consent input').checked = true;
+  byText('.form .btn', 'Confirm my spot').click();
+  await sleep(600);
+
+  ok('payload sent', SENT !== null);
+  if (SENT) {
+    ok('payload carries identity', SENT.identity.firstName === 'Dana' && SENT.identity.lastName === 'Whitlock');
+    ok('payload carries sort tag', SENT.tags.includes('OWNER'));
+    ok('payload carries focus tag', SENT.tags.includes('FOCUS_MENTAL'));
+    ok('payload carries the offer', SENT.offer && SENT.offer.id === 'pack-10');
+    ok('payload carries the path', Array.isArray(SENT.path) && SENT.path.length >= 5, SENT.path.join('>'));
+    ok('payload carries the choices', SENT.choices.some(c => c.tag === 'OWNER'));
+    ok('payload carries consent', SENT.fields.consent === true);
+    ok('payload carries duration', typeof SENT.durationSeconds === 'number');
+  }
+  ok('confirmation replaces the form', !!document.querySelector('.done'));
+
+  const fails = results.filter(r => r.startsWith('FAIL'));
+  document.title = fails.length ? 'FAILED ' + fails.length : 'ALL PASS ' + results.length;
+  document.body.innerHTML = '<pre id="out">' + document.title + '\n\n' + results.join('\n') +
+    (SENT ? '\n\n--- payload ---\n' + JSON.stringify(SENT, null, 1) : '') + '</pre>';
+})();
+</script>
+</body>
+</html>

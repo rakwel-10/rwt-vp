@@ -1,0 +1,108 @@
+<!doctype html><meta charset="utf-8"><title>film check</title>
+<link rel="stylesheet" href="../assets/css/idecide.css">
+<pre id="out">running…</pre>
+<script>window.IDECIDE_CONFIG={funnel:null,handoff:{webhookUrl:''},debug:{validateOnLoad:false}};</script>
+<script src="../data/funnel.js"></script>
+<script src="../assets/js/blocks.js"></script>
+<script src="../assets/js/engine.js"></script>
+<script>
+const r=[]; const ok=(n,c,d)=>r.push((c?'PASS':'FAIL')+'  '+n+(d?'  ['+d+']':''));
+const sleep=ms=>new Promise(x=>setTimeout(x,ms));
+
+(async()=>{
+  try{sessionStorage.clear()}catch(e){}
+  IDecide.start(); await sleep(600);
+
+  /* ---------- S1: title card, countdown, dissolve ----------------
+     S1 carries real footage, so this half checks the sequence and the
+     wiring rather than waiting out a film of unknown length. */
+  location.hash='/S1'; await sleep(700);
+
+  const film=document.querySelector('.film');
+  const card=document.querySelector('.titlecard');
+  const reel=document.querySelector('.reel');
+  const choices=document.querySelector('.choices');
+
+  ok('there is a title card', !!card);
+  ok('it carries the slide line', /most expensive thing in Richmond/.test(card.textContent));
+  ok('the card is up', film.classList.contains('is-carding'));
+  ok('the picture is still dark', parseFloat(getComputedStyle(reel).opacity)<0.1,
+     'reel opacity '+getComputedStyle(reel).opacity);
+  ok('nothing is playing yet', !reel.classList.contains('reel--playing'));
+
+  const numeral=card.querySelector('.countdown__n');
+  ok('there is a countdown', !!numeral);
+  await sleep(500);                       // ~1.2s in, first beat up
+  ok('it counts from three', numeral.textContent==='3', 'showing "'+numeral.textContent+'"');
+  await sleep(900);
+  ok('then two', numeral.textContent==='2', 'showing "'+numeral.textContent+'"');
+  await sleep(900);
+  ok('then one', numeral.textContent==='1', 'showing "'+numeral.textContent+'"');
+
+  await sleep(1200);                      // past the last beat
+  ok('the card gives way', film.classList.contains('is-rolling'));
+  ok('the picture is no longer held back', !film.classList.contains('is-carding'));
+
+  /* ---------- the footage is really wired ----------------------- */
+  const v1=reel.querySelector('video');
+  ok('S1 plays a real file', !!v1 && /S1\.mp4$/.test(v1.getAttribute('src')),
+     v1 ? v1.getAttribute('src') : 'no video element');
+  ok('film frame is full-bleed', reel.classList.contains('reel--full'));
+  ok('no duration or title chrome', !document.querySelector('.reel__meta'));
+  ok('no "footage not loaded" text', !/Footage not loaded/i.test(document.body.textContent));
+  ok('button is held back while it plays', choices && choices.hidden===true);
+
+  location.hash='/S2'; await sleep(700);
+  const v2=document.querySelector('.reel video');
+  ok('S2 plays a real file', !!v2 && /vp-rwt-bg\.mp4$/.test(v2.getAttribute('src')),
+     v2 ? v2.getAttribute('src') : 'no video element');
+
+  /* ---------- the sign-in has a film behind it ------------------ */
+  location.hash='/welcome'; await sleep(800);
+  const bgv=document.querySelector('.bg video');
+  ok('the sign-in has a background film', !!bgv && /ID-rwt2\.mp4$/.test(bgv.getAttribute('src')),
+     bgv ? bgv.getAttribute('src') : 'no background video');
+  ok('it is muted and looping', !!bgv && bgv.muted && bgv.loop);
+  ok('it is hidden from assistive tech',
+     document.querySelector('.bg').getAttribute('aria-hidden')==='true');
+
+  location.hash='/S3'; await sleep(600);
+  ok('the background film is dropped on other slides', !document.querySelector('.bg'));
+
+  /* ---------- S6 still runs on the placeholder clock -------------
+     The only film whose length we know, so the end-of-film behaviour
+     is checked against that rather than against real footage. */
+  location.hash='/S6'; await sleep(4300);        // past the countdown
+  const film6=document.querySelector('.film');
+  const reel6=document.querySelector('.reel');
+  const ch6=document.querySelector('.choices');
+  ok('S6 is running', reel6.classList.contains('reel--playing'));
+  ok('skip is offered', !document.querySelector('.reel__skip').hidden);
+  ok('its button is held back', ch6.hidden===true);
+
+  await sleep(29000);                            // 28s placeholder
+  ok('button appears at the end', ch6.hidden===false);
+  ok('button is actually on screen', ch6.getBoundingClientRect().height>20);
+  ok('the picture steps back behind it', film6.classList.contains('is-ended'));
+  ok('skip is withdrawn', document.querySelector('.reel__skip').hidden);
+  ok('progress reads complete', document.querySelector('.reel__bar').style.width==='100%');
+  ok('it did not auto-advance', location.hash==='#/S6');
+
+  const btn=ch6.querySelector('.choice').getBoundingClientRect();
+  const frame=reel6.getBoundingClientRect();
+  ok('the button is centred on the frame',
+     Math.abs((btn.left+btn.right)/2-(frame.left+frame.right)/2)<3,
+     'button '+Math.round((btn.left+btn.right)/2)+' vs frame '+Math.round((frame.left+frame.right)/2));
+  ok('and vertically centred too',
+     Math.abs((btn.top+btn.bottom)/2-(frame.top+frame.bottom)/2)<3,
+     'button '+Math.round((btn.top+btn.bottom)/2)+' vs frame '+Math.round((frame.top+frame.bottom)/2));
+  ok('the frame is nearly the whole screen',
+     frame.height>window.innerHeight*0.75, Math.round(frame.height)+' of '+window.innerHeight);
+  ok('but keeps a margin of dark', frame.top>8 && frame.left>8);
+  ok('everything fits without scrolling', btn.bottom<=window.innerHeight+2);
+
+  const fails=r.filter(x=>x.startsWith('FAIL'));
+  document.title = fails.length ? 'FAILED '+fails.length : 'ALL PASS '+r.length;
+  document.body.innerHTML='<pre id="out">'+document.title+'\n\n'+r.join('\n')+'</pre>';
+})();
+</script>

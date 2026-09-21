@@ -1,0 +1,1536 @@
+/* ==================================================================
+   RWT-iDecide
+
+   Cream, copper, and copper's patina. Source Serif speaks; Karla
+   labels. The room is made of light, so the page has atmosphere
+   rather than being flat paper: a warm field, fine grain, and
+   shadows tinted brown rather than grey.
+
+   The choice plate is the product. Everything else is quiet.
+   ================================================================== */
+
+:root{
+  color-scheme: light;
+
+  /* ground */
+  --paper:#EFE9DC;
+  --paper-lift:#F6F2E9;      /* the warm side of the field */
+  --paper-deep:#E5DDCC;
+  --paper-sink:#DCD2BE;      /* the far corner of the field */
+  --paper-edge:#D3C8B2;
+  --line:#00000012;
+
+  /* ink */
+  --ink:#231B14;
+  --ink-mid:#5C4E42;
+  --ink-soft:#6E5F52;
+
+  /* copper and its patina */
+  --copper:#9A5527;
+  --copper-deep:#7E4218;
+  --copper-lift:#B96C34;
+  --copper-glow:#C8763C;
+  --copper-wash:#9A552710;
+  --copper-wash-2:#9A55271F;
+  --patina:#4E6F66;
+  --warn:#8E3B2A;
+
+  /* the room */
+  --room:#15100C;
+  --room-ink:#EDE4D6;
+  --room-dim:#A2948A;
+  --room-edge:#2E241D;
+
+  /* warm shadow, never grey */
+  --lift-1:0 1px 2px #3A200C0D;
+  --lift-2:0 2px 4px #3A200C0F, 0 10px 24px -14px #3A200C2E;
+  --lift-3:0 4px 10px #3A200C14, 0 22px 48px -20px #3A200C3D;
+
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --ui:"Karla",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,"Cascadia Code",Consolas,monospace;
+
+  --measure:36rem;
+  --gap:clamp(1.25rem,4vw,2.75rem);
+  --radius:10px;
+  --radius-sm:7px;
+
+  /* one speed vocabulary: nothing here waits on an animation */
+  --fast:120ms;
+  --base:180ms;
+  --slow:260ms;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+/* ==================================================================
+   THE DARK SURFACE
+   A slide marked "surface":"dark" takes the whole page. Redefining
+   tokens rather than overriding components keeps every block working.
+   ================================================================== */
+body.is-dark{
+  --paper:#15100C;
+  --paper-lift:#221A13;
+  --paper-deep:#1D160F;
+  --paper-sink:#0C0806;
+  --paper-edge:#3A2E23;
+  --line:#FFFFFF14;
+
+  --ink:#F2EBE0;
+  --ink-mid:#BCAC9C;
+  --ink-soft:#A2948A;
+
+  --copper:#C8763C;
+  --copper-deep:#B0632C;
+  --copper-lift:#DC9058;
+  --copper-glow:#E8A56B;
+  --copper-wash:#C8763C14;
+  --copper-wash-2:#C8763C26;
+  --patina:#7FA396;
+
+  --lift-1:0 1px 2px #0000004D;
+  --lift-2:0 2px 6px #00000059, 0 14px 30px -16px #00000080;
+  --lift-3:0 6px 16px #00000066, 0 28px 60px -24px #00000099;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+
+body{
+  margin:0;
+  color:var(--ink);
+  font-family:var(--serif);
+  font-optical-sizing:auto;
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+
+  /* The field: warm high-left, sinking to the far corner. Gives the
+     page a direction of light instead of a flat fill. */
+  background-color:var(--paper);
+  background-image:
+    radial-gradient(120% 90% at 12% -10%, var(--paper-lift) 0%, transparent 58%),
+    radial-gradient(100% 80% at 100% 108%, var(--paper-sink) 0%, transparent 62%);
+  background-attachment:fixed;
+  transition:background-color var(--slow) var(--ease);
+}
+
+/* Fine grain, so the ground reads as a material and not a fill.
+   Barely visible on purpose - if you can see it, it is too strong. */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+  opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body.is-dark::after{opacity:.05}
+
+/* ==================================================================
+   THE DRIFTING LIGHT
+   Slow colour moving behind the dark screens, the way light moves in
+   the room itself. Two layers at different rates so it never repeats
+   visibly. Painted only while a dark slide is up, and switched off
+   entirely for anyone who asked for less motion.
+   ================================================================== */
+.aurora{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+  opacity:0;
+  transition:opacity 900ms var(--ease);
+}
+body.is-dark .aurora{opacity:1}
+
+.aurora span{
+  position:absolute;
+  inset:-30%;
+  display:block;
+  filter:blur(70px);
+  will-change:transform;
+}
+.aurora__a{animation:drift-a 38s ease-in-out infinite alternate}
+.aurora__b{animation:drift-b 53s ease-in-out infinite alternate}
+
+/* The colour itself is defined only for the dark screens, so on a
+   light page the layer is genuinely empty rather than merely faded
+   out - no chance of it bleeding through mid-transition. */
+body.is-dark .aurora__a{
+  background:
+    radial-gradient(28% 34% at 26% 32%, #9A552747 0%, transparent 64%),
+    radial-gradient(24% 30% at 74% 66%, #4E6F6633 0%, transparent 66%);
+}
+body.is-dark .aurora__b{
+  background:
+    radial-gradient(30% 26% at 62% 22%, #C8763C33 0%, transparent 66%),
+    radial-gradient(26% 32% at 30% 78%, #7FA39626 0%, transparent 68%);
+}
+@keyframes drift-a{
+  0%  {transform:translate3d(-3%,2%,0) scale(1)}
+  50% {transform:translate3d(4%,-4%,0) scale(1.14)}
+  100%{transform:translate3d(-1%,5%,0) scale(1.04)}
+}
+@keyframes drift-b{
+  0%  {transform:translate3d(3%,-2%,0) scale(1.08)}
+  50% {transform:translate3d(-5%,4%,0) scale(1)}
+  100%{transform:translate3d(2%,-5%,0) scale(1.12)}
+}
+@media (prefers-reduced-motion:reduce){
+  .aurora span{animation:none}
+}
+
+button,input,select,textarea{font:inherit;color:inherit}
+img{max-width:100%;height:auto}
+
+/* Components set their own display, which would otherwise beat the
+   browser's [hidden] rule and leave hidden things on screen. */
+[hidden]{display:none !important}
+
+::selection{background:var(--copper);color:var(--paper)}
+
+:focus-visible{
+  outline:2px solid var(--copper);
+  outline-offset:3px;
+  border-radius:3px;
+}
+/* The engine moves focus to the heading on every route change so
+   screen readers announce the slide. Nobody needs to see that. */
+.head:focus,.head:focus-visible,
+.slide:focus,.slide:focus-visible,
+.done:focus,.done:focus-visible{outline:none}
+
+/* ==================================================================
+   SHELL
+   ================================================================== */
+
+.app{min-height:100vh;min-height:100dvh;position:relative;z-index:2}
+
+.stage{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  min-height:100vh;
+  min-height:100dvh;
+  min-width:0;
+  padding:clamp(3.5rem,8vh,5.5rem) var(--gap) clamp(3rem,7vh,4.5rem);
+}
+
+/* Auto margins centre a short slide and collapse on a tall one.
+   align-items:center would push the top of a tall slide above the
+   scroll origin, where nobody can reach it. */
+.slide{width:100%;min-width:0;max-width:var(--measure);margin-block:auto}
+.slide--editorial{max-width:72rem}
+.slide--editorial.slide--wide{max-width:80rem}
+.slide--wide{max-width:48rem}
+.slide--cinema{max-width:108rem;position:relative}
+/* Nothing on a film slide sits in a column - the title card and the
+   end card are both centred on the frame itself. */
+.slide--cinema .prose{max-width:34rem;margin-inline:auto;text-align:center}
+/* a margin of dark all round, so the picture is framed rather than
+   edge to edge */
+.stage:has(.slide--cinema){padding:clamp(1.25rem,4vh,3rem) clamp(1.25rem,3vw,3.5rem)}
+
+/* ---------- the quiet way back ------------------------------------
+   No step counter, no breadcrumb. One ghost control that stays out of
+   the way until you look for it, plus Backspace. */
+.back{
+  position:fixed;
+  top:clamp(1rem,2.5vh,1.6rem);
+  left:clamp(1rem,2.5vw,1.6rem);
+  z-index:10;
+  display:grid;
+  place-items:center;
+  width:38px;height:38px;
+  border-radius:50%;
+  border:1px solid transparent;
+  background:none;
+  color:var(--ink-soft);
+  cursor:pointer;
+  opacity:.28;
+  transition:opacity var(--fast),background var(--fast),border-color var(--fast),color var(--fast),scale var(--fast);
+}
+.back:hover{opacity:1;background:var(--copper-wash);border-color:var(--paper-edge);color:var(--copper)}
+.back:focus-visible{opacity:1}
+.back:active{scale:.93}
+
+/* ==================================================================
+   SPLIT - the pitch on one side, the sign-in on the other.
+   ================================================================== */
+.slide--split{max-width:68rem}
+.split__text,.split__panel{min-width:0}
+.split__text .prose{max-width:26rem}
+
+@media (min-width:900px){
+  .slide--split{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:clamp(2.5rem,6vw,5.5rem);
+    align-items:center;
+  }
+}
+@media (max-width:899px){.split__panel{margin-top:2.5rem}}
+
+.split__panel .form{
+  margin:0;
+  background:var(--paper-deep);
+  border:1px solid var(--paper-edge);
+  border-radius:var(--radius);
+  padding:clamp(1.5rem,3.5vw,2.35rem);
+  box-shadow:var(--lift-3);
+}
+.split__panel .form__grid{grid-template-columns:1fr;gap:1.15rem}
+.split__panel .form__submit{margin-top:1.6rem}
+.split__panel .btn{width:100%;justify-content:center;padding-block:1.05rem}
+
+/* ==================================================================
+   EDITORIAL
+   ================================================================== */
+
+.eyebrow{
+  font-family:var(--ui);
+  font-size:.8125rem;
+  font-weight:600;
+  color:var(--patina);
+  margin:0 0 1rem;
+  line-height:1.5;
+}
+.eyebrow span{display:block;color:var(--ink-soft);font-weight:400}
+
+.head{
+  font-family:var(--serif);
+  font-weight:300;
+  font-size:clamp(2.05rem,5vw,3.05rem);
+  line-height:1.08;
+  letter-spacing:-.025em;
+  margin:0 0 1.35rem;
+  text-wrap:balance;
+}
+.slide--entry .head{font-size:clamp(2.15rem,5.4vw,3.35rem)}
+
+.prose{margin:0 0 1.15rem;max-width:34rem;color:var(--ink-mid)}
+.prose:last-child{margin-bottom:0}
+.prose--lede{font-size:1.185rem;line-height:1.6;color:var(--ink)}
+.prose strong{font-weight:600;color:var(--ink)}
+
+.spec{
+  font-family:var(--ui);
+  font-size:.9375rem;
+  color:var(--ink-soft);
+  margin:-.6rem 0 1.35rem;
+}
+
+.aside{
+  position:relative;
+  padding:1rem 1.15rem 1rem 1.25rem;
+  margin:1.75rem 0;
+  border-radius:var(--radius-sm);
+  background:var(--copper-wash);
+  color:var(--ink-mid);
+  font-size:1rem;
+  line-height:1.62;
+}
+.aside::before{
+  content:"";
+  position:absolute;
+  left:0;top:.85rem;bottom:.85rem;
+  width:2px;
+  border-radius:2px;
+  background:var(--patina);
+}
+.aside p{margin:0 0 .65rem;max-width:32rem}
+.aside p:last-child{margin:0}
+.aside strong{color:var(--ink);font-weight:600}
+
+/* debug only */
+.buildnote{
+  font-family:var(--ui);
+  font-size:.8125rem;
+  line-height:1.6;
+  background:var(--copper-wash);
+  border:1px dashed var(--copper);
+  border-radius:var(--radius-sm);
+  padding:.7rem .9rem;
+  margin:0 0 1.5rem;
+  color:var(--ink-soft);
+}
+.buildnote b{color:var(--copper);font-weight:600;display:block;margin-bottom:.15rem}
+.slideid{
+  font-family:var(--ui);
+  font-size:.75rem;
+  letter-spacing:.06em;
+  color:var(--copper);
+  margin:0 0 .5rem;
+}
+
+/* ==================================================================
+   THE ROOM - a dark panel on the light page.
+   ================================================================== */
+.room{
+  background:var(--room);
+  color:var(--room-ink);
+  border-radius:var(--radius);
+  padding:clamp(1.75rem,5vw,2.75rem);
+  margin:0 0 2rem;
+  box-shadow:var(--lift-3);
+}
+.room .prose{color:#EDE4D6C4}
+.room .prose strong{color:var(--room-ink)}
+.room .head{color:var(--room-ink)}
+.room .eyebrow,.room .eyebrow span{color:var(--room-dim)}
+.room .aside{background:#C8763C14;color:#EDE4D6AD}
+.room .aside::before{background:var(--copper-lift)}
+.room .aside strong{color:var(--room-ink)}
+.room :focus-visible{outline-color:var(--copper-lift)}
+
+/* ==================================================================
+   THE FILM
+   Black, then a line of type in the middle of it, then a slow
+   dissolve into the picture. The picture takes nearly the whole
+   screen but keeps a margin of dark around it, so it reads as
+   something framed rather than a browser gone fullscreen. When it
+   ends the way onward appears in the middle of the frame.
+   ================================================================== */
+
+/* The picture supplies the height; the film is exactly its box, so
+   the end card centres on the frame and not on something 8px taller.
+   The reel is already present while the card is up - it is simply
+   transparent - so there is height to fill from the first frame. */
+.film{
+  position:relative;
+  width:100%;
+  line-height:0;
+  border-radius:var(--radius);
+}
+.film > *{line-height:1.65}
+
+/* ---------- the card ---------- */
+.titlecard{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:clamp(1.5rem,6vw,4rem);
+  text-align:center;
+  cursor:pointer;
+  opacity:0;
+  transition:opacity 900ms var(--ease);
+}
+.film.is-carding .titlecard{opacity:1;transition-duration:800ms}
+.film.is-rolling .titlecard{opacity:0;pointer-events:none}
+
+/* Three, two, one. One numeral, swapping in place - a reserved box
+   so the line above it never shifts as the digits change. */
+.countdown{
+  display:grid;
+  place-items:center;
+  min-height:clamp(3.5rem,9vh,5.5rem);
+  margin-top:clamp(1.25rem,3.5vh,2.25rem);
+}
+.countdown__n{
+  font-family:var(--serif);
+  font-size:clamp(2.4rem,6vw,4rem);
+  font-weight:200;
+  line-height:1;
+  letter-spacing:-.03em;
+  color:var(--copper);
+  font-variant-numeric:tabular-nums;
+  opacity:0;
+}
+.countdown__n.is-tick{animation:tick 900ms var(--ease) both}
+@keyframes tick{
+  0%  {opacity:0;scale:1.3}
+  20% {opacity:1;scale:1}
+  70% {opacity:1;scale:1}
+  100%{opacity:.12;scale:.95}
+}
+@media (prefers-reduced-motion:reduce){
+  .countdown{display:none}
+}
+
+/* ==================================================================
+   BACKGROUND FILM
+   Behind the whole page, under a scrim heavy enough that the type in
+   front of it never has to fight the footage.
+   ================================================================== */
+.bg{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+.bg__video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  opacity:0;
+  scale:1.04;
+  transition:opacity 1600ms var(--ease);
+}
+.bg.is-ready .bg__video{opacity:1}
+.bg__scrim{
+  position:absolute;
+  inset:0;
+  /* Heavy enough that the type never fights the footage, light
+     enough that there is visibly footage back there. Darkest at the
+     edges where nothing is read. */
+  background:
+    linear-gradient(90deg,#0C0907D9 0%,#0C09079E 38%,#0C0907CC 100%),
+    radial-gradient(100% 90% at 42% 45%,transparent 0%,#0C0907A8 100%);
+}
+/* the drifting light is redundant once there is real footage back there */
+body.has-bg .aurora{opacity:0}
+
+/* the slide's eyebrow, given the whole screen */
+.titlecard .eyebrow{
+  font-family:var(--serif);
+  font-size:clamp(1.85rem,4.6vw,3.4rem);
+  font-weight:300;
+  letter-spacing:-.025em;
+  line-height:1.14;
+  color:var(--ink);
+  margin:0;
+  max-width:22ch;
+  text-wrap:balance;
+}
+.titlecard .eyebrow span{
+  display:block;
+  color:var(--ink-mid);
+  font-weight:300;
+  margin-top:.15em;
+}
+
+/* ---------- the picture ---------- */
+.film .reel{
+  opacity:0;
+  transition:opacity 1500ms var(--ease);
+}
+.film.is-rolling .reel{opacity:1}
+
+.reel{
+  background:var(--room);
+  border-radius:var(--radius);
+  overflow:hidden;
+  margin:0 0 2rem;
+  color:var(--room-ink);
+  box-shadow:var(--lift-3);
+}
+.reel__screen{
+  position:relative;
+  aspect-ratio:16/9;
+  display:grid;
+  place-items:center;
+  background:radial-gradient(62% 76% at 50% 52%,#2A1F18 0%,#15100C 72%);
+}
+
+.reel--full{background:transparent;margin:0;box-shadow:none}
+.reel--full .reel__screen{
+  aspect-ratio:auto;
+  min-height:min(84vh,58rem);
+  border-radius:var(--radius);
+  box-shadow:var(--lift-3),0 0 90px -30px #C8763C4D;
+}
+.reel--full .reel__screen video{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  border-radius:var(--radius);
+}
+.reel--full .reel__bloom{
+  inset:34% 40%;
+  filter:blur(56px);
+  background:radial-gradient(circle,#9A552738 0%,transparent 72%);
+}
+.reel--full .reel__play{width:88px;height:88px}
+
+/* when it has played, the picture steps back so the button can lead */
+.film.is-ended .reel__screen::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:radial-gradient(70% 60% at 50% 50%,#000000A6 0%,#0000005C 72%);
+  animation:scrim 600ms var(--ease) both;
+}
+@keyframes scrim{from{opacity:0}to{opacity:1}}
+
+.reel__bloom{
+  position:absolute;
+  inset:18% 22%;
+  border-radius:50%;
+  background:radial-gradient(circle,#9A552766 0%,transparent 70%);
+  filter:blur(18px);
+  pointer-events:none;
+}
+.reel--playing .reel__bloom{animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{
+  0%,100%{opacity:.55;scale:1}
+  50%{opacity:1;scale:1.09}
+}
+
+.reel__play{
+  position:relative;
+  background:#00000040;
+  border:1px solid #FFFFFF26;
+  border-radius:50%;
+  width:74px;height:74px;
+  cursor:pointer;
+  color:var(--room-ink);
+  display:grid;place-items:center;
+  backdrop-filter:blur(6px);
+  transition:border-color var(--fast),background var(--fast),scale var(--fast);
+}
+.reel__play:hover{border-color:var(--copper-lift);background:#9A552733;scale:1.05}
+.reel__play:active{scale:.96}
+.reel__play svg{translate:2px 0}
+.reel__play:focus-visible{outline-color:var(--copper-lift)}
+
+.reel__bar{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  height:2px;
+  width:0;
+  background:var(--copper-glow);
+  transition:width var(--base) linear;
+  z-index:2;
+}
+.reel{position:relative}
+
+.reel__unmute,.reel__skip{
+  position:absolute;
+  bottom:1.25rem;
+  z-index:3;
+  background:#0000004D;
+  border:1px solid #FFFFFF2E;
+  border-radius:100px;
+  padding:.38rem .95rem;
+  cursor:pointer;
+  color:#EDE4D6;
+  font-family:var(--ui);
+  font-size:.8125rem;
+  font-weight:500;
+  backdrop-filter:blur(8px);
+  transition:background var(--fast),border-color var(--fast),scale var(--fast);
+}
+.reel__unmute{left:1.25rem}
+.reel__skip{right:1.25rem}
+.reel__unmute:hover,.reel__skip:hover{background:#00000080;border-color:#FFFFFF5C}
+.reel__unmute:active,.reel__skip:active{scale:.95}
+
+.reel__script{
+  border-top:1px solid var(--room-edge);
+  padding:.9rem 1.1rem 1.1rem;
+  font-family:var(--ui);
+  font-size:.8125rem;
+  line-height:1.65;
+  color:var(--room-dim);
+  white-space:pre-wrap;
+}
+.reel__script b{display:block;color:var(--copper-lift);margin-bottom:.4rem;font-weight:600}
+
+/* ---------- the end card ---------- */
+.slide--cinema .choices{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0;
+  padding:1.5rem;
+  pointer-events:none;
+}
+.slide--cinema .choices .choice{
+  pointer-events:auto;
+  width:auto;
+  min-width:17rem;
+  max-width:26rem;
+}
+@media (prefers-reduced-motion:reduce){
+  .titlecard,.film .reel{transition:none}
+}
+
+/* ==================================================================
+   THE ROOM PLAN
+   ================================================================== */
+.plan{width:100%;max-width:23rem;margin:0 0 .55rem;display:block}
+.plan__cap{
+  font-family:var(--ui);
+  font-size:.75rem;
+  letter-spacing:.02em;
+  color:var(--ink-soft);
+  margin:0 0 2.25rem;
+  max-width:23rem;
+  text-align:center;
+}
+.plan__screen{fill:none;stroke:var(--copper);stroke-width:1.1}
+.plan__chair{fill:none;stroke:var(--patina);stroke-width:1.1}
+.plan__floor{fill:none;stroke:var(--paper-edge);stroke-width:1;stroke-dasharray:3 4}
+
+/* ==================================================================
+   EDITORIAL COLUMNS
+   The heading takes the left and holds it; everything the visitor
+   reads or touches runs down the right. A single stacked column
+   leaves two thirds of a desktop screen empty.
+   ================================================================== */
+.cols{display:grid;gap:1.75rem}
+/* Grid items default to min-width:auto, so a wide table inside the
+   body column would stretch the page instead of scrolling in place. */
+.cols__head,.cols__body{min-width:0}
+
+@media (min-width:1000px){
+  .cols{
+    grid-template-columns:minmax(0,20rem) minmax(0,1fr);
+    gap:clamp(2.5rem,5vw,4.5rem);
+    align-items:start;
+  }
+  /* The heading stays with you while the right column is long. */
+  .cols__head{position:sticky;top:clamp(3.5rem,8vh,5.5rem)}
+  .slide--wide .cols{grid-template-columns:minmax(0,21rem) minmax(0,1fr)}
+}
+
+.cols__head .head{margin-bottom:0}
+.cols__head .eyebrow{margin-bottom:.85rem}
+.cols__body > *:first-child{margin-top:0}
+.cols__body > *:last-child{margin-bottom:0}
+.cols__body .prose{max-width:38rem}
+
+/* ==================================================================
+   BIG MEDIA
+   Photography of a room like this is the argument. It is shown at
+   the size of the argument.
+   ================================================================== */
+.media{display:grid;gap:.75rem;margin:1.75rem 0}
+/* Two images sit side by side and stay big; three put the lead
+   across the top with the others beneath. */
+.media--2,.media--3{grid-template-columns:repeat(2,minmax(0,1fr))}
+.media--3 .media__cell--lead{grid-column:1/-1}
+@media (max-width:620px){
+  .media--2,.media--3{grid-template-columns:minmax(0,1fr)}
+}
+
+.media__cell{
+  margin:0;
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:var(--paper-deep);
+  box-shadow:var(--lift-2);
+  aspect-ratio:4/3;
+  /* big, but never so tall that the buttons fall off the screen */
+  max-height:min(38vh,22rem);
+}
+.media--1 .media__cell,
+.media--3 .media__cell--lead{aspect-ratio:16/9;max-height:min(42vh,26rem)}
+.media__cell{position:relative}
+.media__cell img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* A caption that sits on the image rather than under it, so a row of
+   pictures keeps its rhythm. Only shown where there is something
+   worth saying about what the picture is. */
+.media__cap{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  padding:1.6rem .9rem .7rem;
+  font-family:var(--ui);
+  font-size:.75rem;
+  line-height:1.45;
+  color:#F4EDE3;
+  background:linear-gradient(180deg,transparent 0%,#0C0907C7 65%);
+}
+
+/* the mark */
+.logo{
+  display:block;
+  width:clamp(3.25rem,6vw,4.25rem);
+  height:auto;
+  margin:0 0 1.5rem;
+}
+/* a full lockup, not a badge - it carries the name and the promise,
+   so it leads the page rather than sitting in a corner of it */
+.logo--wide{
+  width:min(100%,26rem);
+  margin:0 0 1.75rem;
+  margin-left:-.35rem;   /* the script overhangs its own box on the left */
+}
+.titlecard .logo{margin:0 auto 1.75rem;opacity:.9}
+
+/* waiting on photography */
+.media__cell--empty{
+  display:grid;
+  place-items:center;
+  padding:1.5rem;
+  border:1px dashed var(--paper-edge);
+  background:
+    linear-gradient(135deg,var(--copper-wash) 0%,transparent 55%),
+    var(--paper-deep);
+  box-shadow:none;
+}
+.media__note{
+  font-family:var(--ui);
+  font-size:.875rem;
+  line-height:1.55;
+  color:var(--ink-soft);
+  text-align:center;
+  max-width:22rem;
+}
+.room .media__cell--empty{
+  background:linear-gradient(135deg,#C8763C14 0%,transparent 55%),#1C1510;
+  border-color:var(--room-edge);
+}
+.room .media__note{color:var(--room-dim)}
+
+/* ==================================================================
+   THE BUTTON ROW
+   Real buttons, side by side. They only stack when the screen is
+   genuinely too narrow to hold them.
+   ================================================================== */
+
+.choices{
+  display:grid;
+  gap:.75rem;
+  margin:2.25rem 0 0;
+  grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));
+}
+/* one action should not span the whole screen */
+.choices[data-count="1"]{grid-template-columns:minmax(0,22rem)}
+.choices[data-count="2"],
+.choices[data-count="4"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+.choices[data-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+/* full sentences need room to breathe; two across, never three */
+.choices[data-longest="long"]{grid-template-columns:repeat(auto-fit,minmax(20rem,1fr))}
+
+/* the editorial column is narrower, so the row is too */
+.cols__body .choices{margin-top:1.75rem}
+
+@media (max-width:719px){
+  .choices,
+  .choices[data-count="1"],
+  .choices[data-count="2"],
+  .choices[data-count="3"],
+  .choices[data-count="4"],
+  .choices[data-longest="long"]{grid-template-columns:minmax(0,1fr)}
+}
+
+.choice{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.1rem;
+  width:100%;
+  min-height:3.9rem;
+  text-align:center;
+  font-family:var(--ui);
+  font-size:1.0125rem;
+  font-weight:600;
+  line-height:1.35;
+  padding:1rem 1.9rem;
+  cursor:pointer;
+  border:1px solid transparent;
+  /* A pill. Nothing else in the build is this shape, so a button is
+     never mistaken for a card you can select. */
+  border-radius:999px;
+  background:none;
+  color:var(--ink);
+  isolation:isolate;
+  transition:
+    background var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    box-shadow var(--base) var(--ease),
+    opacity var(--base) var(--ease),
+    translate var(--fast) var(--ease);
+}
+
+.choice__text{display:block}
+.choice__note{
+  display:block;
+  font-weight:500;
+  font-size:.8125rem;
+  letter-spacing:.01em;
+  opacity:.8;
+  margin-top:.2rem;
+}
+
+/* --- weights ---------------------------------------------------- */
+
+/* Secondary: a raised pill in paper, lit from the top edge. */
+.choice--secondary{
+  background:linear-gradient(180deg,#FFFFFF 0%,var(--paper-lift) 46%,var(--paper-deep) 100%);
+  border-color:var(--paper-edge);
+  box-shadow:var(--lift-2),inset 0 1px 0 #FFFFFFB8;
+}
+.choice--secondary:hover{
+  border-color:var(--copper);
+  color:var(--copper-deep);
+  box-shadow:var(--lift-3),inset 0 1px 0 #FFFFFF,0 0 0 4px var(--copper-wash);
+  translate:0 -2px;
+}
+
+/* Primary: copper, graded top to bottom, with a hairline of light
+   along the top edge so it reads as a raised surface. */
+.choice--primary{
+  background:linear-gradient(180deg,var(--copper-lift) 0%,var(--copper) 52%,var(--copper-deep) 100%);
+  border-color:var(--copper-deep);
+  color:#FFF7EC;
+  box-shadow:var(--lift-2),inset 0 1px 0 #FFFFFF4D;
+}
+.choice--primary:hover{
+  background:linear-gradient(180deg,#C87B42 0%,var(--copper-lift) 52%,var(--copper) 100%);
+  box-shadow:var(--lift-3),inset 0 1px 0 #FFFFFF66,0 0 0 5px var(--copper-wash-2);
+  translate:0 -2px;
+}
+
+/* An exit is not a button: no pill, no weight, its own line. */
+.choice--quiet{
+  grid-column:1/-1;
+  min-height:0;
+  border:0;
+  background:none;
+  box-shadow:none;
+  color:var(--ink-soft);
+  font-size:.9375rem;
+  font-weight:500;
+  padding:.7rem .35rem;
+  text-decoration:underline;
+  text-underline-offset:4px;
+  text-decoration-color:transparent;
+  transition:color var(--fast),text-decoration-color var(--fast);
+}
+.choice--quiet:hover{
+  color:var(--copper);
+  background:none;
+  translate:0;
+  box-shadow:none;
+  text-decoration-color:var(--copper);
+}
+
+.choice:active{translate:0 1px;box-shadow:var(--lift-1),inset 0 1px 0 #FFFFFF4D}
+
+/* --- the commit: confirm the pick, then move -------------------- */
+.choices--committed .choice{pointer-events:none}
+.choices--committed .choice:not(.is-chosen){opacity:.22;translate:0}
+.choice.is-chosen{
+  background:linear-gradient(180deg,#CE8047 0%,var(--copper-lift) 52%,var(--copper) 100%);
+  border-color:var(--copper-deep);
+  color:#FFF8EE;
+  box-shadow:var(--lift-3),inset 0 1px 0 #FFFFFF73,0 0 0 6px var(--copper-wash-2);
+  translate:0;
+}
+
+/* on the dark surface */
+.room .choice--secondary{
+  background:linear-gradient(180deg,#FFFFFF1C 0%,#FFFFFF0D 100%);
+  border-color:var(--room-edge);
+  color:var(--room-ink);
+  box-shadow:var(--lift-2),inset 0 1px 0 #FFFFFF1F;
+}
+.room .choice--secondary:hover{
+  border-color:var(--copper-lift);
+  color:#FFF1E0;
+  box-shadow:var(--lift-3),inset 0 1px 0 #FFFFFF2E,0 0 0 4px #C8763C1F;
+}
+.room .choice--quiet{color:var(--room-dim)}
+.room .choice--quiet:hover{color:var(--copper-lift);text-decoration-color:var(--copper-lift)}
+
+.choice--end{cursor:default}
+.choice--end:hover{translate:0;box-shadow:var(--lift-2),inset 0 1px 0 #FFFFFFB8}
+
+/* ==================================================================
+   TILES - the focus menu.
+
+   These are things you select, not places you go, so they must not
+   look like the pills. Square corners, a flat card surface, no
+   gradient, and a selected state that tints rather than fills - the
+   solid copper fill read as a primary button and confused the two.
+   ================================================================== */
+.tiles{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(14.5rem,1fr));
+  gap:.55rem;
+  margin:1.75rem 0;
+}
+.tile{
+  position:relative;
+  background:var(--paper-lift);
+  border:1px solid var(--paper-edge);
+  border-radius:4px;
+  text-align:left;
+  padding:1.05rem 1.15rem 1.2rem;
+  padding-left:1.4rem;
+  cursor:pointer;
+  font-family:var(--serif);
+  color:var(--ink);
+  box-shadow:none;
+  transition:background var(--fast),border-color var(--fast);
+}
+/* a selection rail down the left edge, filled when chosen */
+.tile::before{
+  content:"";
+  position:absolute;
+  left:0;top:-1px;bottom:-1px;
+  width:3px;
+  background:transparent;
+  border-radius:4px 0 0 4px;
+  transition:background var(--fast);
+}
+.tile:hover{background:var(--paper);border-color:var(--ink-soft)}
+.tile:hover::before{background:var(--paper-edge)}
+
+.tile[aria-pressed="true"]{
+  background:var(--copper-wash);
+  border-color:var(--copper);
+}
+.tile[aria-pressed="true"]::before{background:var(--copper)}
+.tile[aria-pressed="true"] .tile__name{color:var(--copper-deep)}
+
+.tile__name{
+  display:block;
+  font-size:1.185rem;
+  font-weight:400;
+  letter-spacing:-.012em;
+  margin-bottom:.15rem;
+  padding-right:1.6rem;
+  transition:color var(--fast);
+}
+.tile__lede{
+  display:block;
+  font-style:italic;
+  font-size:.9375rem;
+  color:var(--ink-soft);
+  margin-bottom:.6rem;
+}
+.tile__list{
+  display:block;
+  font-family:var(--ui);
+  font-size:.875rem;
+  line-height:1.6;
+  color:var(--ink-soft);
+}
+
+/* a checkbox, because that is what this is */
+.tile::after{
+  content:"";
+  position:absolute;
+  top:1.05rem;right:1.15rem;
+  width:17px;height:17px;
+  border:1.5px solid var(--paper-edge);
+  border-radius:4px;
+  background:var(--paper);
+  transition:background var(--fast),border-color var(--fast);
+}
+.tile:hover::after{border-color:var(--ink-soft)}
+.tile[aria-pressed="true"]::after{
+  background:var(--copper);
+  border-color:var(--copper);
+  /* the tick */
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2 4.8 8.6 9.5 3.6' fill='none' stroke='%23FFF6EA' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size:13px;
+  background-repeat:no-repeat;
+  background-position:center;
+}
+
+.tiles__after{
+  font-family:var(--ui);
+  font-size:.875rem;
+  color:var(--ink-soft);
+  margin:-.5rem 0 1.75rem;
+  max-width:32rem;
+}
+
+.room .tile{background:#FFFFFF08;border-color:var(--room-edge)}
+.room .tile:hover{background:#FFFFFF12}
+.room .tile[aria-pressed="true"]{background:#C8763C1A;border-color:var(--copper)}
+.room .tile[aria-pressed="true"] .tile__name{color:var(--copper-lift)}
+.room .tile::after{background:#00000040;border-color:var(--room-edge)}
+
+/* ==================================================================
+   PANELS - mechanism and objections, always behind a click.
+   ================================================================== */
+.panels{margin:1.75rem 0;display:flex;flex-direction:column;gap:.4rem}
+.panel{
+  border:1px solid var(--paper-edge);
+  border-radius:var(--radius-sm);
+  background:var(--paper-lift);
+  overflow:hidden;
+  transition:border-color var(--fast),box-shadow var(--fast);
+}
+.panel:hover{border-color:var(--copper)}
+.panel[open]{box-shadow:var(--lift-2)}
+.panel summary{
+  cursor:pointer;
+  list-style:none;
+  padding:.95rem 1.15rem;
+  font-size:1.0375rem;
+  display:flex;
+  gap:.85rem;
+  align-items:center;
+  transition:color var(--fast),background var(--fast);
+}
+.panel summary::-webkit-details-marker{display:none}
+.panel summary:hover{color:var(--copper);background:var(--copper-wash)}
+.panel summary::before{
+  content:"";
+  flex:0 0 auto;
+  width:8px;height:8px;
+  border-right:1.5px solid var(--copper);
+  border-bottom:1.5px solid var(--copper);
+  rotate:45deg;
+  translate:0 -2px;
+  transition:rotate var(--base) var(--ease),translate var(--base) var(--ease);
+}
+.panel[open] summary::before{rotate:225deg;translate:0 2px}
+.panel__body{
+  padding:0 1.15rem 1.15rem 2.75rem;
+  color:var(--ink-mid);
+  max-width:34rem;
+  animation:unfold var(--slow) var(--ease) both;
+}
+@keyframes unfold{from{opacity:0;translate:0 -4px}to{opacity:1;translate:0 0}}
+.panel__body p{margin:0 0 .8rem}
+.panel__body p:last-child{margin:0}
+
+.room .panel{background:#FFFFFF08;border-color:var(--room-edge)}
+.room .panel summary{color:var(--room-ink)}
+.room .panel__body{color:#EDE4D6AD}
+
+/* ==================================================================
+   LADDER - price options. Selecting one records the offer.
+   ================================================================== */
+.ladder{margin:1.75rem 0;display:flex;flex-direction:column;gap:.5rem}
+.rung{
+  position:relative;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  grid-template-areas:"mark name price" ". note unit";
+  align-items:baseline;
+  gap:.3rem 1rem;
+  text-align:left;
+  background:var(--paper-lift);
+  border:1px solid var(--paper-edge);
+  border-radius:var(--radius-sm);
+  padding:1.05rem 1.2rem;
+  cursor:pointer;
+  font-family:var(--serif);
+  color:var(--ink);
+  box-shadow:var(--lift-1);
+  transition:background var(--fast),border-color var(--fast),box-shadow var(--fast),translate var(--fast);
+}
+.rung:hover{border-color:var(--copper);box-shadow:var(--lift-2);translate:0 -1px}
+.rung:active{translate:0;box-shadow:var(--lift-1)}
+.rung[aria-pressed="true"]{
+  border-color:var(--copper);
+  background:var(--copper-wash);
+  box-shadow:var(--lift-2),inset 0 0 0 1px var(--copper);
+}
+
+/* a radio dot, so the selected rung is unambiguous */
+.rung__mark{
+  grid-area:mark;
+  align-self:center;
+  width:17px;height:17px;
+  border-radius:50%;
+  border:1.5px solid var(--paper-edge);
+  display:grid;place-items:center;
+  transition:border-color var(--fast);
+}
+.rung:hover .rung__mark{border-color:var(--copper)}
+.rung__mark::after{
+  content:"";
+  width:9px;height:9px;
+  border-radius:50%;
+  background:var(--copper);
+  scale:0;
+  transition:scale var(--base) var(--ease);
+}
+.rung[aria-pressed="true"] .rung__mark{border-color:var(--copper)}
+.rung[aria-pressed="true"] .rung__mark::after{scale:1}
+
+.rung__name{grid-area:name;font-size:1.1875rem;letter-spacing:-.012em}
+.rung__price{
+  grid-area:price;
+  font-size:1.1875rem;
+  color:var(--copper);
+  white-space:nowrap;
+  text-align:right;
+  font-weight:600;
+}
+.rung__price small{font-family:var(--ui);font-size:.72rem;font-weight:500;color:var(--ink-soft)}
+.rung__note{
+  grid-area:note;
+  font-family:var(--ui);
+  font-size:.875rem;
+  line-height:1.55;
+  color:var(--ink-soft);
+  margin:0;
+  white-space:pre-line;
+}
+.rung__unit{
+  grid-area:unit;
+  font-family:var(--ui);
+  font-size:.875rem;
+  color:var(--ink-soft);
+  text-align:right;
+  white-space:nowrap;
+}
+@media (max-width:560px){
+  .rung{
+    grid-template-columns:auto 1fr;
+    grid-template-areas:"mark name" ". price" ". note" ". unit";
+    gap:.2rem .85rem;
+  }
+  .rung__price,.rung__unit{text-align:left}
+  .rung__unit{white-space:normal}
+}
+
+/* ---------- a single headline price ---------- */
+.price{
+  border:1px solid var(--copper);
+  border-radius:var(--radius-sm);
+  background:var(--copper-wash);
+  padding:1.15rem 1.35rem;
+  margin:1.75rem 0;
+}
+.price__was{
+  font-family:var(--ui);
+  font-size:.875rem;
+  color:var(--ink-soft);
+  text-decoration:line-through;
+}
+.price__now{
+  font-size:clamp(2.1rem,6vw,2.9rem);
+  font-weight:300;
+  line-height:1.02;
+  letter-spacing:-.03em;
+  color:var(--copper);
+  margin:.15rem 0 .3rem;
+}
+.price__sub{font-family:var(--ui);font-size:.875rem;color:var(--ink-soft)}
+
+/* ---------- the counter ---------- */
+.counter{margin:1.75rem 0}
+.counter__n{
+  font-size:clamp(3rem,11vw,5rem);
+  font-weight:200;
+  line-height:.92;
+  letter-spacing:-.045em;
+  color:var(--copper);
+  display:block;
+}
+.counter__n small{font-size:.36em;color:var(--ink-soft);font-weight:300;letter-spacing:0}
+.counter__label{font-family:var(--ui);font-size:.9375rem;color:var(--ink-soft);margin:.5rem 0 0}
+.room .counter__n{color:var(--copper-lift)}
+.room .counter__label,.room .counter__n small{color:var(--room-dim)}
+
+/* ---------- what the visitor picked ---------- */
+.summary{
+  border:1px solid var(--paper-edge);
+  border-left:3px solid var(--copper);
+  border-radius:var(--radius-sm);
+  background:var(--paper-lift);
+  padding:.95rem 1.15rem 1.05rem;
+  margin:1.75rem 0 0;
+}
+.summary__label{
+  font-family:var(--ui);
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.04em;
+  color:var(--ink-soft);
+  margin:0 0 .35rem;
+}
+.summary__list{margin:0;padding:0;list-style:none;font-size:1.0375rem}
+.summary__list li{margin:0 0 .2rem}
+.summary__list li:last-child{margin:0}
+
+/* ==================================================================
+   COMPARE TABLE
+   ================================================================== */
+.compare-wrap{
+  overflow-x:auto;
+  margin:1.75rem 0;
+  border:1px solid var(--paper-edge);
+  border-radius:var(--radius-sm);
+  background:var(--paper-lift);
+}
+table.compare{
+  width:100%;
+  min-width:30rem;
+  border-collapse:collapse;
+  font-family:var(--ui);
+  font-size:.9375rem;
+}
+table.compare th,table.compare td{
+  text-align:left;
+  padding:.72rem .95rem;
+  border-bottom:1px solid var(--line);
+}
+table.compare tbody tr:last-child th,
+table.compare tbody tr:last-child td{border-bottom:0}
+table.compare thead th{
+  color:var(--ink-soft);
+  font-weight:600;
+  background:var(--paper-deep);
+  border-bottom:1px solid var(--paper-edge);
+}
+table.compare tbody th{font-weight:400;color:var(--ink-soft)}
+table.compare tbody tr:hover td,table.compare tbody tr:hover th{background:var(--copper-wash)}
+table.compare td:last-child,table.compare thead th:last-child{color:var(--copper);font-weight:500}
+table.compare caption{
+  caption-side:bottom;
+  text-align:left;
+  padding:.7rem .95rem;
+  color:var(--ink-soft);
+  font-size:.8125rem;
+}
+
+/* ==================================================================
+   FORMS
+   ================================================================== */
+.form{margin:1.75rem 0 0}
+.form__grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));
+  gap:1.05rem .9rem;
+}
+.field{display:flex;flex-direction:column;gap:.35rem;min-width:0}
+.field--full{grid-column:1/-1}
+.field label{
+  font-family:var(--ui);
+  font-size:.8125rem;
+  font-weight:600;
+  color:var(--ink-soft);
+}
+
+/* Bordered rather than a bare underline: a field you can see is a
+   field people fill in. */
+.field input,.field select{
+  background:var(--paper);
+  border:1px solid var(--paper-edge);
+  border-radius:var(--radius-sm);
+  padding:.72rem .85rem;
+  font-family:var(--serif);
+  font-size:1.0375rem;
+  color:var(--ink);
+  min-width:0;
+  box-shadow:inset 0 1px 2px #3A200C0A;
+  transition:border-color var(--fast),box-shadow var(--fast),background var(--fast);
+}
+.field select{font-family:var(--ui);font-size:.9375rem}
+.field input:hover,.field select:hover{border-color:var(--ink-soft)}
+.field input:focus,.field select:focus{
+  outline:0;
+  border-color:var(--copper);
+  box-shadow:0 0 0 3px var(--copper-wash-2);
+  background:var(--paper-lift);
+}
+.field input::placeholder{color:var(--ink-soft);opacity:.55}
+.field--error input,.field--error select{border-color:var(--warn)}
+.field--error input:focus,.field--error select:focus{box-shadow:0 0 0 3px #8E3B2A1F}
+.field__error{font-family:var(--ui);font-size:.8125rem;color:var(--warn)}
+
+.consent{
+  display:flex;
+  gap:.7rem;
+  align-items:flex-start;
+  margin:1.5rem 0 0;
+  font-family:var(--ui);
+  font-size:.875rem;
+  line-height:1.6;
+  color:var(--ink-soft);
+  max-width:34rem;
+  cursor:pointer;
+}
+.consent input{
+  flex:0 0 auto;
+  width:18px;height:18px;
+  margin:.1rem 0 0;
+  accent-color:var(--copper);
+  cursor:pointer;
+}
+
+.form__submit{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.9rem;align-items:center}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.6rem;
+  font-family:var(--ui);
+  font-size:1rem;
+  font-weight:600;
+  background:linear-gradient(180deg,var(--copper-lift) 0%,var(--copper) 52%,var(--copper-deep) 100%);
+  color:#FFF7EC;
+  border:1px solid var(--copper-deep);
+  border-radius:999px;
+  padding:.95rem 1.9rem;
+  cursor:pointer;
+  box-shadow:var(--lift-2),inset 0 1px 0 #FFFFFF4D;
+  transition:background var(--fast),box-shadow var(--base),translate var(--fast);
+}
+.btn:hover{
+  background:linear-gradient(180deg,#C87B42 0%,var(--copper-lift) 52%,var(--copper) 100%);
+  box-shadow:var(--lift-3),inset 0 1px 0 #FFFFFF66,0 0 0 5px var(--copper-wash-2);
+  translate:0 -1px;
+}
+.btn:active{translate:0 1px;box-shadow:var(--lift-1),inset 0 1px 0 #FFFFFF4D}
+.btn:disabled{
+  background:var(--paper-edge);
+  border-color:var(--paper-edge);
+  color:var(--ink-soft);
+  cursor:progress;
+  box-shadow:none;
+  translate:0;
+}
+.btn--quiet{
+  background:none;
+  box-shadow:none;
+  border-color:transparent;
+  color:var(--ink-soft);
+  box-shadow:none;
+  font-weight:500;
+  padding-inline:.6rem;
+}
+.btn--quiet:hover{background:var(--copper-wash);color:var(--copper);box-shadow:none;translate:0}
+.btn:disabled:hover{background:var(--paper-edge);box-shadow:none;translate:0}
+
+/* a spinner while a submission is in flight */
+.btn[data-busy]::before{
+  content:"";
+  width:14px;height:14px;
+  border-radius:50%;
+  border:2px solid currentColor;
+  border-top-color:transparent;
+  animation:spin .6s linear infinite;
+}
+@keyframes spin{to{rotate:360deg}}
+
+.form__title{
+  font-family:var(--serif);
+  font-size:1.5rem;
+  font-weight:400;
+  letter-spacing:-.018em;
+  margin:0 0 .35rem;
+  color:var(--ink);
+}
+.form__intro{
+  font-family:var(--ui);
+  font-size:.9375rem;
+  line-height:1.6;
+  color:var(--ink-soft);
+  margin:0 0 1.4rem;
+}
+.form__footnote{
+  font-family:var(--ui);
+  font-size:.8125rem;
+  line-height:1.6;
+  color:var(--ink-soft);
+  margin:1.2rem 0 0;
+  padding-top:1.05rem;
+  border-top:1px solid var(--paper-edge);
+}
+.form__status{font-family:var(--ui);font-size:.875rem;color:var(--warn);margin:.9rem 0 0}
+
+/* ==================================================================
+   CONFIRMATION
+   ================================================================== */
+.done{
+  border:1px solid var(--copper);
+  border-radius:var(--radius);
+  background:var(--copper-wash);
+  padding:clamp(1.5rem,4vw,2.25rem);
+  margin-top:1rem;
+}
+.done .head{font-size:clamp(1.7rem,4.4vw,2.35rem);margin-bottom:.85rem}
+
+/* ==================================================================
+   ENGINE MESSAGES
+   ================================================================== */
+.boot{max-width:36rem;margin:0 auto;padding:clamp(3rem,12vh,7rem) var(--gap)}
+.boot h1{font-weight:300;font-size:1.9rem;letter-spacing:-.02em;margin:0 0 1rem}
+.boot p{margin:0 0 1rem;color:var(--ink-soft);max-width:32rem}
+.boot code{
+  font-family:var(--mono);
+  font-size:.875rem;
+  background:var(--paper-deep);
+  padding:.15rem .4rem;
+  border-radius:3px;
+}
+.boot pre{
+  background:var(--paper-deep);
+  padding:.9rem 1.1rem;
+  border-radius:var(--radius-sm);
+  overflow-x:auto;
+  font-family:var(--mono);
+  font-size:.8125rem;
+  line-height:1.6;
+}
+
+.payload{
+  position:fixed;
+  inset:auto 0 0 0;
+  max-height:45vh;
+  overflow:auto;
+  background:var(--room);
+  color:var(--room-ink);
+  font-family:var(--mono);
+  font-size:.75rem;
+  line-height:1.6;
+  padding:1rem 1.25rem 1.5rem;
+  z-index:20;
+  border-top:2px solid var(--copper);
+}
+.payload b{color:var(--copper-lift);display:block;margin-bottom:.5rem;font-family:var(--ui);font-size:.8125rem}
+.payload button{
+  position:absolute;top:.6rem;right:1rem;
+  background:none;
+  border:1px solid var(--room-edge);
+  border-radius:5px;
+  color:var(--room-dim);
+  cursor:pointer;
+  padding:.15rem .6rem;
+  font-family:var(--ui);
+  font-size:.75rem;
+}
+.payload pre{margin:0;white-space:pre-wrap;word-break:break-word}
+
+/* ==================================================================
+   MOTION
+   One choreography per slide change, all of it under 300ms, and all
+   of it answering something the visitor did.
+   ================================================================== */
+
+.slide{animation:arrive var(--slow) var(--ease) both}
+@keyframes arrive{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+
+/* choices arrive one after another, so the list reads as a list */
+.choice{animation:plate var(--slow) var(--ease) both;animation-delay:calc(var(--i,0) * 45ms + 60ms)}
+@keyframes plate{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
+
+/* choices a film held back get their own entrance when it ends */
+.choices--revealed .choice{animation-delay:calc(var(--i,0) * 60ms)}
+
+/* The end card settles rather than slides: a button that arrives by
+   moving would not be centred on the frame until it landed. */
+.slide--cinema .choices--revealed .choice{
+  animation:endcard 420ms var(--ease) both;
+}
+@keyframes endcard{from{opacity:0;scale:.94}to{opacity:1;scale:1}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+  .choice:hover,.choice--primary:hover,.tile:hover,.rung:hover,.btn:hover{translate:0}
+}

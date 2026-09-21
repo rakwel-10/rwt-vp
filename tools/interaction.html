@@ -1,0 +1,118 @@
+<!doctype html><meta charset="utf-8"><title>interaction check</title>
+<link rel="stylesheet" href="../assets/css/idecide.css">
+<pre id="out">running…</pre>
+<script>window.IDECIDE_CONFIG={funnel:null,handoff:{webhookUrl:''},debug:{validateOnLoad:false}};</script>
+<script src="../data/funnel.js"></script>
+<script src="../assets/js/blocks.js"></script>
+<script src="../assets/js/engine.js"></script>
+<script>
+const r=[]; const ok=(n,c,d)=>r.push((c?'PASS':'FAIL')+'  '+n+(d?'  ['+d+']':''));
+const sleep=ms=>new Promise(x=>setTimeout(x,ms));
+const key=k=>document.dispatchEvent(new KeyboardEvent('keydown',{key:k,bubbles:true}));
+const css=(el,p)=>getComputedStyle(el).getPropertyValue(p);
+
+(async()=>{
+  try{sessionStorage.clear()}catch(e){}
+  IDecide.start(); await sleep(600);
+
+  // --- the quiet back control ------------------------------------
+  ok('no back control on the first screen', document.querySelector('.back').hidden);
+
+  location.hash='/S3'; await sleep(500);
+  const plates=[...document.querySelectorAll('.choice')];
+  ok('five choice plates', plates.length===5, plates.length+' found');
+  ok('no keycaps on the buttons', !document.querySelector('.choice__key'));
+  ok('shortcuts are still announced to assistive tech',
+     plates[0].getAttribute('aria-keyshortcuts')==='1');
+  ok('buttons stagger their entrance', plates[2].style.getPropertyValue('--i')==='2');
+
+  // --- buttons sit in a row, not a stack ------------------------
+  const wrapEl=document.querySelector('.choices');
+  const cols=getComputedStyle(wrapEl).gridTemplateColumns.split(' ').length;
+  ok('buttons are laid out in a row', cols>=2, cols+' columns');
+  ok('the first two buttons share a line',
+     Math.abs(plates[0].getBoundingClientRect().top-plates[1].getBoundingClientRect().top)<2);
+
+  // --- the page is used, not a narrow column --------------------
+  const slide=document.querySelector('.slide');
+  ok('the slide uses the width of the screen',
+     slide.getBoundingClientRect().width>900, Math.round(slide.getBoundingClientRect().width)+'px');
+  ok('heading and content are side by side',
+     !!document.querySelector('.cols__head') && !!document.querySelector('.cols__body'));
+  const h=document.querySelector('.cols__head').getBoundingClientRect();
+  const bdy=document.querySelector('.cols__body').getBoundingClientRect();
+  ok('the two columns really are beside each other', bdy.left > h.right - 2,
+     'head ends '+Math.round(h.right)+', body starts '+Math.round(bdy.left));
+
+  // --- keyboard: arrows move focus -------------------------------
+  plates[0].focus();
+  key('ArrowDown'); await sleep(60);
+  ok('ArrowDown moves to the next plate', document.activeElement===plates[1]);
+  key('ArrowUp'); key('ArrowUp'); await sleep(60);
+  ok('ArrowUp wraps to the last plate', document.activeElement===plates[4]);
+
+  // --- the commit animation --------------------------------------
+  plates[1].click();
+  await sleep(70);
+  const wrap=document.querySelector('.choices');
+  ok('the pick is confirmed before the page moves', plates[1].classList.contains('is-chosen'));
+  ok('the others fade back', wrap.classList.contains('choices--committed'));
+  ok('the commit is brief', location.hash==='#/S3', 'still on S3 at 70ms');
+
+  await sleep(400);
+  ok('then it moves', location.hash==='#/S5');
+  ok('the right tag was recorded', IDecide.record.hasTag('URGENT'));
+  ok('back control appears once there is a way back', !document.querySelector('.back').hidden);
+
+  // --- keyboard: number keys pick --------------------------------
+  location.hash='/S3'; await sleep(500);
+  key('3'); await sleep(400);
+  ok('number key picks that plate', location.hash==='#/S6', 'went to '+location.hash);
+  ok('number key recorded its tag', IDecide.record.hasTag('INSIDER'));
+
+  // --- keyboard does not fight a form ----------------------------
+  location.hash='/S14'; await sleep(500);
+  const input=document.querySelector('input[name="firstName"]');
+  input.focus(); input.value='';
+  input.dispatchEvent(new KeyboardEvent('keydown',{key:'2',bubbles:true}));
+  await sleep(150);
+  ok('typing a digit in a field does not navigate', location.hash==='#/S14');
+
+  // --- surfaces and depth ----------------------------------------
+  location.hash='/S10'; await sleep(450);
+  const rung=document.querySelector('.rung');
+  ok('price rows have a radio mark', !!rung.querySelector('.rung__mark'));
+  ok('the chosen tier is marked', document.querySelector('.rung[aria-pressed="true"]'));
+  ok('plates cast a warm shadow, never grey',
+     /58|3A|200C/i.test(css(document.querySelector('.choice--primary'),'box-shadow')),
+     css(document.querySelector('.choice--primary'),'box-shadow').slice(0,40));
+  ok('the ground is a field, not a flat fill',
+     css(document.body,'background-image').includes('radial-gradient'));
+
+  // --- the drifting light behind the dark screens ---------------
+  const aurora=document.querySelector('.aurora');
+  ok('a light layer exists', !!aurora);
+  ok('it paints nothing on the light pages',
+     getComputedStyle(aurora.querySelector('.aurora__a')).backgroundImage==='none');
+  /* S1 rather than the welcome: the sign-in has real footage behind
+     it now, which the light layer stands down for.
+
+     These read the painted colour rather than the fade, because a CSS
+     transition does not advance under a headless virtual clock and a
+     test that waits on one only ever measures the browser. */
+  location.hash='/S1'; await sleep(600);
+  ok('it paints on the dark screens',
+     document.body.classList.contains('is-dark') &&
+     getComputedStyle(aurora.querySelector('.aurora__a')).backgroundImage!=='none');
+  location.hash='/welcome'; await sleep(700);
+  ok('it stands down where there is real footage',
+     document.body.classList.contains('has-bg'));
+  const a=aurora.querySelector('.aurora__a');
+  ok('and it is actually moving', getComputedStyle(a).animationName==='drift-a',
+     getComputedStyle(a).animationName);
+
+  const fails=r.filter(x=>x.startsWith('FAIL'));
+  document.title = fails.length ? 'FAILED '+fails.length : 'ALL PASS '+r.length;
+  document.body.innerHTML='<pre id="out">'+document.title+'\n\n'+r.join('\n')+'</pre>';
+})();
+</script>
