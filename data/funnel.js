@@ -76,10 +76,10 @@ window.FUNNEL = {
         {
           "type": "video",
           "id": "V1",
-          "src": "assets/media/S1.mp4",
+          "src": "assets/media/ID-J1.mp4",
           "hold": true,
           "full": true,
-          "seconds": 22,
+          "seconds": 29,
           "words": 55,
           "script": "There's one thing money keeps failing to buy you.\n\nAn hour that nobody can interrupt.\n\nNot a spa hour. Not a vacation hour, where you're still checking email from a beach chair.\n\nA real one. Dark. Quiet. No phone. No one who needs anything from you.\n\nRichmond — we built you a room."
         }
@@ -101,10 +101,10 @@ window.FUNNEL = {
         {
           "type": "video",
           "id": "V2",
-          "src": "assets/media/vp-rwt-bg.mp4",
+          "src": "assets/media/ID-J2.mp4",
           "hold": true,
           "full": true,
-          "seconds": 30,
+          "seconds": 37,
           "words": 76,
           "script": "Sixteen screens. One room. And a combination that didn't exist two years ago.\n\nColour, sound, motion and language, moving together across every screen at once. Not layered. Not taking turns. Together.\n\nYou sink into a recliner. The light drops. And for the next sixty minutes, you are genuinely unreachable.\n\nMost people fall asleep the first time. Almost everybody books a second one before they leave the building.\n\nThis is the Radiant Wave Lounge. Members only."
         }
@@ -311,9 +311,10 @@ window.FUNNEL = {
         {
           "type": "video",
           "id": "V3",
+          "src": "assets/media/ID-J3.mp4",
           "hold": true,
           "full": true,
-          "seconds": 28,
+          "seconds": 37,
           "words": 69,
           "script": "Here's the part we don't put on the website.\n\nScalar waves, sound, colour and proclamation — moving together as one. That combination was perfected in 2025, and there are two installations of it in the United States.\n\nThis is one of them.\n\nThe room has eight recliners. That's the entire constraint, and no amount of demand changes it.\n\nRight now, getting in is easy.\n\nThat is a temporary condition."
         }

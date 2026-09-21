@@ -1,0 +1,83 @@
+<!doctype html><meta charset="utf-8"><title>media check</title>
+<style>
+ body{margin:0;background:#15100C;color:#EDE4D6;font:13px/1.6 ui-monospace,Consolas,monospace;padding:1.5rem}
+ pre{margin:0;white-space:pre-wrap}
+</style>
+<pre id="out">loading the footage…</pre>
+<script src="../data/funnel.js"></script>
+<script>
+/* Runs in REAL time, not under a virtual clock, because the whole
+   point is whether these files actually reach a browser and start
+   playing before they have finished downloading. Open it directly,
+   or drive it without --virtual-time-budget. */
+
+const out = document.getElementById('out');
+const r = [];
+const ok = (n, c, d) => r.push((c ? 'PASS' : 'FAIL') + '  ' + n + (d ? '  [' + d + ']' : ''));
+const sleep = ms => new Promise(x => setTimeout(x, ms));
+
+/* every media file the funnel names, in the order it names them */
+function referenced() {
+  const seen = [];
+  JSON.stringify(window.FUNNEL).replace(/"(assets\/media\/[^"]+)"/g, (m, p) => {
+    if (seen.indexOf(p) === -1) seen.push(p); return m;
+  });
+  return seen.filter(p => /\.mp4$/i.test(p));
+}
+
+function load(src) {
+  return new Promise(resolve => {
+    const v = document.createElement('video');
+    const t0 = performance.now();
+    let firstFrameAt = null;
+
+    v.src = '../' + src;
+    v.muted = true;
+    v.playsInline = true;
+    v.preload = 'auto';
+
+    const done = why => resolve({
+      src, why,
+      duration: v.duration,
+      readyState: v.readyState,
+      w: v.videoWidth, h: v.videoHeight,
+      ms: Math.round((firstFrameAt || performance.now()) - t0)
+    });
+
+    v.addEventListener('loadeddata', () => { firstFrameAt = performance.now(); done('loadeddata'); });
+    v.addEventListener('error', () => done('error ' + (v.error && v.error.code)));
+    setTimeout(() => done('timeout'), 25000);
+    document.body.appendChild(v);
+    v.style.display = 'none';
+  });
+}
+
+(async () => {
+  const files = referenced();
+  ok('the funnel names some footage', files.length > 0, files.length + ' files');
+
+  for (const f of files) {
+    out.textContent = 'loading ' + f + ' …';
+    const res = await load(f);
+    const name = f.replace('assets/media/', '');
+
+    ok(name + ' loads', res.why === 'loadeddata', res.why);
+    if (res.why !== 'loadeddata') continue;
+
+    ok(name + ' reports a duration', res.duration > 1, res.duration.toFixed(1) + 's');
+    ok(name + ' decodes a frame', res.w > 0 && res.h > 0, res.w + 'x' + res.h);
+    /* faststart is what makes this quick: the header is at the front,
+       so the browser can show a frame long before the file is in. */
+    ok(name + ' is playable early', res.ms < 8000, 'first frame after ' + res.ms + 'ms');
+  }
+
+  const fails = r.filter(x => x.startsWith('FAIL'));
+  document.title = fails.length ? 'FAILED ' + fails.length : 'ALL PASS ' + r.length;
+  const report = document.title + '\n\n' + r.join('\n');
+  out.textContent = report;
+
+  /* If a runner is listening, hand it the result — this page takes far
+     longer than a headless dump will wait for. Harmless otherwise. */
+  try { fetch('/__done?r=' + encodeURIComponent(report)); } catch (e) {}
+})();
+</script>

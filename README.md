@@ -41,7 +41,7 @@ assets/js/engine.js     state, routing, layouts, validation, handoff
 data/funnel.js          the funnel itself: every slide, every fork
 assets/media/           the footage
 serve.cmd / serve.js    optional local server
-tools/                  four checks you can run in a browser
+tools/                  five checks you can run in a browser
 ```
 
 `tools/smoke.html` walks a whole path — identity, sort, focus tags, offer
@@ -54,12 +54,20 @@ access on `file://`, and the tool says so rather than reporting a false pass.
 Trust it over a phone-sized screenshot: headless browsers on Windows enforce a
 minimum window width and then crop the image, which fakes a clipped layout.
 
-`tools/film.html` checks the film sequence end to end: the title card, the
-countdown ticking three-two-one, the dissolve, that the real files are wired
-to the right slides, that the sign-in's background film is muted and looping
-and dropped again on other slides, and — on S6, the one film whose length is
-known — that the button is held back and then lands dead centre on the frame.
-It takes about forty seconds, because it sits through a film.
+`tools/film.html` checks the film sequence: the title card, the countdown
+ticking three-two-one, the dissolve, the right file on the right slide, the
+button held back and then landing dead centre on the frame, and the sign-in's
+background film being muted, looping and dropped again elsewhere. It drives
+the end of the film directly rather than sitting through it.
+
+`tools/media.html` is the one that checks the footage itself, and it runs in
+**real time** — open it in a browser rather than driving it headless. It loads
+every file the funnel names and reports whether each one decodes and how
+quickly a first frame appears. Under 100ms means `faststart` is set and the
+browser can begin playing before the download finishes; several seconds means
+the `moov` atom is at the end of the file and the whole thing has to arrive
+first. Fix that losslessly with
+`ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4`.
 
 `tools/interaction.html` checks the things that make it feel responsive and
 the things that make the layout wide: that buttons really sit side by side,
@@ -220,7 +228,7 @@ slides that do not exist, dead ends, and unreachable slides. Slides marked
 |---|---|
 | `S6b` | `remaining: 11` — update weekly with the real count. Never reset it. |
 | `S11`, `S11a-c` | "Ends 31 October 2026" — the introductory pricing deadline. |
-| `S6` | Still a placeholder. Drop a file in `assets/media/` and add `"src"` to its video block. See the note below about sound. |
+| Video weight | The three films are ~9.5 Mbps, about 3× what 1080p web delivery needs. Re-encoding at CRF 23 would take 115MB down to roughly 25MB with little visible loss. |
 | Photography | The stills are borrowed from RhemaWave. Replace them with Richmond photographs when you have them: same `{ "src", "note" }` shape. |
 | `S8b` | Testimonials, parked until written releases are signed. |
 | `config.js` | The GHL webhook URL. |
@@ -342,8 +350,9 @@ half seconds and then dissolves. The count is suppressed entirely under
 | File | Where it plays |
 |---|---|
 | `ID-rwt2.mp4` | Behind the sign-in, muted and looping |
-| `S1.mp4` | S1, the hook |
-| `vp-rwt-bg.mp4` | S2, the room |
+| `ID-J1.mp4` | S1, the hook |
+| `ID-J2.mp4` | S2, the room |
+| `ID-J3.mp4` | S6, the insider film |
 | `lounge.jpg` | S8 and S11c |
 | `home-evening.jpg` | S5 and S11b |
 | `home-living.jpg` | S11a |
