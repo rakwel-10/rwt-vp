@@ -244,6 +244,17 @@
     return { record: Record, navigate: navigate, debug: debug, funnel: funnel };
   }
 
+  /* ==================================================================
+     SLIDE TRANSITION
+     The outgoing slide fades before the incoming one is built, so a
+     change of screen reads as a dissolve rather than a cut. The
+     surface changes at the top of the fade, so the ground and the
+     content cross over together instead of the page snapping from
+     cream to dark after the words have gone.
+     ================================================================== */
+  var LEAVE_MS = 200;
+  var renderToken = 0;
+
   function render(slideId) {
     var slide = funnel.slides[slideId];
     if (!slide) {
@@ -252,6 +263,24 @@
       return;
     }
 
+    var stage = root.querySelector('.stage');
+    var leaving = stage.querySelector('.slide');
+    var token = ++renderToken;
+
+    if (!leaving || reduceMotion()) { paint(slideId, slide); return; }
+
+    document.body.classList.toggle('is-dark', slide.surface === 'dark');
+    stage.classList.add('is-leaving');
+
+    setTimeout(function () {
+      /* A faster click started another transition; that one wins. */
+      if (token !== renderToken) return;
+      stage.classList.remove('is-leaving');
+      paint(slideId, slide);
+    }, LEAVE_MS);
+  }
+
+  function paint(slideId, slide) {
     currentId = slideId;
     Record.visit(slideId);
     document.title = slide.name
@@ -584,14 +613,14 @@
     timers.push(setTimeout(beat, 700));
   }
 
-  /* Confirm the pick before the page moves: the chosen plate fills,
-     the rest fade back. Short enough that it reads as responsiveness
-     rather than a wait. */
+  /* Confirm the pick, then hand over to the slide dissolve. Kept
+     short because the fade that follows it is another 200ms, and the
+     two together are what the visitor feels as the wait. */
   function commit(wrap, btn, done) {
     if (reduceMotion()) { done(); return; }
     wrap.classList.add('choices--committed');
     btn.classList.add('is-chosen');
-    setTimeout(done, 170);
+    setTimeout(done, 120);
   }
 
   function reduceMotion() {

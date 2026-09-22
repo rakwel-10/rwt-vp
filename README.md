@@ -300,7 +300,20 @@ responsiveness, long enough to confirm the pick.
 
 The shortcuts are announced to assistive tech via `aria-keyshortcuts` but
 nothing is printed on the buttons — visible keycaps were clutter on a page
-that is mostly buttons. Number keys are ignored while a form field has focus,
+that is mostly buttons. ### Between slides
+
+A change of screen is a dissolve, not a cut. The outgoing slide fades over
+200ms before the next one is built, and the incoming one settles in over
+340ms — mostly opacity, with 6px of movement to give the change a direction.
+The surface flips at the *top* of the fade rather than after it, so going
+from cream to dark crosses the ground and the content over together instead
+of snapping once the words have gone.
+
+A second click during a fade cancels the first rather than queueing behind
+it, so nothing can strand the page half-faded. Under
+ the swap is immediate.
+
+Number keys are ignored while a form field has focus,
 so typing a ZIP code never navigates. Everything is under 300ms and all of it
 is suppressed under `prefers-reduced-motion`.
 

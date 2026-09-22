@@ -111,6 +111,46 @@ const css=(el,p)=>getComputedStyle(el).getPropertyValue(p);
   ok('and it is actually moving', getComputedStyle(a).animationName==='drift-a',
      getComputedStyle(a).animationName);
 
+  /* --- the dissolve between slides ----------------------------- */
+  location.hash='/S3'; await sleep(700);
+  const stage=document.querySelector('.stage');
+  const before=document.querySelector('.slide');
+
+  location.hash='/S10';
+  await sleep(60);
+  ok('the outgoing slide is fading, not gone',
+     stage.classList.contains('is-leaving') && document.querySelector('.slide')===before);
+  ok('it is on its way out',
+     getComputedStyle(before).animationName==='leave',
+     getComputedStyle(before).animationName);
+  ok('it cannot be clicked mid-fade',
+     getComputedStyle(before).pointerEvents==='none');
+
+  await sleep(500);
+  ok('the new slide has taken over', document.querySelector('.slide')!==before);
+  ok('the fade class is cleaned up', !stage.classList.contains('is-leaving'));
+  ok('and it settles in rather than cutting',
+     getComputedStyle(document.querySelector('.slide')).animationName==='arrive');
+
+  /* the ground should change with the content, not after it */
+  location.hash='/S3'; await sleep(600);
+  ok('a light slide is light', !document.body.classList.contains('is-dark'));
+  location.hash='/S1';
+  await sleep(60);
+  ok('the surface flips at the top of the fade, not after it',
+     document.body.classList.contains('is-dark'));
+  await sleep(700);
+
+  /* a fast second click must not strand the page mid-fade */
+  location.hash='/S3'; await sleep(600);
+  location.hash='/S10';
+  await sleep(40);
+  location.hash='/S9';
+  await sleep(900);
+  ok('a fast second navigation does not strand the fade',
+     !stage.classList.contains('is-leaving'));
+  ok('and the last one wins', location.hash==='#/S9', 'on '+location.hash);
+
   const fails=r.filter(x=>x.startsWith('FAIL'));
   document.title = fails.length ? 'FAILED '+fails.length : 'ALL PASS '+r.length;
   document.body.innerHTML='<pre id="out">'+document.title+'\n\n'+r.join('\n')+'</pre>';

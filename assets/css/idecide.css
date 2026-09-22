@@ -112,7 +112,8 @@ body{
     radial-gradient(120% 90% at 12% -10%, var(--paper-lift) 0%, transparent 58%),
     radial-gradient(100% 80% at 100% 108%, var(--paper-sink) 0%, transparent 62%);
   background-attachment:fixed;
-  transition:background-color var(--slow) var(--ease);
+  /* spans the whole swap, so dark and cream cross over gently */
+  transition:background-color 420ms var(--ease);
 }
 
 /* Fine grain, so the ground reads as a material and not a fill.
@@ -1508,11 +1509,20 @@ table.compare caption{
    of it answering something the visitor did.
    ================================================================== */
 
-.slide{animation:arrive var(--slow) var(--ease) both}
-@keyframes arrive{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+/* A slide dissolves out before the next is built, and settles in
+   rather than sliding: mostly opacity, with just enough movement to
+   give the change a direction. */
+.slide{animation:arrive 340ms var(--ease) both}
+@keyframes arrive{from{opacity:0;translate:0 6px}to{opacity:1;translate:0 0}}
+
+.stage.is-leaving .slide{
+  animation:leave 200ms var(--ease) both;
+  pointer-events:none;
+}
+@keyframes leave{to{opacity:0;translate:0 -4px}}
 
 /* choices arrive one after another, so the list reads as a list */
-.choice{animation:plate var(--slow) var(--ease) both;animation-delay:calc(var(--i,0) * 45ms + 60ms)}
+.choice{animation:plate 300ms var(--ease) both;animation-delay:calc(var(--i,0) * 40ms + 120ms)}
 @keyframes plate{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
 
 /* choices a film held back get their own entrance when it ends */
