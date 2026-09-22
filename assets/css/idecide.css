@@ -607,7 +607,8 @@ body.has-bg .aurora{opacity:0}
 
 .reel__unmute,.reel__skip{
   position:absolute;
-  bottom:1.25rem;
+  /* top corners: the control bar owns the bottom edge */
+  top:1.25rem;
   z-index:3;
   background:#0000004D;
   border:1px solid #FFFFFF2E;
@@ -657,6 +658,129 @@ body.has-bg .aurora{opacity:0}
 }
 @media (prefers-reduced-motion:reduce){
   .titlecard,.film .reel{transition:none}
+}
+
+/* ==================================================================
+   FILM CONTROLS
+   The browser's own bar is a grey Chrome widget; this is the same
+   handful of controls in the room's own colours. Out of the way while
+   the film runs, back on hover, on keyboard focus, or whenever it is
+   paused — a paused film with hidden controls is a puzzle.
+   ================================================================== */
+.rc{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  z-index:4;
+  display:flex;
+  align-items:center;
+  gap:.85rem;
+  padding:2.5rem 1.15rem .95rem;
+  background:linear-gradient(180deg,transparent 0%,#0A0705D9 78%);
+  opacity:0;
+  translate:0 8px;
+  transition:opacity var(--base) var(--ease),translate var(--base) var(--ease);
+}
+.reel:hover .rc,
+.reel:focus-within .rc,
+.reel.is-paused .rc{opacity:1;translate:0 0}
+
+/* the thin progress line steps aside when the full bar is up */
+.reel:hover .reel__bar,
+.reel:focus-within .reel__bar,
+.reel.is-paused .reel__bar{opacity:0}
+.reel__bar{transition:opacity var(--fast) var(--ease)}
+
+.rc__btn{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:34px;height:34px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:none;
+  color:#F2E9DE;
+  cursor:pointer;
+  transition:background var(--fast),color var(--fast),scale var(--fast);
+}
+.rc__btn svg{width:17px;height:17px;display:block}
+.rc__btn:hover{background:#FFFFFF1F;color:#FFF}
+.rc__btn:active{scale:.92}
+.rc__btn:focus-visible{outline-color:var(--copper-lift)}
+
+.rc__time{
+  flex:0 0 auto;
+  font-family:var(--ui);
+  font-size:.75rem;
+  font-variant-numeric:tabular-nums;
+  color:#EDE4D6B8;
+  letter-spacing:.01em;
+}
+
+/* ---------- the scrubber -----------------------------------------
+   A real range input, so it is keyboard-operable for free: arrows
+   nudge, Home and End jump. Styled to look like the progress line it
+   replaces rather than like a form control. */
+.rc__seek{
+  flex:1 1 auto;
+  min-width:0;
+  height:22px;
+  margin:0;
+  padding:0;
+  background:none;
+  cursor:pointer;
+  -webkit-appearance:none;
+  appearance:none;
+}
+.rc__seek:focus{outline:0}
+.rc__seek:focus-visible{outline:2px solid var(--copper-lift);outline-offset:3px;border-radius:4px}
+
+.rc__seek::-webkit-slider-runnable-track{
+  height:3px;
+  border-radius:3px;
+  background:#FFFFFF2E;
+}
+.rc__seek::-moz-range-track{
+  height:3px;
+  border-radius:3px;
+  background:#FFFFFF2E;
+}
+.rc__seek::-moz-range-progress{
+  height:3px;
+  border-radius:3px;
+  background:var(--copper-glow);
+}
+
+.rc__seek::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:12px;height:12px;
+  margin-top:-4.5px;
+  border-radius:50%;
+  border:0;
+  background:var(--copper-glow);
+  box-shadow:0 0 0 0 #C8763C00;
+  transition:box-shadow var(--fast),scale var(--fast);
+}
+.rc__seek::-moz-range-thumb{
+  width:12px;height:12px;
+  border-radius:50%;
+  border:0;
+  background:var(--copper-glow);
+}
+.rc__seek:hover::-webkit-slider-thumb,
+.rc__seek:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 5px #C8763C33}
+.rc__seek:active::-webkit-slider-thumb{scale:1.15}
+
+/* On a touch screen there is no hover to reveal anything, so the bar
+   simply stays. */
+@media (pointer:coarse){
+  .rc{opacity:1;translate:0 0}
+  .reel__bar{opacity:0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .rc{transition:none}
 }
 
 /* ==================================================================

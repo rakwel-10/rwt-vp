@@ -139,10 +139,127 @@
       if (b.poster) v.poster = b.poster;
       screen.appendChild(v);
 
-      v.addEventListener('timeupdate', function () {
-        if (v.duration) bar.style.width = (v.currentTime / v.duration * 100) + '%';
+      /* ---------- controls ---------------------------------------
+         Real controls, but not the browser's: a native bar drops a
+         grey Chrome widget into a copper room. These keep out of the
+         way while the film runs and come back on hover, on keyboard
+         focus, or any time it is paused.
+         ----------------------------------------------------------- */
+      var controls = el('div', 'rc');
+      controls.hidden = true;
+
+      var toggle = el('button', 'rc__btn rc__toggle');
+      toggle.type = 'button';
+
+      var seek = document.createElement('input');
+      seek.className = 'rc__seek';
+      seek.type = 'range';
+      seek.min = 0; seek.max = 1000; seek.step = 1; seek.value = 0;
+      seek.setAttribute('aria-label', 'Seek');
+
+      var time = el('span', 'rc__time', '0:00 / 0:00');
+
+      var mute = el('button', 'rc__btn rc__mute');
+      mute.type = 'button';
+
+      var full = el('button', 'rc__btn rc__full');
+      full.type = 'button';
+      full.setAttribute('aria-label', 'Full screen');
+
+      controls.appendChild(toggle);
+      controls.appendChild(seek);
+      controls.appendChild(time);
+      controls.appendChild(mute);
+      controls.appendChild(full);
+
+      var ICON = {
+        play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5 13 8 4 13.5Z" fill="currentColor"/></svg>',
+        pause: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="2.5" width="3" height="11" rx="1" fill="currentColor"/><rect x="9" y="2.5" width="3" height="11" rx="1" fill="currentColor"/></svg>',
+        loud: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6h2.6L8.6 3v10L5.1 10H2.5Z" fill="currentColor"/><path d="M10.8 6.2a2.6 2.6 0 0 1 0 3.6M12.6 4.4a5.2 5.2 0 0 1 0 7.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+        quiet: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6h2.6L8.6 3v10L5.1 10H2.5Z" fill="currentColor"/><path d="M11 6.4l3.4 3.4M14.4 6.4L11 9.8" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+        expand: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2H2v4M10 2h4v4M10 14h4v-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        shrink: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h4V2M14 6h-4V2M14 10h-4v4M2 10h4v4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      };
+
+      function clock(s) {
+        if (!isFinite(s) || s < 0) s = 0;
+        var m = Math.floor(s / 60);
+        var r = Math.floor(s % 60);
+        return m + ':' + (r < 10 ? '0' : '') + r;
+      }
+
+      function paintToggle() {
+        var paused = v.paused;
+        toggle.innerHTML = paused ? ICON.play : ICON.pause;
+        toggle.setAttribute('aria-label', paused ? 'Play' : 'Pause');
+        /* Paused pins the controls open, so they are never hidden
+           behind a hover the visitor has to guess at. */
+        reel.classList.toggle('is-paused', paused && !finished);
+      }
+
+      function paintMute() {
+        mute.innerHTML = v.muted ? ICON.quiet : ICON.loud;
+        mute.setAttribute('aria-label', v.muted ? 'Unmute' : 'Mute');
+      }
+
+      paintToggle();
+      paintMute();
+      full.innerHTML = ICON.expand;
+
+      toggle.addEventListener('click', function () {
+        if (v.paused) v.play().catch(function () {}); else v.pause();
       });
-      v.addEventListener('ended', finish);
+
+      mute.addEventListener('click', function () {
+        v.muted = !v.muted;
+        if (!v.muted) unmute.hidden = true;
+      });
+
+      full.addEventListener('click', function () {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else if (screen.requestFullscreen) screen.requestFullscreen().catch(function () {});
+      });
+
+      document.addEventListener('fullscreenchange', function () {
+        var on = document.fullscreenElement === screen;
+        full.innerHTML = on ? ICON.shrink : ICON.expand;
+        full.setAttribute('aria-label', on ? 'Leave full screen' : 'Full screen');
+      });
+
+      /* A drag on the scrubber must not fight the timeupdate that is
+         also trying to move it. */
+      var scrubbing = false;
+      seek.addEventListener('pointerdown', function () { scrubbing = true; });
+      seek.addEventListener('input', function () {
+        if (!v.duration) return;
+        v.currentTime = (seek.value / 1000) * v.duration;
+        bar.style.width = (seek.value / 10) + '%';
+        time.textContent = clock(v.currentTime) + ' / ' + clock(v.duration);
+      });
+      function stopScrub() { scrubbing = false; }
+      seek.addEventListener('pointerup', stopScrub);
+      seek.addEventListener('change', stopScrub);
+      window.addEventListener('pointerup', stopScrub);
+
+      v.addEventListener('play', paintToggle);
+      v.addEventListener('pause', paintToggle);
+      v.addEventListener('volumechange', paintMute);
+      v.addEventListener('loadedmetadata', function () {
+        time.textContent = clock(0) + ' / ' + clock(v.duration);
+      });
+
+      v.addEventListener('timeupdate', function () {
+        if (!v.duration) return;
+        var pct = v.currentTime / v.duration;
+        bar.style.width = (pct * 100) + '%';
+        if (!scrubbing) seek.value = Math.round(pct * 1000);
+        time.textContent = clock(v.currentTime) + ' / ' + clock(v.duration);
+      });
+
+      v.addEventListener('ended', function () {
+        reel.classList.remove('is-paused');
+        finish();
+      });
 
       play.addEventListener('click', function () { play.hidden = true; start(); });
       unmute.addEventListener('click', function () {
@@ -153,6 +270,7 @@
       function start() {
         reel.classList.add('reel--playing');
         skip.hidden = false;
+        controls.hidden = false;
         v.muted = false;
         var p = v.play();
         if (!p || !p.catch) return;
@@ -165,14 +283,18 @@
               reel.classList.remove('reel--playing');
               skip.hidden = true;
               play.hidden = false;
+              paintToggle();
             });
           }
           unmute.hidden = false;
         });
       }
+
       reel.addEventListener('film:start', start, { once: true });
+      screen.appendChild(controls);
 
     } else {
+
       /* No footage yet. Run the stated duration so the prototype paces
          the way the finished funnel will. */
       var total = (b.seconds || 20) * 1000;

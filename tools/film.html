@@ -67,6 +67,57 @@ const sleep=ms=>new Promise(x=>setTimeout(x,ms));
   ok('skip is offered while it rolls', !rolled || !document.querySelector('.reel__skip').hidden);
   ok('button is held back while it plays', choices.hidden===true);
 
+  /* ---------- the controls -------------------------------------- */
+  const rc=reel.querySelector('.rc');
+  ok('there is a control bar', !!rc);
+  ok('it has play, seek, time, mute and fullscreen',
+     !!rc.querySelector('.rc__toggle') && !!rc.querySelector('.rc__seek') &&
+     !!rc.querySelector('.rc__time') && !!rc.querySelector('.rc__mute') &&
+     !!rc.querySelector('.rc__full'));
+  ok('the bar only exists once the film is running', rc.hidden===false);
+
+  const seekEl=rc.querySelector('.rc__seek');
+  ok('the scrubber is a real range input, so arrows work',
+     seekEl.tagName==='INPUT' && seekEl.type==='range');
+  ok('every control is labelled',
+     ['.rc__toggle','.rc__mute','.rc__full','.rc__seek']
+       .every(sel=>(rc.querySelector(sel).getAttribute('aria-label')||'').length>1));
+
+  /* Out of the way while it runs, pinned open when paused. The class
+     is set explicitly here: whether autoplay actually started is a
+     browser decision and not what this is testing. */
+  const wasPaused = reel.classList.contains('is-paused');
+  const thin = reel.querySelector('.reel__bar');
+  /* Read the rule, not the fade: a CSS transition does not advance
+     under a virtual clock, so opacity would sit at its start value
+     however long the test waited. */
+  const settled = (node, cls, on) => {
+    const prev = node.style.transition;
+    node.style.transition = 'none';
+    reel.classList.toggle(cls, on);
+    void node.offsetWidth;
+    const o = getComputedStyle(node).opacity;
+    node.style.transition = prev;
+    return o;
+  };
+  ok('the bar keeps out of the way while it plays',
+     settled(rc, 'is-paused', false)==='0');
+  ok('a paused film shows its controls',
+     settled(rc, 'is-paused', true)==='1');
+  ok('the thin progress line steps aside for the full bar',
+     settled(thin, 'is-paused', true)==='0');
+  reel.classList.toggle('is-paused', wasPaused);
+
+  ok('the toggle reads as play while paused',
+     rc.querySelector('.rc__toggle').getAttribute('aria-label')==='Play' ||
+     rc.querySelector('.rc__toggle').getAttribute('aria-label')==='Pause');
+  const muteBtn=rc.querySelector('.rc__mute');
+  const wasMuted=v.muted;
+  muteBtn.click();
+  ok('mute toggles the video', v.muted!==wasMuted);
+  muteBtn.click();
+  ok('and toggles back', v.muted===wasMuted);
+
   /* ---------- the end of the film ------------------------------- */
   v.dispatchEvent(new Event('ended'));
   await sleep(700);

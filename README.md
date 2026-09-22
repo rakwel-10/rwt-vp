@@ -354,6 +354,23 @@ Each film slide runs as a sequence rather than a page:
 4. **The end card.** The picture dims behind a soft scrim and the single way
    onward settles into the middle of the frame.
 
+### Film controls
+
+Play/pause, a scrubber, elapsed and total time, mute, and fullscreen — built
+rather than native, because the browser's own bar drops a grey Chrome widget
+into a copper room.
+
+They stay out of the way while the film runs and come back on hover, on
+keyboard focus, or any time it is paused. A paused film with hidden controls
+is a puzzle, so pausing pins them open. The thin copper progress line is what
+shows while they are hidden; it steps aside when the full bar appears. On a
+touch screen there is no hover to reveal anything, so the bar simply stays.
+
+The scrubber is a real `<input type="range">`, which makes it keyboard
+operable for free — arrows nudge, Home and End jump — and it is styled to
+read as the progress line it replaces rather than as a form control. **Skip**
+and **Sound on** moved to the top corners so the bar owns the bottom edge.
+
 The card is the slide's `eyebrow` field and the count is `"countdown": 3` on
 the slide, so both are content rather than code. A film slide with no eyebrow
 skips straight to step 3; one with no `countdown` holds the card for two and a
