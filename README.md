@@ -38,10 +38,11 @@ config.js               webhook URL, identity gate, debug flags
 assets/css/idecide.css  the whole design system
 assets/js/blocks.js     block renderers — the content vocabulary
 assets/js/engine.js     state, routing, layouts, validation, handoff
+assets/js/music.js      the background music player
 data/funnel.js          the funnel itself: every slide, every fork
 assets/media/           the footage
 serve.cmd / serve.js    optional local server
-tools/                  five checks you can run in a browser
+tools/                  six checks you can run in a browser
 ```
 
 `tools/smoke.html` walks a whole path — identity, sort, focus tags, offer
@@ -75,6 +76,13 @@ that the two columns are beside each other, arrow-key movement, number-key
 selection, that typing a digit into a form field does not navigate, the commit
 animation, the back control, warm shadows, and that the drifting light is on
 for dark screens and paints nothing on light ones.
+
+`tools/music.html` checks the background player: that it starts on track one
+at the level the funnel asked for, that next and previous walk and wrap, that
+a finished track rolls into the next, that the volume slider moves the level,
+that a film ducks it and the level comes back, and — the one that matters
+most — that the same player survives five slide changes without being rebuilt
+or restarted.
 
 None of them are part of the funnel; delete the folder before you deploy if
 you'd rather not ship them.
@@ -228,7 +236,8 @@ slides that do not exist, dead ends, and unreachable slides. Slides marked
 |---|---|
 | `S6b` | `remaining: 11` — update weekly with the real count. Never reset it. |
 | `S11`, `S11a-c` | "Ends 31 October 2026" — the introductory pricing deadline. |
-| Video weight | The three films are ~9.5 Mbps, about 3× what 1080p web delivery needs. Re-encoding at CRF 23 would take 115MB down to roughly 25MB with little visible loss. |
+| Video weight | The three films are ~9.5 Mbps, about 3× what 1080p web delivery needs. Re-encoding at CRF 23 would take 120MB down to roughly 25MB with little visible loss. |
+| Music weight | `bgm/2.mp3` is 2h 17m and 89MB. It streams, so a visitor only downloads what they hear, but it is a third of the repository on its own. Worth trimming. |
 | Photography | The stills are borrowed from RhemaWave. Replace them with Richmond photographs when you have them: same `{ "src", "note" }` shape. |
 | `S8b` | Testimonials, parked until written releases are signed. |
 | `config.js` | The GHL webhook URL. |
@@ -318,6 +327,34 @@ than queueing behind it, so nothing can strand the page half-faded.
 
 Everything here is suppressed under `prefers-reduced-motion`, where the swap
 is immediate.
+
+### Background music
+
+A capsule in the bottom left: play/pause and four bars that move only while
+something is playing, so the control doubles as the status. Hovering or
+tabbing into it slides out previous, next, which track of six, and volume.
+It folds away again when you leave. On touch there is no hover, so the panel
+simply stays out.
+
+It lives outside the stage, so it survives every slide change — it must never
+restart when the page moves on, and the test checks exactly that.
+
+**A film ducks it rather than stopping it.** The films carry narration and two
+voices at once is nobody's idea of calm, so the level drops to 8% and the
+capsule fades back, then both return when the film ends. Leaving a film
+part-way through also hands the level back.
+
+The playlist, the starting level and the ducked level are all in
+`data/funnel.js` under `music`, so they travel with the client rather than
+living in code. A finished track rolls into the next and wraps at the end, so
+there is sound throughout.
+
+**On autoplay.** It tries to start on load and browsers will usually refuse:
+audio is blocked until the visitor has interacted with the page. Nothing in
+this code can change that. So when it is refused, the player waits and starts
+on the first click or keypress — which on this funnel is the sign-in button,
+a few seconds in. The capsule shows a play icon until then, so it never looks
+broken.
 
 ### Images
 

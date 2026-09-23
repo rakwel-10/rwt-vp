@@ -22,12 +22,15 @@ function referenced() {
   JSON.stringify(window.FUNNEL).replace(/"(assets\/media\/[^"]+)"/g, (m, p) => {
     if (seen.indexOf(p) === -1) seen.push(p); return m;
   });
-  return seen.filter(p => /\.mp4$/i.test(p));
+  return seen.filter(p => /\.(mp4|mp3|m4a|ogg|wav)$/i.test(p));
 }
 
 function load(src) {
   return new Promise(resolve => {
-    const v = document.createElement('video');
+    /* The music is audio in both .mp3 and .mp4 containers, so decide
+       by folder as well as extension. */
+    const isAudio = /\.(mp3|m4a|ogg|wav)$/i.test(src) || /\/bgm\//i.test(src);
+    const v = document.createElement(isAudio ? 'audio' : 'video');
     const t0 = performance.now();
     let firstFrameAt = null;
 
@@ -37,10 +40,10 @@ function load(src) {
     v.preload = 'auto';
 
     const done = why => resolve({
-      src, why,
+      src, why, isAudio,
       duration: v.duration,
       readyState: v.readyState,
-      w: v.videoWidth, h: v.videoHeight,
+      w: v.videoWidth || 0, h: v.videoHeight || 0,
       ms: Math.round((firstFrameAt || performance.now()) - t0)
     });
 
@@ -65,7 +68,7 @@ function load(src) {
     if (res.why !== 'loadeddata') continue;
 
     ok(name + ' reports a duration', res.duration > 1, res.duration.toFixed(1) + 's');
-    ok(name + ' decodes a frame', res.w > 0 && res.h > 0, res.w + 'x' + res.h);
+    if (!res.isAudio) ok(name + ' decodes a frame', res.w > 0 && res.h > 0, res.w + 'x' + res.h);
     /* faststart is what makes this quick: the header is at the front,
        so the browser can show a frame long before the file is in. */
     ok(name + ' is playable early', res.ms < 8000, 'first frame after ' + res.ms + 'ms');

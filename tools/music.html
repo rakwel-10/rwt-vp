@@ -1,0 +1,116 @@
+<!doctype html><meta charset="utf-8"><title>music check</title>
+<link rel="stylesheet" href="../assets/css/idecide.css">
+<link rel="stylesheet" href="../assets/css/music.css">
+<pre id="out">running…</pre>
+<script>window.IDECIDE_CONFIG={funnel:null,handoff:{webhookUrl:''},debug:{validateOnLoad:false}};</script>
+<script src="../data/funnel.js"></script>
+<script src="../assets/js/blocks.js"></script>
+<script src="../assets/js/music.js"></script>
+<script src="../assets/js/engine.js"></script>
+<script>
+const r=[]; const ok=(n,c,d)=>r.push((c?'PASS':'FAIL')+'  '+n+(d?'  ['+d+']':''));
+const sleep=ms=>new Promise(x=>setTimeout(x,ms));
+
+/* The player's job is to survive the whole funnel, start on the first
+   track at a low level, walk the playlist, and get out of the way of
+   a narrated film. Whether audio actually sounds is the browser's
+   decision and is checked in real time by tools/media.html. */
+
+(async()=>{
+  try{sessionStorage.clear()}catch(e){}
+  IDecide.start(); await sleep(700);
+
+  const bgm = document.querySelector('.bgm');
+  const audio = bgm && bgm.querySelector('audio');
+
+  ok('there is a player', !!bgm);
+  ok('it sits in the bottom left', (() => {
+    const s = getComputedStyle(bgm);
+    return s.position === 'fixed' && parseFloat(s.left) < 40 && parseFloat(s.bottom) < 40;
+  })());
+
+  ok('it has play, previous, next and volume',
+     !!bgm.querySelector('.bgm__toggle') && !!bgm.querySelector('.bgm__prev') &&
+     !!bgm.querySelector('.bgm__next') && !!bgm.querySelector('.bgm__vol'));
+  ok('every control is labelled',
+     ['.bgm__toggle','.bgm__prev','.bgm__next','.bgm__vol']
+       .every(s => (bgm.querySelector(s).getAttribute('aria-label')||'').length > 1));
+
+  /* ---------- the playlist ---------- */
+  ok('it starts on the first track', /\/1\.mp3$/.test(audio.getAttribute('src')),
+     audio.getAttribute('src'));
+  ok('it says which track is up', bgm.querySelector('.bgm__count').textContent === '1 / 6',
+     bgm.querySelector('.bgm__count').textContent);
+  ok('it starts at the level the funnel asked for',
+     Math.abs(audio.volume - window.FUNNEL.music.volume) < 0.001,
+     'volume ' + audio.volume);
+
+  bgm.querySelector('.bgm__next').click(); await sleep(60);
+  ok('next moves on', /\/2\.mp3$/.test(audio.getAttribute('src')), audio.getAttribute('src'));
+  ok('and the count follows', bgm.querySelector('.bgm__count').textContent === '2 / 6');
+
+  bgm.querySelector('.bgm__prev').click(); await sleep(60);
+  ok('previous goes back', /\/1\.mp3$/.test(audio.getAttribute('src')));
+
+  bgm.querySelector('.bgm__prev').click(); await sleep(60);
+  ok('previous wraps to the last track', /\/6\.mp4$/.test(audio.getAttribute('src')),
+     audio.getAttribute('src'));
+  bgm.querySelector('.bgm__next').click(); await sleep(60);
+  ok('next wraps back to the first', /\/1\.mp3$/.test(audio.getAttribute('src')));
+
+  /* a track ending should roll on by itself, so there is no silence */
+  audio.dispatchEvent(new Event('ended')); await sleep(60);
+  ok('a finished track rolls into the next', /\/2\.mp3$/.test(audio.getAttribute('src')),
+     audio.getAttribute('src'));
+  Music.load(0);
+
+  /* ---------- volume ---------- */
+  const vol = bgm.querySelector('.bgm__vol');
+  ok('the slider reflects the starting level', Number(vol.value) === 40, 'at ' + vol.value);
+  vol.value = 15;
+  vol.dispatchEvent(new Event('input'));
+  await sleep(40);
+  ok('moving the slider moves the level', Math.abs(audio.volume - 0.15) < 0.01,
+     'volume ' + audio.volume.toFixed(2));
+  vol.value = 40; vol.dispatchEvent(new Event('input')); await sleep(40);
+
+  /* ---------- pause and play ---------- */
+  const toggle = bgm.querySelector('.bgm__toggle');
+  toggle.click(); await sleep(60);
+  ok('the toggle stops it', audio.paused);
+  ok('and says so', toggle.getAttribute('aria-label') === 'Play music');
+
+  /* ---------- it gets out of the way of a film ---------- */
+  Music.duck(true); await sleep(40);
+  ok('a film ducks the music', Math.abs(audio.volume - window.FUNNEL.music.duckTo) < 0.001,
+     'volume ' + audio.volume);
+  ok('and the player recedes', bgm.classList.contains('is-ducked'));
+  Music.duck(false); await sleep(40);
+  ok('the level comes back when the film ends', Math.abs(audio.volume - 0.4) < 0.01,
+     'volume ' + audio.volume);
+
+  /* ---------- it survives the funnel ---------- */
+  const same = audio;
+  for (const id of ['S3','S10','S1','welcome','S7']) {
+    location.hash = '/' + id;
+    await sleep(450);
+  }
+  ok('the same player is still there after five slides',
+     document.querySelector('.bgm audio') === same);
+  ok('it was never rebuilt', document.querySelectorAll('.bgm').length === 1,
+     document.querySelectorAll('.bgm').length + ' players');
+  ok('and it keeps its track', /\/1\.mp3$/.test(audio.getAttribute('src')),
+     audio.getAttribute('src'));
+
+  /* ---------- it does not collide with the back control ---------- */
+  const back = document.querySelector('.back');
+  const bb = back.getBoundingClientRect(), pb = bgm.getBoundingClientRect();
+  ok('it clears the back control',
+     bb.bottom < pb.top || bb.right < pb.left || bb.left > pb.right,
+     'back ' + Math.round(bb.bottom) + ', player top ' + Math.round(pb.top));
+
+  const fails = r.filter(x => x.startsWith('FAIL'));
+  document.title = fails.length ? 'FAILED ' + fails.length : 'ALL PASS ' + r.length;
+  document.body.innerHTML = '<pre id="out">' + document.title + '\n\n' + r.join('\n') + '</pre>';
+})();
+</script>

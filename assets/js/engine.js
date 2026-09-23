@@ -288,6 +288,9 @@
       : funnel.meta.name;
 
     var stage = root.querySelector('.stage');
+    /* Leaving a film part-way through still has to hand the level
+       back, or the music stays quiet for the rest of the funnel. */
+    if (window.Music && slide.layout !== 'cinema') window.Music.duck(false);
     stage.innerHTML = '';
     /* Cleared before blocks render, because a ladder's default selection
        fires an offer change while the new slide is still being built. */
@@ -416,6 +419,7 @@
            puts a ring on it that reads as a rendering fault. */
         choices.setAttribute('aria-live', 'polite');
         article.addEventListener('film:end', function () {
+          if (window.Music) window.Music.duck(false);
           if (film) film.classList.add('is-ended');
           choices.hidden = false;
           choices.classList.add('choices--revealed');
@@ -577,6 +581,7 @@
         film.classList.remove('is-carding');
         film.classList.add('is-rolling');
       }
+      if (window.Music) window.Music.duck(true);
       reel.dispatchEvent(new CustomEvent('film:start'));
     }
 
@@ -799,6 +804,10 @@
     document.body.innerHTML = '';
     document.body.appendChild(aurora);
     document.body.appendChild(root);
+
+    /* Music lives outside the stage so it survives every slide
+       change; it must never restart when the page moves on. */
+    if (window.Music) window.Music.mount(f.music);
 
     window.addEventListener('hashchange', function () {
       render(idFromHash() || f.meta.start);

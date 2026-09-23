@@ -1,0 +1,184 @@
+/* ==================================================================
+   BACKGROUND MUSIC
+   Bottom left, and deliberately small: a capsule with a play control
+   and four bars that move while something is playing. Everything else
+   — previous, next, which track, volume — slides out when you go near
+   it, and folds away again when you leave.
+
+   It reads the page's own tokens, so it is cream on the light slides
+   and near-black on the dark ones without being told which.
+   ================================================================== */
+
+.bgm{
+  position:fixed;
+  left:clamp(1rem,2.5vw,1.6rem);
+  bottom:clamp(1rem,2.5vh,1.6rem);
+  z-index:12;
+
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+
+  padding:.4rem .55rem;
+  border:1px solid var(--paper-edge);
+  border-radius:100px;
+  background:color-mix(in srgb, var(--paper-lift) 82%, transparent);
+  backdrop-filter:blur(10px);
+  box-shadow:var(--lift-2);
+
+  transition:
+    background var(--base) var(--ease),
+    border-color var(--base) var(--ease),
+    box-shadow var(--base) var(--ease),
+    opacity var(--base) var(--ease);
+}
+.bgm:hover,
+.bgm:focus-within{
+  border-color:var(--copper);
+  box-shadow:var(--lift-3);
+}
+
+/* While a film is speaking the player gets out of the way. It is
+   still there, still reachable, just not competing. */
+.bgm.is-ducked{opacity:.32}
+.bgm.is-ducked:hover,
+.bgm.is-ducked:focus-within{opacity:1}
+
+.bgm audio{display:none}
+
+/* ---------- the always-visible half ---------- */
+.bgm__btn{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:30px;height:30px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:none;
+  color:var(--ink-mid);
+  cursor:pointer;
+  transition:background var(--fast),color var(--fast),scale var(--fast);
+}
+.bgm__btn svg{width:15px;height:15px;display:block}
+.bgm__btn:hover{background:var(--copper-wash-2);color:var(--copper)}
+.bgm__btn:active{scale:.9}
+
+.bgm__toggle{color:var(--copper)}
+
+/* Four bars. They hold still unless something is actually playing,
+   so the capsule doubles as the status without any words. */
+.bgm__eq{
+  flex:0 0 auto;
+  display:flex;
+  align-items:flex-end;
+  gap:2px;
+  height:14px;
+  padding-right:.15rem;
+}
+.bgm__eq i{
+  display:block;
+  width:2px;
+  height:3px;
+  border-radius:1px;
+  background:var(--copper);
+  opacity:.45;
+  transition:opacity var(--base);
+}
+.bgm.is-playing .bgm__eq i{
+  opacity:1;
+  animation:bgm-bar 1.1s ease-in-out infinite alternate;
+}
+.bgm.is-playing .bgm__eq i:nth-child(2){animation-duration:.78s;animation-delay:-.2s}
+.bgm.is-playing .bgm__eq i:nth-child(3){animation-duration:1.35s;animation-delay:-.5s}
+.bgm.is-playing .bgm__eq i:nth-child(4){animation-duration:.94s;animation-delay:-.1s}
+@keyframes bgm-bar{from{height:3px}to{height:13px}}
+
+/* ---------- the half that folds away ---------- */
+.bgm__panel{
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+
+  /* grid-template-columns would be cleaner, but this collapses to a
+     true zero width on every browser we care about */
+  max-width:0;
+  overflow:hidden;
+  opacity:0;
+  transition:max-width var(--slow) var(--ease),opacity var(--base) var(--ease);
+}
+.bgm:hover .bgm__panel,
+.bgm:focus-within .bgm__panel{
+  max-width:16rem;
+  opacity:1;
+}
+
+.bgm__count{
+  flex:0 0 auto;
+  font-family:var(--ui);
+  font-size:.7rem;
+  font-variant-numeric:tabular-nums;
+  color:var(--ink-soft);
+  white-space:nowrap;
+  padding-inline:.1rem;
+}
+
+.bgm__volicon{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  color:var(--ink-soft);
+}
+.bgm__volicon svg{width:14px;height:14px;display:block}
+
+/* ---------- volume ---------- */
+.bgm__vol{
+  flex:0 0 auto;
+  width:4.5rem;
+  height:18px;
+  margin:0;
+  padding:0;
+  background:none;
+  cursor:pointer;
+  -webkit-appearance:none;
+  appearance:none;
+}
+.bgm__vol:focus{outline:0}
+.bgm__vol:focus-visible{outline:2px solid var(--copper);outline-offset:3px;border-radius:4px}
+
+.bgm__vol::-webkit-slider-runnable-track{
+  height:3px;border-radius:3px;background:var(--paper-edge);
+}
+.bgm__vol::-moz-range-track{
+  height:3px;border-radius:3px;background:var(--paper-edge);
+}
+.bgm__vol::-moz-range-progress{
+  height:3px;border-radius:3px;background:var(--copper);
+}
+.bgm__vol::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:11px;height:11px;margin-top:-4px;
+  border:0;border-radius:50%;
+  background:var(--copper);
+  transition:box-shadow var(--fast);
+}
+.bgm__vol::-moz-range-thumb{
+  width:11px;height:11px;border:0;border-radius:50%;background:var(--copper);
+}
+.bgm__vol:hover::-webkit-slider-thumb,
+.bgm__vol:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px var(--copper-wash-2)}
+
+/* ---------- small screens ----------
+   No hover to open it with, so the panel stays out and the capsule
+   sits a little tighter. */
+@media (max-width:640px),(pointer:coarse){
+  .bgm{gap:.35rem;padding:.35rem .45rem}
+  .bgm__panel{max-width:none;opacity:1;overflow:visible}
+  .bgm__vol{width:3.5rem}
+  .bgm__count{display:none}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .bgm.is-playing .bgm__eq i{animation:none;height:8px}
+  .bgm__panel{transition:none}
+}

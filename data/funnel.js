@@ -29,6 +29,23 @@ window.FUNNEL = {
     "room": "#16110E"
   },
 
+  /* Background music. Plays from the first track, advances when one
+     ends and wraps at the end, so there is sound throughout. Volume
+     is a fraction, deliberately low - this sits under the room, it
+     is not the room. */
+  "music": {
+    "volume": 0.4,
+    "duckTo": 0.08,
+    "tracks": [
+      "assets/media/bgm/1.mp3",
+      "assets/media/bgm/2.mp3",
+      "assets/media/bgm/3.mp3",
+      "assets/media/bgm/4.mp4",
+      "assets/media/bgm/5.mp4",
+      "assets/media/bgm/6.mp4"
+    ]
+  },
+
   "slides": {
 
     "welcome": {
