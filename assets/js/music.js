@@ -69,7 +69,15 @@
 
       var self = this;
 
-      this.audio = document.createElement('audio');
+      /* A <video> element, not <audio>, and that is deliberate.
+         Chrome's autoplay policy blocks an audio element outright
+         without a gesture, but permits a muted video one - so this
+         is what lets the track genuinely start at page load. There
+         is no picture in these files; it is a player, not a screen. */
+      this.audio = document.createElement('video');
+      this.audio.className = 'bgm__media';
+      this.audio.playsInline = true;
+      this.audio.setAttribute('playsinline', '');
       this.audio.preload = 'auto';
       this.audio.volume = this.level;
       this.audio.addEventListener('ended', function () { self.step(1); });
@@ -132,26 +140,129 @@
       this.load(this.i);
       this.paint();
 
-      /* Try to start. Browsers refuse audio until the visitor has
-         interacted with the page, so if this is refused we wait and
-         start on the first click - which here is the sign-in. */
-      this.audio.play().catch(function () {
+      this.begin();
+    },
+
+    /* ---------- starting ------------------------------------------
+       It autoplays. Browsers will not let a page make a sound before
+       the visitor has touched it, but they do allow a page to play
+       something silently - so the track genuinely starts at load,
+       running and in time, and the mute lifts the instant anything
+       is clicked, typed or tapped. By then the music has been going
+       a few seconds and simply becomes audible, which is closer to
+       walking into a room with music already in it than starting a
+       track from nothing would be.
+       -------------------------------------------------------------- */
+    begin: function () {
+      var self = this;
+
+      /* Wait until there is something to play. Calling play() while
+         the media is still arriving fails with NotSupportedError,
+         which looks exactly like a codec problem and is not one. */
+      if (this.audio.readyState >= 2) this.attempt();
+      else this.audio.addEventListener('loadeddata', function () { self.attempt(); }, { once: true });
+    },
+
+    attempt: function () {
+      var self = this;
+      if (this.started) return;
+      this.started = true;
+
+      this.audio.muted = false;
+      var p = this.audio.play();
+      if (!p || !p.catch) { this.startedAs = 'sound'; this.paint(); return; }
+
+      p.then(function () {
+        self.startedAs = 'sound';
         self.paint();
-        var wake = function () {
-          document.removeEventListener('pointerdown', wake, true);
-          document.removeEventListener('keydown', wake, true);
-          if (self.audio.paused && !self.stoppedByHand) {
-            self.audio.play().catch(function () {});
-          }
-        };
-        document.addEventListener('pointerdown', wake, true);
-        document.addEventListener('keydown', wake, true);
+      }).catch(function (e1) {
+        /* Refused with sound, as expected on a cold visit. Start it
+           silently instead - which browsers do allow - so the track
+           is genuinely running, then lift the mute on first touch. */
+        self.audio.muted = true;
+        var q = self.audio.play();
+        if (q && q.then) {
+          q.then(function () { self.startedAs = 'silent'; self.paint(); })
+           .catch(function (e2) {
+             self.startedAs = 'refused';
+             self.whyRefused = (e1 && e1.name) + ' / ' + (e2 && e2.name);
+             self.paint();
+           });
+        }
+        self.armSound();
+        self.paint();
       });
+    },
+
+    /* The first touch anywhere lifts the mute, and the level comes up
+       over about a second so it arrives rather than lands. */
+    armSound: function () {
+      if (this.armed) return;
+      this.armed = true;
+      var self = this;
+
+      var wake = function () {
+        ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+          document.removeEventListener(ev, wake, true);
+        });
+        self.armed = false;
+        if (self.stoppedByHand) return;
+
+        self.audio.muted = false;
+        self.fadeUp();
+        self.resume();
+        /* Lifting the mute is only allowed off a real gesture. If this
+           one did not carry one, the browser pauses the element a beat
+           later rather than immediately - so check again after it. */
+        setTimeout(function () { self.resume(); }, 80);
+        self.paint();
+      };
+
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+        document.addEventListener(ev, wake, true);
+      });
+    },
+
+    /* Keep it running whatever happens. If sound is not permitted
+       yet, fall back to silence and wait for the next touch rather
+       than letting the track die mid-bar. */
+    resume: function () {
+      var self = this;
+      if (this.stoppedByHand || !this.audio.paused) return;
+      var p = this.audio.play();
+      if (p && p.catch) p.catch(function () {
+        self.audio.muted = true;
+        self.audio.play().catch(function () {});
+        self.armSound();
+        self.paint();
+      });
+    },
+
+    fadeUp: function () {
+      var self = this;
+      var target = this.ducked ? this.duckTo : this.level;
+      var t0 = (window.performance && performance.now()) || Date.now();
+      this.audio.volume = 0;
+
+      (function step() {
+        var now = (window.performance && performance.now()) || Date.now();
+        var k = Math.min(1, (now - t0) / 900);
+        /* ease out, so the last of it is gentle */
+        self.audio.volume = (self.ducked ? self.duckTo : self.level) * (1 - Math.pow(1 - k, 2));
+        if (k < 1) {
+          if (window.requestAnimationFrame) requestAnimationFrame(step);
+          else setTimeout(step, 32);
+        } else {
+          self.audio.volume = self.ducked ? self.duckTo : self.level;
+        }
+      })();
+      return target;
     },
 
     load: function (i) {
       this.i = (i + this.tracks.length) % this.tracks.length;
       this.audio.src = this.tracks[this.i];
+      this.started = false;
       this.audio.volume = this.ducked ? this.duckTo : this.level;
       this.save();
       this.paint();
@@ -188,11 +299,21 @@
     paint: function () {
       if (!this.root) return;
       var playing = !this.audio.paused;
+      var silent = this.audio.muted;
+
       this.root.classList.toggle('is-playing', playing);
+      /* Running but silent, waiting for the first touch. Saying so
+         beats four bars dancing over no sound at all. */
+      this.root.classList.toggle('is-silent', playing && silent);
+
       this.ui.toggle.innerHTML = playing ? ICON.pause : ICON.play;
       this.ui.toggle.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
+      this.root.title = playing && silent
+        ? 'Music is playing silently until you click anywhere'
+        : '';
+
       this.ui.count.textContent = (this.i + 1) + ' / ' + this.tracks.length;
-      this.ui.volIcon.innerHTML = this.level > 0.01 ? ICON.loud : ICON.quiet;
+      this.ui.volIcon.innerHTML = (silent || this.level <= 0.01) ? ICON.quiet : ICON.loud;
     },
 
     save: function () {

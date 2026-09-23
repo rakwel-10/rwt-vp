@@ -21,7 +21,7 @@ const sleep=ms=>new Promise(x=>setTimeout(x,ms));
   IDecide.start(); await sleep(700);
 
   const bgm = document.querySelector('.bgm');
-  const audio = bgm && bgm.querySelector('audio');
+  const audio = bgm && bgm.querySelector('.bgm__media');
 
   ok('there is a player', !!bgm);
   ok('it sits in the bottom left', (() => {
@@ -96,7 +96,7 @@ const sleep=ms=>new Promise(x=>setTimeout(x,ms));
     await sleep(450);
   }
   ok('the same player is still there after five slides',
-     document.querySelector('.bgm audio') === same);
+     document.querySelector('.bgm__media') === same);
   ok('it was never rebuilt', document.querySelectorAll('.bgm').length === 1,
      document.querySelectorAll('.bgm').length + ' players');
   ok('and it keeps its track', /\/1\.mp3$/.test(audio.getAttribute('src')),

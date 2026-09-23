@@ -38,7 +38,7 @@ const WIDTHS = [390, 768];
       f.remove();
     }
   }
-  document.getElementById('out').textContent =
+  const report =
     (unreadable
       ? 'INCONCLUSIVE — ' + unreadable + ' of ' + (ids.length * WIDTHS.length) +
         ' frames could not be read.\nBrowsers block iframe access on file:// URLs. ' +
@@ -47,6 +47,10 @@ const WIDTHS = [390, 768];
             : 'NO OVERFLOW — ' + (ids.length * WIDTHS.length) + ' checks clean') +
     '\n' + lines.join('\n');
   document.title = unreadable ? 'INCONCLUSIVE' : bad ? 'BAD ' + bad : 'CLEAN';
+  /* This one takes minutes, far longer than a page load, so it tells
+     the runner when it has actually finished rather than being sampled. */
+  try { fetch('/__done?r=' + encodeURIComponent(document.title + '\n' + report)); } catch (e) {}
+  document.getElementById('out').textContent = report;
 })();
 </script>
 </body></html>

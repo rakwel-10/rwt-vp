@@ -1,0 +1,94 @@
+<!doctype html><meta charset="utf-8"><title>autoplay check</title>
+<link rel="stylesheet" href="../assets/css/idecide.css">
+<link rel="stylesheet" href="../assets/css/music.css">
+<pre id="out" style="font:12px/1.6 ui-monospace,Consolas,monospace;padding:1rem">running…</pre>
+<script>window.IDECIDE_CONFIG={funnel:null,handoff:{webhookUrl:''},debug:{validateOnLoad:false}};</script>
+<script src="../data/funnel.js"></script>
+<script src="../assets/js/blocks.js"></script>
+<script src="../assets/js/music.js"></script>
+<script src="../assets/js/engine.js"></script>
+<script>
+/* Real time, and deliberately WITHOUT the autoplay policy relaxed,
+   so this measures what a visitor's browser actually does rather
+   than what a test flag lets it do. */
+const r=[]; const ok=(n,c,d)=>r.push((c?'PASS':'FAIL')+'  '+n+(d?'  ['+d+']':''));
+const sleep=ms=>new Promise(x=>setTimeout(x,ms));
+
+(async()=>{
+  try{sessionStorage.clear()}catch(e){}
+
+  /* This page lives in tools/, so the funnel's root-relative media
+     paths would resolve a folder too deep and 404. index.html sits
+     at the root and does not have the problem. */
+  window.FUNNEL.music.tracks = window.FUNNEL.music.tracks.map(function(t){ return '../' + t; });
+
+  IDecide.start();
+
+  /* give the element a real chance to start */
+  await sleep(2500);
+
+  const bgm=document.querySelector('.bgm');
+  const a=bgm.querySelector('.bgm__media');
+
+  ok('the track is actually running at load', !a.paused,
+     a.paused ? 'paused' : 'playing, currentTime ' + a.currentTime.toFixed(2) + 's');
+  ok('the clock has moved, so it is really playing', a.currentTime > 0,
+     a.currentTime.toFixed(2) + 's');
+  ok('it is on track one', /\/1\.mp3$/.test(a.getAttribute('src')));
+
+  r.push('NOTE  readyState=' + a.readyState + ' networkState=' + a.networkState +
+          ' err=' + (a.error ? a.error.code : 'none') + ' muted=' + a.muted +
+          ' tag=' + a.tagName + ' started=' + Music.started);
+  r.push('NOTE  outcome: ' + (Music.startedAs || 'unknown') + (Music.whyRefused ? ' (' + Music.whyRefused + ')' : ''));
+  const startedSilent = a.muted;
+  r.push('NOTE  browser ' + (startedSilent ? 'required silence' : 'allowed sound outright'));
+  let silentIcon = null;
+  if (startedSilent) {
+    ok('the capsule admits it is silent', bgm.classList.contains('is-silent'));
+    silentIcon = bgm.querySelector('.bgm__volicon').innerHTML;
+    ok('and it draws an icon to say so', silentIcon.length > 20);
+  }
+
+  /* ---------- the first touch should lift the mute ----------
+     The click has to come from OUTSIDE the page. An event made with
+     dispatchEvent() is untrusted, grants no user activation, and the
+     browser goes on refusing sound - so testing with one would prove
+     the opposite of what a visitor experiences. The runner sends a
+     real one over the DevTools protocol instead. A transparent sheet
+     catches it so it cannot press anything on the slide. */
+  const at = a.currentTime;
+  const shield = document.createElement('div');
+  shield.style.cssText = 'position:fixed;inset:0;z-index:99999';
+  document.body.appendChild(shield);
+
+  let clicked = false;
+  try { clicked = (await fetch('/__click')).ok; } catch (e) { clicked = false; }
+  await sleep(1600);
+  shield.remove();
+  r.push('NOTE  trusted click ' + (clicked ? 'delivered' : 'COULD NOT BE SENT'));
+
+  ok('the first touch turns the sound on', !a.muted);
+  ok('it did not restart, it just became audible', a.currentTime >= at,
+     'was ' + at.toFixed(2) + 's, now ' + a.currentTime.toFixed(2) + 's');
+  ok('the clock kept moving through it', a.currentTime > at,
+     at.toFixed(2) + 's -> ' + a.currentTime.toFixed(2) + 's');
+  ok('the level faded up to where it should be',
+     Math.abs(a.volume - window.FUNNEL.music.volume) < 0.02,
+     'volume ' + a.volume.toFixed(3));
+  ok('the capsule stops saying it is silent', !bgm.classList.contains('is-silent'));
+  ok('and it is still playing', !a.paused);
+  if (silentIcon !== null) {
+    ok('the volume icon changed now there is sound',
+       bgm.querySelector('.bgm__volicon').innerHTML !== silentIcon);
+  }
+
+  const report = (r.filter(x=>x.startsWith('FAIL')).length
+    ? 'FAILED ' + r.filter(x=>x.startsWith('FAIL')).length
+    : 'ALL PASS ' + r.filter(x=>!x.startsWith('NOTE')).length) + '\n\n' + r.join('\n');
+  /* Report before touching the DOM: the engine replaces document.body
+     on boot, so #out is long gone and writing to it would throw
+     before the runner ever heard from us. */
+  try { fetch('/__done?r=' + encodeURIComponent(report)); } catch (e) {}
+  document.body.innerHTML = '<pre id="out">' + report + '</pre>';
+})();
+</script>

@@ -84,6 +84,27 @@ that a film ducks it and the level comes back, and — the one that matters
 most — that the same player survives five slide changes without being rebuilt
 or restarted.
 
+`tools/autoplay.html` checks the one claim that is easy to make and hard to
+keep: that the music genuinely starts at page load. It runs under the
+browser's real autoplay policy and takes a trusted click from outside the
+page, because a click the page makes itself would be waved through where a
+visitor's would not.
+
+**Three of these need a server.** `media.html` times how soon a film is
+playable, which needs Range requests; `overflow.html` reads inside iframes,
+which browsers forbid between `file://` origins; `autoplay.html` needs that
+outside click. Run them with:
+
+```
+node tools/run.js tools/media.html
+node tools/run.js tools/overflow.html
+node tools/run.js --strict tools/autoplay.html
+```
+
+`--strict` leaves the autoplay policy alone. Without it Chrome is told to
+allow autoplay — right for the film tests, and the one thing that would make
+the autoplay test lie. The rest open straight in a browser.
+
 None of them are part of the funnel; delete the folder before you deploy if
 you'd rather not ship them.
 
@@ -349,12 +370,31 @@ The playlist, the starting level and the ducked level are all in
 living in code. A finished track rolls into the next and wraps at the end, so
 there is sound throughout.
 
-**On autoplay.** It tries to start on load and browsers will usually refuse:
-audio is blocked until the visitor has interacted with the page. Nothing in
-this code can change that. So when it is refused, the player waits and starts
-on the first click or keypress — which on this funnel is the sign-in button,
-a few seconds in. The capsule shows a play icon until then, so it never looks
-broken.
+**On autoplay.** It does autoplay. The track starts at page load, in time,
+before the visitor touches anything — but silently for the first moment,
+because that is the only shape of autoplay a browser will allow.
+
+The trick is the element. A browser refuses to autoplay an `<audio>` element
+outright, with or without sound; it permits a *muted* `<video>` one. So the
+player is a hidden `<video>` with no picture in it. That is the whole reason
+for the odd choice, and it is worth not tidying away later.
+
+The mute lifts on the first click, keypress or tap anywhere, and the level
+fades up over about a second. Because the track has been running since load
+it does not begin — it becomes audible, already a few bars in, which is much
+closer to walking into a room with music in it. On this funnel the first
+touch is the sign-in button, so the wait is short. Until then the capsule
+says so rather than pretending: the bars dim and the tooltip reads that the
+music is playing silently.
+
+If sound is still refused when the mute lifts — a gesture the browser does
+not count as one — the player falls back to silence and keeps running rather
+than dying mid-bar, then waits for the next touch.
+
+`tools/autoplay.html` checks this under the browser's real autoplay policy,
+with no flag relaxing it, and with a genuinely trusted click delivered from
+outside the page: an in-page `dispatchEvent` grants no user activation, so
+testing with one would prove the opposite of what a visitor gets.
 
 ### Images
 

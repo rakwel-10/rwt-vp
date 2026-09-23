@@ -44,7 +44,7 @@
 .bgm.is-ducked:hover,
 .bgm.is-ducked:focus-within{opacity:1}
 
-.bgm audio{display:none}
+.bgm audio,.bgm video,.bgm__media{display:none}
 
 /* ---------- the always-visible half ---------- */
 .bgm__btn{
@@ -93,6 +93,12 @@
 .bgm.is-playing .bgm__eq i:nth-child(3){animation-duration:1.35s;animation-delay:-.5s}
 .bgm.is-playing .bgm__eq i:nth-child(4){animation-duration:.94s;animation-delay:-.1s}
 @keyframes bgm-bar{from{height:3px}to{height:13px}}
+
+/* Running, but silent until the first touch. The bars keep moving,
+   because it really is playing, but they hold back so the capsule is
+   not claiming to make a sound it is not yet making. */
+.bgm.is-silent .bgm__eq i{opacity:.4}
+.bgm.is-silent .bgm__toggle{color:var(--ink-soft)}
 
 /* ---------- the half that folds away ---------- */
 .bgm__panel{
