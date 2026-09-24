@@ -160,9 +160,20 @@ body.is-dark .aurora{opacity:1}
 .aurora__a{animation:drift-a 38s ease-in-out infinite alternate}
 .aurora__b{animation:drift-b 53s ease-in-out infinite alternate}
 
-/* The colour itself is defined only for the dark screens, so on a
-   light page the layer is genuinely empty rather than merely faded
-   out - no chance of it bleeding through mid-transition. */
+/* The colour is defined per surface rather than faded, so whichever
+   one is not in use is genuinely empty and cannot bleed through
+   mid-transition.
+
+   Dark screens get light from two directions, the way the room does.
+   Light screens get one copper bloom low and right - the corner
+   nothing is ever set in - so the cream has something happening in
+   it without anything to read there. Two lobes rather than one,
+   because a single radial gradient reads as exactly what it is: a
+   circle. Offset and overlapping, they read as one soft shape.
+
+   The positions look wrong until you remember the span is inset by
+   -30%, so it is 160% of the viewport: 70% across that box is 82%
+   across the screen. */
 body.is-dark .aurora__a{
   background:
     radial-gradient(28% 34% at 26% 32%, #9A552747 0%, transparent 64%),
@@ -172,6 +183,16 @@ body.is-dark .aurora__b{
   background:
     radial-gradient(30% 26% at 62% 22%, #C8763C33 0%, transparent 66%),
     radial-gradient(26% 32% at 30% 78%, #7FA39626 0%, transparent 68%);
+}
+
+body:not(.is-dark) .aurora{opacity:1}
+body:not(.is-dark) .aurora__a{
+  background:
+    radial-gradient(14% 22% at 69% 70%, #9A55275E 0%, #9A55272E 44%, transparent 70%);
+}
+body:not(.is-dark) .aurora__b{
+  background:
+    radial-gradient(9% 14% at 75% 76%, #C8763C54 0%, transparent 68%);
 }
 @keyframes drift-a{
   0%  {transform:translate3d(-3%,2%,0) scale(1)}

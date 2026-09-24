@@ -74,8 +74,9 @@ first. Fix that losslessly with
 the things that make the layout wide: that buttons really sit side by side,
 that the two columns are beside each other, arrow-key movement, number-key
 selection, that typing a digit into a form field does not navigate, the commit
-animation, the back control, warm shadows, and that the drifting light is on
-for dark screens and paints nothing on light ones.
+animation, the back control, warm shadows, and that the drifting light paints
+on both surfaces — two-directional on the dark screens, one copper bloom low
+and right on the light ones — and stands down behind real footage.
 
 `tools/music.html` checks the background player: that it starts on track one
 at the level the funnel asked for, that next and previous walk and wrap, that
@@ -428,11 +429,25 @@ never fall off the bottom of the screen.
 
 ### The drifting light
 
-The dark screens carry a slow-moving light layer behind everything — two
-blurred colour fields at 38 and 53 seconds, drifting on different cycles so it
-never visibly repeats. The colour is defined only under `body.is-dark`, so on
-a light page the layer paints nothing at all rather than merely fading out.
-It stops entirely under `prefers-reduced-motion`.
+One layer behind everything, two blurred colour fields drifting on 38 and 53
+second cycles so it never visibly repeats. It stops entirely under
+`prefers-reduced-motion`.
+
+It paints differently depending on the surface, and the colour is defined per
+surface rather than faded between, so whichever one is not in use is genuinely
+empty and cannot bleed through mid-transition.
+
+**Dark screens** get light from two directions, the way the room does.
+
+**Light screens** get one copper bloom, low and right — the corner nothing is
+ever set in. It is two overlapping lobes rather than one, because a single
+radial gradient reads as exactly what it is: a circle. Offset and blurred
+together they read as one soft shape.
+
+The positions in the CSS look wrong until you remember the span is inset by
+-30%, so it is 160% of the viewport: 69% across that box is 80% across the
+screen. Equal percentages give an ellipse rather than a circle for the same
+reason, which is why the two numbers differ.
 
 The welcome screen is a two-column sign-in — the pitch on the left, a framed
 panel on the right — on the dark surface.

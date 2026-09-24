@@ -123,8 +123,28 @@ const css=(el,p)=>getComputedStyle(el).getPropertyValue(p);
   // --- the drifting light behind the dark screens ---------------
   const aurora=document.querySelector('.aurora');
   ok('a light layer exists', !!aurora);
-  ok('it paints nothing on the light pages',
-     getComputedStyle(aurora.querySelector('.aurora__a')).backgroundImage==='none');
+  /* It used to paint nothing here. The light pages now get one copper
+     bloom low and right, so what matters is that it is painted, that
+     it is copper, and that it is over in that corner rather than
+     anywhere near the reading. */
+  const lightA = getComputedStyle(aurora.querySelector('.aurora__a')).backgroundImage;
+  ok('the light pages get a bloom of their own', lightA !== 'none');
+  ok('and it is copper', /154,\s*85,\s*39/.test(lightA), lightA.slice(0, 58));
+  const where = /at\s+([\d.]+)%\s+([\d.]+)%/.exec(lightA);
+  ok('it sits low and right', (() => {
+    /* The span is inset by -30%, so the gradient's own percentage is
+       not where it lands: 69% across a 160% box is 80% of the screen. */
+    if (!where) return false;
+    const x = -30 + Number(where[1]) * 1.6, y = -30 + Number(where[2]) * 1.6;
+    return x > 60 && x < 100 && y > 60 && y < 100;
+  })(), where ? Math.round(-30 + Number(where[1])*1.6) + '%, ' +
+        Math.round(-30 + Number(where[2])*1.6) + '% of the screen' : 'no position');
+  /* Not the computed opacity: that is mid-transition under a virtual
+     clock and would only ever measure the browser. The rule is what
+     decides whether the layer shows, so read the rule. */
+  ok('the light layer is not held at nothing',
+     [...document.styleSheets].flatMap(s => { try { return [...s.cssRules] } catch (e) { return [] } })
+       .some(r => r.selectorText === 'body:not(.is-dark) .aurora' && r.style.opacity === '1'));
   /* S1 rather than the welcome: the sign-in has real footage behind
      it now, which the light layer stands down for.
 
