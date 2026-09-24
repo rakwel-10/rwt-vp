@@ -528,39 +528,59 @@
      browser allows unasked, and it carries no sound worth hearing.
      ================================================================== */
   function setBackground(spec) {
-    var src = spec && spec.video;
+    /* A background is either a film or a still. Both sit in the same
+       layer under the same scrim, so a slide can swap one for the
+       other without anything else knowing the difference. */
+    var src = (spec && (spec.video || spec.image)) || null;
+    var isFilm = !!(spec && spec.video);
 
     if (!src) {
       if (bg) { bg.remove(); bg = null; }
       document.body.classList.remove('has-bg');
       return;
     }
-    if (bg && bg.dataset.src === src) return;   /* already running */
+    /* Consecutive slides often share a background. Leaving it alone
+       means no reload and no flash between them. */
+    if (bg && bg.dataset.src === src) return;
     if (bg) bg.remove();
 
-    bg = el('div', 'bg');
+    bg = el('div', 'bg' + (isFilm ? '' : ' bg--still'));
     bg.dataset.src = src;
     bg.setAttribute('aria-hidden', 'true');
 
-    var v = document.createElement('video');
-    v.className = 'bg__video';
-    v.src = src;
-    v.muted = true;
-    v.loop = true;
-    v.autoplay = true;
-    v.playsInline = true;
-    v.preload = 'auto';
-    /* Fade it up only once there are frames to show, so the page never
-       flashes an empty black rectangle. */
-    v.addEventListener('loadeddata', function () { bg.classList.add('is-ready'); });
+    var media;
+    if (isFilm) {
+      media = document.createElement('video');
+      media.className = 'bg__video';
+      media.muted = true;
+      media.loop = true;
+      media.autoplay = true;
+      media.playsInline = true;
+      media.preload = 'auto';
+      media.addEventListener('loadeddata', function () { bg.classList.add('is-ready'); });
+    } else {
+      media = document.createElement('img');
+      media.className = 'bg__still';
+      media.alt = '';
+      media.decoding = 'async';
+      media.addEventListener('load', function () { bg.classList.add('is-ready'); });
+    }
+    /* Fade it up only once there is something to show, so the page
+       never flashes an empty black rectangle. */
+    media.src = src;
 
-    bg.appendChild(v);
+    bg.appendChild(media);
     bg.appendChild(el('span', 'bg__scrim'));
     document.body.insertBefore(bg, document.body.firstChild);
     document.body.classList.add('has-bg');
 
-    var p = v.play();
-    if (p && p.catch) p.catch(function () { /* a still frame is fine */ });
+    if (isFilm) {
+      var p = media.play();
+      if (p && p.catch) p.catch(function () { /* a still frame is fine */ });
+    } else if (media.complete) {
+      /* Served from cache: the load event already went by. */
+      bg.classList.add('is-ready');
+    }
   }
 
   /* ==================================================================

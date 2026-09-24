@@ -467,7 +467,8 @@ img{max-width:100%;height:auto}
   overflow:hidden;
   pointer-events:none;
 }
-.bg__video{
+.bg__video,
+.bg__still{
   width:100%;
   height:100%;
   object-fit:cover;
@@ -476,7 +477,22 @@ img{max-width:100%;height:auto}
   scale:1.04;
   transition:opacity 1600ms var(--ease);
 }
-.bg.is-ready .bg__video{opacity:1}
+.bg.is-ready .bg__video,
+.bg.is-ready .bg__still{opacity:1}
+
+/* A still has none of a film's movement, and it sits under a title
+   card that holds for several seconds before the picture arrives. So
+   it drifts - slowly enough to read as the room breathing rather than
+   as something sliding about. The extra scale is the room it needs to
+   move in without showing an edge. */
+.bg__still{
+  scale:1.09;
+  animation:bg-drift 52s var(--ease) infinite alternate;
+}
+@keyframes bg-drift{
+  from{transform:translate3d(-1.1%,-.7%,0)}
+  to{transform:translate3d(1.1%,.7%,0)}
+}
 .bg__scrim{
   position:absolute;
   inset:0;
@@ -487,8 +503,22 @@ img{max-width:100%;height:auto}
     linear-gradient(90deg,#0C0907D9 0%,#0C09079E 38%,#0C0907CC 100%),
     radial-gradient(100% 90% at 42% 45%,transparent 0%,#0C0907A8 100%);
 }
+/* The film scrim is tuned for moving footage, which carries its own
+   contrast. A still needs less on top of it or the picture may as
+   well not be there - but the title card sits right in the middle,
+   so the middle is where the cover stays. */
+.bg--still .bg__scrim{
+  background:
+    linear-gradient(90deg,#0C0907A6 0%,#0C09075E 38%,#0C09079C 100%),
+    radial-gradient(92% 82% at 50% 48%,#0C090761 0%,#0C0907C7 100%);
+}
+
 /* the drifting light is redundant once there is real footage back there */
 body.has-bg .aurora{opacity:0}
+
+@media (prefers-reduced-motion:reduce){
+  .bg__still{animation:none}
+}
 
 /* the slide's eyebrow, given the whole screen */
 .titlecard .eyebrow{

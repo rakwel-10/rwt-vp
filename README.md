@@ -189,6 +189,7 @@ trailing commas, which strict JSON forbids.
   "eyebrow": "line one\nline two",   // on a film slide this is the title card
   "countdown": 3,               // optional, film slides — 3, 2, 1 before the dissolve
   "background": { "video": "assets/media/x.mp4" },   // optional — film behind the page
+  "background": { "image": "assets/media/x.jpg" },   //   …or a still, same layer
   "heading": "...",
   "blocks": [ ... ],
   "choices": [ ... ]
@@ -473,11 +474,29 @@ footage. Every one carries a caption saying what it actually shows, because
 they are renders and stills of other rooms and a product page should not imply
 a configuration it is not photographing.
 
-A slide gets a background film with
-`"background": { "video": "assets/media/….mp4" }`. It is always muted and
-looped — that is the only autoplay a browser allows unasked — and it sits
-under a scrim heavy enough that the type in front never fights it. The
-drifting light layer stands down wherever there is real footage.
+A slide gets a background with `"background"`, and it takes either a film or
+a still:
+
+```js
+"background": { "video": "assets/media/….mp4" }   // the sign-in
+"background": { "image": "assets/media/….jpg" }   // S1 and S2
+```
+
+Both sit in the same layer under the same scrim, so a slide can swap one for
+the other and nothing else has to know. A film is always muted and looped —
+that is the only autoplay a browser allows unasked. The drifting light layer
+stands down wherever there is a background at all.
+
+**Consecutive slides sharing a background keep the same element.** S1 and S2
+both carry the copper still, and it is deliberately not torn down and rebuilt
+between them; doing so would flash a black frame in the middle of the film
+sequence. The test pins this.
+
+A still gets two things a film does not. It drifts, very slowly, because a
+static picture sits behind a title card that holds for several seconds and
+would otherwise read as dead — and it gets a lighter scrim, because footage
+carries its own contrast and a photograph behind the film scrim may as well
+not be there. The drift is off under `prefers-reduced-motion`.
 
 Copy note: the guide's calls to action were in capitals. They are sentence case
 here — shouting contradicts the calm the whole thing is selling. Easy to change

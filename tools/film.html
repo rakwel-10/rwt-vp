@@ -162,6 +162,39 @@ const sleep=ms=>new Promise(x=>setTimeout(x,ms));
   ok('it is hidden from assistive tech',
      document.querySelector('.bg').getAttribute('aria-hidden')==='true');
 
+  /* ---------- the still behind the two films --------------------
+     The slides between the sign-in and the sort carry a copper still
+     rather than footage. It has to behave like the film background
+     does: one layer, under the scrim, hidden from assistive tech,
+     and gone by the time the funnel reaches daylight. */
+  location.hash='/S1'; await sleep(800);
+  const still = document.querySelector('.bg__still');
+  ok('S1 has a still behind it', !!still,
+     still ? still.getAttribute('src') : 'no still');
+  ok('it is the copper background', !!still && /copper-bg.jpg$/.test(still.getAttribute('src')));
+  ok('it is an image, not a film', !!still && still.tagName === 'IMG' &&
+     !document.querySelector('.bg video'));
+  ok('the layer is marked as a still', !!document.querySelector('.bg.bg--still'));
+  ok('it is hidden from assistive tech',
+     document.querySelector('.bg').getAttribute('aria-hidden') === 'true');
+  ok('it carries no alt text to read out', still && still.getAttribute('alt') === '');
+  ok('the page knows it has a background', document.body.classList.contains('has-bg'));
+  ok('it sits under the scrim', !!document.querySelector('.bg--still .bg__scrim'));
+  ok('the drifting light stands down behind it',
+     getComputedStyle(document.querySelector('.aurora')).opacity === '0');
+
+  /* S1 and S2 share it, so it must not be torn down and rebuilt
+     between them - that would flash a black frame mid-sequence. */
+  location.hash='/S2'; await sleep(800);
+  ok('S2 keeps the very same still', document.querySelector('.bg__still') === still);
+  ok('there is only ever one background layer',
+     document.querySelectorAll('.bg').length === 1,
+     document.querySelectorAll('.bg').length + ' layers');
+
+  location.hash='/S3'; await sleep(600);
+  ok('the still is dropped once the funnel reaches daylight',
+     !document.querySelector('.bg') && !document.body.classList.contains('has-bg'));
+
   location.hash='/S3'; await sleep(600);
   ok('the background film is dropped on other slides', !document.querySelector('.bg'));
 
