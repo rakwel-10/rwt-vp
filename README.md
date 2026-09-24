@@ -298,6 +298,28 @@ two thirds of a desktop screen empty, which was the old layout's real problem.
 
 It collapses to one column below 1000px.
 
+**How wide it goes.** The frame runs to 86rem, and to 96rem past 1700px, so a
+large screen is used rather than framed with 180px of nothing down each side.
+The heading column grows with it — `clamp(17rem,24vw,27rem)` rather than a
+fixed 20rem — because a fixed column looks starved as the page widens around
+it.
+
+Width on its own would ruin the text, so the reading measure is capped
+separately at 44rem and does not follow the frame. Prose stops where it stops;
+the actions underneath take the full width. That gap on the right of a
+paragraph is deliberate.
+
+**The type is fluid, but only upward.** The base is
+`clamp(17px,0.6vw + 12px,20px)`, which resolves to exactly the old 17px below
+about 830px and climbs to 20px on a desktop. Phones get nothing new, so none
+of the narrow layouts had to move. Headings and pills carry their own clamps
+for the same reason — they are set in `rem`, which is the root size, and would
+not otherwise have followed.
+
+Three actions sit three across only where three fit. Between 1000px and
+1180px they fall to two and wrap, because a third of a narrow column turns a
+short label into three lines of text.
+
 ### The buttons
 
 They sit in a row, not a stack — a grid that fits two, three or four across

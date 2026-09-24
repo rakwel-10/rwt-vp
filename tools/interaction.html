@@ -46,6 +46,35 @@ const css=(el,p)=>getComputedStyle(el).getPropertyValue(p);
   ok('the two columns really are beside each other', bdy.left > h.right - 2,
      'head ends '+Math.round(h.right)+', body starts '+Math.round(bdy.left));
 
+  /* "Wider than 900px" would go on passing if the shell stopped
+     growing while screens got bigger, so measure it against the room
+     actually available rather than against a number. */
+  const gutter = parseFloat(getComputedStyle(document.querySelector('.stage')).paddingLeft);
+  const room = document.documentElement.clientWidth - gutter*2;
+  ok('it uses nearly all the room there is',
+     slide.getBoundingClientRect().width > room*0.9,
+     Math.round(slide.getBoundingClientRect().width)+'px of '+Math.round(room)+'px');
+
+  /* Width is only worth having if the line length survives it. Prose
+     that runs the full width of a wide screen is unreadable, so the
+     measure is capped independently and this is what says so. */
+  const para = document.querySelector('.cols__body .prose');
+  if (para) {
+    const pw = para.getBoundingClientRect().width;
+    ok('the reading measure is still a measure', pw < 760, Math.round(pw)+'px');
+  }
+
+  /* The buttons are meant to read as buttons at arm's length on a
+     desktop, which is a size, not a style. */
+  const cbox = plates[0].getBoundingClientRect();
+  const cstyle = getComputedStyle(plates[0]);
+  ok('the buttons are a real size on a desktop',
+     cbox.height >= 60 && parseFloat(cstyle.fontSize) >= 17,
+     Math.round(cbox.height)+'px tall, '+cstyle.fontSize+' type');
+  ok('and the type scales with the screen, not fixed at 17px',
+     parseFloat(getComputedStyle(document.body).fontSize) > 17,
+     getComputedStyle(document.body).fontSize);
+
   // --- keyboard: arrows move focus -------------------------------
   plates[0].focus();
   key('ArrowDown'); await sleep(60);

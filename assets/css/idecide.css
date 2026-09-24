@@ -100,7 +100,10 @@ body{
   color:var(--ink);
   font-family:var(--serif);
   font-optical-sizing:auto;
-  font-size:17px;
+  /* Fluid, so a wide screen gets bigger type without a phone getting
+     a single pixel more - below about 830px this resolves to the 17px
+     it has always been, which is what keeps the narrow layouts safe. */
+  font-size:clamp(17px,0.6vw + 12px,20px);
   line-height:1.65;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
@@ -224,8 +227,16 @@ img{max-width:100%;height:auto}
    align-items:center would push the top of a tall slide above the
    scroll origin, where nobody can reach it. */
 .slide{width:100%;min-width:0;max-width:var(--measure);margin-block:auto}
-.slide--editorial{max-width:72rem}
-.slide--editorial.slide--wide{max-width:80rem}
+.slide--editorial{max-width:86rem}
+.slide--editorial.slide--wide{max-width:92rem}
+/* A big monitor has room for more than a 1376px column sitting in
+   the middle of it. The measure of the prose is capped separately,
+   so this gives the heading and the actions the width, not the
+   line length. */
+@media (min-width:1700px){
+  .slide--editorial{max-width:96rem}
+  .slide--editorial.slide--wide{max-width:102rem}
+}
 .slide--wide{max-width:48rem}
 .slide--cinema{max-width:108rem;position:relative}
 /* Nothing on a film slide sits in a column - the title card and the
@@ -304,17 +315,17 @@ img{max-width:100%;height:auto}
 .head{
   font-family:var(--serif);
   font-weight:300;
-  font-size:clamp(2.05rem,5vw,3.05rem);
+  font-size:clamp(2.05rem,5vw,3.7rem);
   line-height:1.08;
   letter-spacing:-.025em;
   margin:0 0 1.35rem;
   text-wrap:balance;
 }
-.slide--entry .head{font-size:clamp(2.15rem,5.4vw,3.35rem)}
+.slide--entry .head{font-size:clamp(2.15rem,5.4vw,4rem)}
 
-.prose{margin:0 0 1.15rem;max-width:34rem;color:var(--ink-mid)}
+.prose{margin:0 0 1.15rem;max-width:38rem;color:var(--ink-mid)}
 .prose:last-child{margin-bottom:0}
-.prose--lede{font-size:1.185rem;line-height:1.6;color:var(--ink)}
+.prose--lede{font-size:1.185em;line-height:1.6;color:var(--ink)}
 .prose strong{font-weight:600;color:var(--ink)}
 
 .spec{
@@ -342,7 +353,7 @@ img{max-width:100%;height:auto}
   border-radius:2px;
   background:var(--patina);
 }
-.aside p{margin:0 0 .65rem;max-width:32rem}
+.aside p{margin:0 0 .65rem;max-width:36rem}
 .aside p:last-child{margin:0}
 .aside strong{color:var(--ink);font-weight:600}
 
@@ -843,20 +854,22 @@ body.has-bg .aurora{opacity:0}
 
 @media (min-width:1000px){
   .cols{
-    grid-template-columns:minmax(0,20rem) minmax(0,1fr);
-    gap:clamp(2.5rem,5vw,4.5rem);
+    /* The heading column grows with the screen instead of sitting at
+       a fixed 20rem while the page gets wider around it. */
+    grid-template-columns:minmax(0,clamp(17rem,24vw,27rem)) minmax(0,1fr);
+    gap:clamp(2.5rem,4.5vw,5rem);
     align-items:start;
   }
   /* The heading stays with you while the right column is long. */
   .cols__head{position:sticky;top:clamp(3.5rem,8vh,5.5rem)}
-  .slide--wide .cols{grid-template-columns:minmax(0,21rem) minmax(0,1fr)}
+  .slide--wide .cols{grid-template-columns:minmax(0,clamp(18rem,25vw,28rem)) minmax(0,1fr)}
 }
 
 .cols__head .head{margin-bottom:0}
 .cols__head .eyebrow{margin-bottom:.85rem}
 .cols__body > *:first-child{margin-top:0}
 .cols__body > *:last-child{margin-bottom:0}
-.cols__body .prose{max-width:38rem}
+.cols__body .prose{max-width:44rem}
 
 /* ==================================================================
    BIG MEDIA
@@ -952,15 +965,24 @@ body.has-bg .aurora{opacity:0}
   display:grid;
   gap:.75rem;
   margin:2.25rem 0 0;
-  grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));
 }
 /* one action should not span the whole screen */
-.choices[data-count="1"]{grid-template-columns:minmax(0,22rem)}
+.choices[data-count="1"]{grid-template-columns:minmax(0,26rem)}
 .choices[data-count="2"],
 .choices[data-count="4"]{grid-template-columns:repeat(2,minmax(0,1fr))}
 .choices[data-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
 /* full sentences need room to breathe; two across, never three */
-.choices[data-longest="long"]{grid-template-columns:repeat(auto-fit,minmax(20rem,1fr))}
+.choices[data-longest="long"]{grid-template-columns:repeat(auto-fit,minmax(23rem,1fr))}
+
+/* Three across is right when there is room for three. Between the
+   point the two columns appear and the point the screen is actually
+   wide, there is not - and three pills squeezed into a third of a
+   narrow column each turn into three lines of text. Let them fall
+   to two and wrap. */
+@media (max-width:1180px){
+  .choices[data-count="3"]{grid-template-columns:repeat(auto-fit,minmax(14rem,1fr))}
+}
 
 /* the editorial column is narrower, so the row is too */
 .cols__body .choices{margin-top:1.75rem}
@@ -974,6 +996,14 @@ body.has-bg .aurora{opacity:0}
   .choices[data-longest="long"]{grid-template-columns:minmax(0,1fr)}
 }
 
+/* The music player is fixed in the bottom left. On a wide screen it
+   sits in empty margin; on a narrow one the page scrolls underneath
+   it, and without this the last choice finishes behind it and cannot
+   be pressed. */
+@media (max-width:719px){
+  .stage{padding-bottom:calc(clamp(3rem,7vh,4.5rem) + 3.5rem)}
+}
+
 .choice{
   position:relative;
   display:flex;
@@ -982,13 +1012,13 @@ body.has-bg .aurora{opacity:0}
   justify-content:center;
   gap:.1rem;
   width:100%;
-  min-height:3.9rem;
+  min-height:clamp(3.9rem,1.1vw + 3.45rem,4.6rem);
   text-align:center;
   font-family:var(--ui);
-  font-size:1.0125rem;
+  font-size:clamp(1.0125rem,.34vw + .85rem,1.2rem);
   font-weight:600;
   line-height:1.35;
-  padding:1rem 1.9rem;
+  padding:clamp(1rem,.4vw + .84rem,1.25rem) clamp(1.9rem,.9vw + 1.55rem,2.5rem);
   cursor:pointer;
   border:1px solid transparent;
   /* A pill. Nothing else in the build is this shape, so a button is
