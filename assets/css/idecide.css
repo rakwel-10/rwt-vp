@@ -718,10 +718,11 @@ body.has-bg .aurora{opacity:0}
 }
 .reel{position:relative}
 
-.reel__unmute,.reel__skip{
+.reel__skip{
   position:absolute;
-  /* top corners: the control bar owns the bottom edge */
+  /* top corner: the control bar owns the bottom edge */
   top:1.25rem;
+  right:1.25rem;
   z-index:3;
   background:#0000004D;
   border:1px solid #FFFFFF2E;
@@ -735,10 +736,8 @@ body.has-bg .aurora{opacity:0}
   backdrop-filter:blur(8px);
   transition:background var(--fast),border-color var(--fast),scale var(--fast);
 }
-.reel__unmute{left:1.25rem}
-.reel__skip{right:1.25rem}
-.reel__unmute:hover,.reel__skip:hover{background:#00000080;border-color:#FFFFFF5C}
-.reel__unmute:active,.reel__skip:active{scale:.95}
+.reel__skip:hover{background:#00000080;border-color:#FFFFFF5C}
+.reel__skip:active{scale:.95}
 
 .reel__script{
   border-top:1px solid var(--room-edge);

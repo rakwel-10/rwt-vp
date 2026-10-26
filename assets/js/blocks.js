@@ -91,10 +91,11 @@
      card has had its moment.
 
      Autoplay with sound is blocked by every browser until the visitor
-     has interacted with the page, so the order is: try with sound,
-     fall back to muted with an unmute control, and if even that is
-     refused, show a play button. The first film on a cold visit will
-     usually land on muted; every one after it plays with sound.
+     has interacted with the page, so it only ever tries the one way:
+     with sound. If that is refused, it hands back a play button
+     rather than falling back to a silent autoplay - the film only
+     ever starts itself when it can do so with sound, and otherwise
+     waits for the click that guarantees it.
      ================================================================== */
   function video(b, ctx) {
     var reel = el('div', 'reel' + (b.full ? ' reel--full' : ''));
@@ -110,10 +111,6 @@
       '<path d="M1 1.5 19 12 1 22.5Z" fill="none" stroke="currentColor" ' +
       'stroke-width="1.3" stroke-linejoin="round"/></svg>';
 
-    var unmute = el('button', 'reel__unmute', 'Sound on');
-    unmute.type = 'button';
-    unmute.hidden = true;
-
     var skip = el('button', 'reel__skip', 'Skip');
     skip.type = 'button';
     skip.hidden = true;
@@ -124,7 +121,6 @@
       finished = true;
       reel.classList.remove('reel--playing');
       skip.hidden = true;
-      unmute.hidden = true;
       bar.style.width = '100%';
       if (b.advanceTo) { ctx.navigate(b.advanceTo); return; }
       /* The slide is listening for this and reveals its choices. */
@@ -212,7 +208,6 @@
 
       mute.addEventListener('click', function () {
         v.muted = !v.muted;
-        if (!v.muted) unmute.hidden = true;
       });
 
       full.addEventListener('click', function () {
@@ -262,10 +257,6 @@
       });
 
       play.addEventListener('click', function () { play.hidden = true; start(); });
-      unmute.addEventListener('click', function () {
-        v.muted = false;
-        unmute.hidden = true;
-      });
 
       function start() {
         reel.classList.add('reel--playing');
@@ -275,18 +266,12 @@
         var p = v.play();
         if (!p || !p.catch) return;
         p.catch(function () {
-          v.muted = true;
-          var p2 = v.play();
-          if (p2 && p2.catch) {
-            p2.catch(function () {
-              /* Autoplay refused outright. Hand it back to the visitor. */
-              reel.classList.remove('reel--playing');
-              skip.hidden = true;
-              play.hidden = false;
-              paintToggle();
-            });
-          }
-          unmute.hidden = false;
+          /* Autoplay with sound refused. Hand it back to the visitor
+             rather than starting it silently. */
+          reel.classList.remove('reel--playing');
+          skip.hidden = true;
+          play.hidden = false;
+          paintToggle();
         });
       }
 
@@ -317,7 +302,6 @@
     skip.addEventListener('click', finish);
 
     screen.appendChild(play);
-    screen.appendChild(unmute);
     screen.appendChild(skip);
     reel.appendChild(screen);
     reel.appendChild(bar);

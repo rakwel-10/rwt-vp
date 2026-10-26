@@ -484,7 +484,7 @@ touch screen there is no hover to reveal anything, so the bar simply stays.
 The scrubber is a real `<input type="range">`, which makes it keyboard
 operable for free — arrows nudge, Home and End jump — and it is styled to
 read as the progress line it replaces rather than as a form control. **Skip**
-and **Sound on** moved to the top corners so the bar owns the bottom edge.
+moved to the top corner so the bar owns the bottom edge.
 
 The card is the slide's `eyebrow` field and the count is `"countdown": 3` on
 the slide, so both are content rather than code. A film slide with no eyebrow
@@ -545,20 +545,27 @@ back in the JSON if you disagree.
 
 ## When the real footage lands
 
-Autoplay **with sound** is blocked by every browser until the visitor has
-interacted with the page. Nothing in this code can change that; it is a rule
-the browser enforces, and it exists because of autoplaying ads.
+Autoplay **with sound** is blocked by every browser until the `play()` call
+itself happens inside a user gesture — a click, in the same instant, on the
+same page. Nothing in this code can change that; it is a rule the browser
+enforces, and it exists because of autoplaying ads.
 
-So the first film a cold visitor sees will start muted. The engine handles it
-in three steps: try to play with sound, fall back to muted with a small
-**Sound on** control in the corner of the frame, and if even muted autoplay is
-refused, show a play button. Once they have clicked anything — the sign-in
-button counts — every later film plays with sound normally.
+So the player only ever tries the one way: with sound. There is no muted
+fallback. If a film starts from a real click — tapping the title card to
+skip the countdown, or the play button itself — that click is the gesture,
+and it plays with sound immediately. If the countdown is left to run out on
+its own, the browser has nothing to call a gesture, refuses the unmuted
+`play()`, and the film hands itself back as a plain play button rather than
+starting silently. The visitor always gets sound or a clear invitation to
+start it themselves — never footage playing with the sound off and no
+obvious way to notice.
 
-Two things follow. First, these films are narration-driven, so the opening
-seconds of V1 should still read without audio, or carry a caption. Second, the
-sign-in screen now earns its keep twice over: clicking **Enter the Lounge** is
-the interaction that unlocks sound for the rest of the funnel.
+Two things follow. First, these films are narration-driven, so a visitor who
+waits out the countdown and then taps play should not be missing anything —
+the opening seconds of V1 should still read as an opening even on a second
+start. Second, this is a genuine trade-off against the ambient, nobody-has-
+to-touch-anything feel of the countdown: the price of "it may always need one
+click" is that the film is never shown muted without saying so.
 
 A **Skip** control sits in the corner while a film plays. Without it a visitor
 is held for 22 to 30 seconds with no way out, which is worse on a second visit
