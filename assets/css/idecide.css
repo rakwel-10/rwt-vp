@@ -291,33 +291,76 @@ img{max-width:100%;height:auto}
 .back:active{scale:.93}
 
 /* ==================================================================
-   SPLIT - the pitch on one side, the sign-in on the other.
+   HERO - a card with two panels: the sign-in on one side, the room's
+   own photograph filling the other with a caption over it. Only the
+   welcome slide uses this layout.
    ================================================================== */
-.slide--split{max-width:68rem}
-.split__text,.split__panel{min-width:0}
-.split__text .prose{max-width:26rem}
+.slide--hero{
+  max-width:64rem;
+  width:100%;
+  border-radius:calc(var(--radius) * 1.8);
+  overflow:hidden;
+  box-shadow:var(--lift-3);
+  background:var(--paper);
+}
+.hero__content,.hero__media{min-width:0}
 
-@media (min-width:900px){
-  .slide--split{
+.hero__content{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:clamp(2rem,5vw,3.25rem);
+}
+.hero__content .logo--wide{
+  width:min(100%,16rem);
+  margin:0 0 clamp(1rem,2.5vh,1.5rem);
+}
+.hero__content .prose{max-width:22rem}
+.hero__content .prose--lede{
+  font-size:.9em;
+  line-height:1.55;
+  color:var(--ink-soft);
+  margin-bottom:clamp(1.25rem,3vh,1.75rem);
+}
+
+.hero__content .form{width:100%;max-width:22rem;margin:0;text-align:left}
+.hero__content .form__title{text-align:center;font-size:1.3rem}
+.hero__content .form__intro{text-align:center;margin-bottom:clamp(1rem,2.5vh,1.5rem)}
+.hero__content .form__grid{grid-template-columns:1fr;gap:clamp(.7rem,1.6vh,1rem)}
+.hero__content .btn{width:100%;justify-content:center;padding-block:.9rem}
+.hero__content .form__footnote{text-align:center}
+
+.hero__media{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  min-height:16rem;
+}
+/* the film fills its own panel exactly - not fixed to the viewport
+   the way a page-level background is. */
+.hero__media .bg{position:absolute;inset:0;z-index:0}
+.slide--entry .hero__media .head{
+  position:relative;
+  z-index:1;
+  color:#F7F1E6;
+  font-size:clamp(1.3rem,2.4vw,1.75rem);
+  font-weight:300;
+  margin:0;
+  padding:0 clamp(1.5rem,4vw,2.5rem) clamp(1.75rem,4vw,2.5rem);
+}
+
+@media (min-width:760px){
+  .slide--hero{
     display:grid;
-    grid-template-columns:1.05fr .95fr;
-    gap:clamp(2.5rem,6vw,5.5rem);
-    align-items:center;
+    grid-template-columns:1fr 1.05fr;
+    gap:0;
+    align-items:stretch;
+    min-height:clamp(28rem,62vh,36rem);
   }
 }
-@media (max-width:899px){.split__panel{margin-top:2.5rem}}
-
-.split__panel .form{
-  margin:0;
-  background:var(--paper-deep);
-  border:1px solid var(--paper-edge);
-  border-radius:var(--radius);
-  padding:clamp(1.5rem,3.5vw,2.35rem);
-  box-shadow:var(--lift-3);
-}
-.split__panel .form__grid{grid-template-columns:1fr;gap:1.15rem}
-.split__panel .form__submit{margin-top:1.6rem}
-.split__panel .btn{width:100%;justify-content:center;padding-block:1.05rem}
 
 /* ==================================================================
    EDITORIAL
@@ -543,6 +586,14 @@ img{max-width:100%;height:auto}
   background:
     linear-gradient(90deg,#0C0907A6 0%,#0C09075E 38%,#0C09079C 100%),
     radial-gradient(92% 82% at 50% 48%,#0C090761 0%,#0C0907C7 100%);
+}
+
+/* The hero card's film sits in its own panel rather than behind the
+   whole page, so it only needs a dark pool at its own foot for the
+   caption sitting on top of it to read - the rest of the panel stays
+   clear so the footage carries its own colour. */
+.slide--entry .hero__media .bg__scrim{
+  background:linear-gradient(0deg,#0C0907CC 0%,#0C090766 32%,transparent 60%);
 }
 
 /* the drifting light is redundant once there is real footage back there */

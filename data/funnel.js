@@ -52,18 +52,16 @@ window.FUNNEL = {
       "name": "Welcome",
       "zone": "Entry",
       "kind": "entry",
-      "surface": "dark",
-      "layout": "split",
-      "background": { "video": "assets/media/ID-rwt2.mp4" },
+      "surface": "light",
+      "layout": "hero",
+      "background": { "image": "assets/media/login-rwt.jpg" },
       "note": "Hard gate: no skip, both fields required. Every visitor is named from the first screen, at the cost of whatever share of traffic will not give an email before seeing anything.",
-      "eyebrow": "Richmond, Virginia",
-      "heading": "There is a room here that nobody can reach you in.",
       "blocks": [
-        { "type": "logo", "src": "assets/media/rwt-lounge.png", "alt": "Radiant Wave Lounge — Members Only", "wide": true },
+        { "type": "logo", "src": "assets/media/radiant-wave-lounge.png", "alt": "Radiant Wave Lounge — Members Only", "wide": true },
         {
           "type": "prose",
           "lede": true,
-          "text": "Eight recliners. Thirty-two members. Admission is by membership or invitation, and the room stays that small on purpose."
+          "text": "Thirty-two members. Admission is by membership or invitation, and the room stays that small on purpose."
         },
         {
           "type": "form",
@@ -84,17 +82,15 @@ window.FUNNEL = {
     "S1": {
       "name": "Hook",
       "zone": "Spine",
-      "surface": "dark",
-      "background": { "image": "assets/media/copper-bg.jpg" },
       "layout": "cinema",
-      "countdown": 3,
+      "countdown": 5,
       "note": "Room stays empty all 22 seconds. An empty room is an invitation; an occupied one is somebody else's hour.",
       "eyebrow": "The most expensive thing in Richmond\nisn't what you think",
       "blocks": [
         {
           "type": "video",
           "id": "V1",
-          "src": "assets/media/ID-J1.mp4",
+          "src": "assets/media/RWT1.mp4",
           "hold": true,
           "full": true,
           "seconds": 33,

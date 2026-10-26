@@ -298,12 +298,21 @@
 
     /* surface:dark takes the whole page, not just a panel. */
     document.body.classList.toggle('is-dark', slide.surface === 'dark');
-    setBackground(slide.background);
 
     /* Default layout is two columns: the heading holds the left, and
        everything the visitor reads or touches runs down the right.
        A single stacked column wastes most of a desktop screen. */
     var layout = slide.layout || 'editorial';
+
+    /* hero keeps its film in its own card panel rather than behind
+       the whole page, so the page-level background sits this one
+       out. */
+    if (layout === 'hero') {
+      if (bg) { bg.remove(); bg = null; }
+      document.body.classList.remove('has-bg');
+    } else {
+      setBackground(slide.background);
+    }
 
     var article = el('article', 'slide slide--' + layout +
       (slide.wide ? ' slide--wide' : '') +
@@ -346,18 +355,20 @@
       host.appendChild(h);
     }
 
-    if (layout === 'split') {
-      /* The sign-in: pitch on the left, panel on the right. */
-      var left = el('div', 'split__text');
-      var right = el('div', 'split__panel');
-      while (host.firstChild) left.appendChild(host.firstChild);
+    if (layout === 'hero') {
+      /* A card with two panels: the sign-in on one side, the room's
+         own photograph filling the other with a caption over it. */
+      var content = el('div', 'hero__content');
+      var media = el('div', 'hero__media');
+      while (host.firstChild) media.appendChild(host.firstChild);
+      if (slide.background) media.insertBefore(buildFilm(slide.background), media.firstChild);
 
       (slide.blocks || []).forEach(function (block) {
-        (block.type === 'form' ? right : left).appendChild(B.render(block, ctx()));
+        content.appendChild(B.render(block, ctx()));
       });
-      liftLogo(left);
-      host.appendChild(left);
-      host.appendChild(right);
+      liftLogo(content);
+      host.appendChild(content);
+      host.appendChild(media);
 
     } else if (layout === 'cinema') {
       /* The film is the whole composition: a title card on black,
@@ -527,12 +538,56 @@
      Muted and looping, because that is the only kind of autoplay a
      browser allows unasked, and it carries no sound worth hearing.
      ================================================================== */
-  function setBackground(spec) {
-    /* A background is either a film or a still. Both sit in the same
-       layer under the same scrim, so a slide can swap one for the
-       other without anything else knowing the difference. */
+  /* A background is either a film or a still, built as a free-standing
+     node - the caller decides whether it sits fixed behind the whole
+     page or inside a card panel of its own, like hero's media side
+     does. Both kinds sit under the same scrim, so a slide can swap
+     one for the other without anything else knowing the difference. */
+  function buildFilm(spec) {
     var src = (spec && (spec.video || spec.image)) || null;
+    if (!src) return null;
     var isFilm = !!(spec && spec.video);
+
+    var node = el('div', 'bg' + (isFilm ? '' : ' bg--still'));
+    node.dataset.src = src;
+    node.setAttribute('aria-hidden', 'true');
+
+    var media;
+    if (isFilm) {
+      media = document.createElement('video');
+      media.className = 'bg__video';
+      media.muted = true;
+      media.loop = true;
+      media.autoplay = true;
+      media.playsInline = true;
+      media.preload = 'auto';
+      media.addEventListener('loadeddata', function () { node.classList.add('is-ready'); });
+    } else {
+      media = document.createElement('img');
+      media.className = 'bg__still';
+      media.alt = '';
+      media.decoding = 'async';
+      media.addEventListener('load', function () { node.classList.add('is-ready'); });
+    }
+    /* Fade it up only once there is something to show, so the page
+       never flashes an empty black rectangle. */
+    media.src = src;
+
+    node.appendChild(media);
+    node.appendChild(el('span', 'bg__scrim'));
+
+    if (isFilm) {
+      var p = media.play();
+      if (p && p.catch) p.catch(function () { /* a still frame is fine */ });
+    } else if (media.complete) {
+      /* Served from cache: the load event already went by. */
+      node.classList.add('is-ready');
+    }
+    return node;
+  }
+
+  function setBackground(spec) {
+    var src = (spec && (spec.video || spec.image)) || null;
 
     if (!src) {
       if (bg) { bg.remove(); bg = null; }
@@ -544,43 +599,9 @@
     if (bg && bg.dataset.src === src) return;
     if (bg) bg.remove();
 
-    bg = el('div', 'bg' + (isFilm ? '' : ' bg--still'));
-    bg.dataset.src = src;
-    bg.setAttribute('aria-hidden', 'true');
-
-    var media;
-    if (isFilm) {
-      media = document.createElement('video');
-      media.className = 'bg__video';
-      media.muted = true;
-      media.loop = true;
-      media.autoplay = true;
-      media.playsInline = true;
-      media.preload = 'auto';
-      media.addEventListener('loadeddata', function () { bg.classList.add('is-ready'); });
-    } else {
-      media = document.createElement('img');
-      media.className = 'bg__still';
-      media.alt = '';
-      media.decoding = 'async';
-      media.addEventListener('load', function () { bg.classList.add('is-ready'); });
-    }
-    /* Fade it up only once there is something to show, so the page
-       never flashes an empty black rectangle. */
-    media.src = src;
-
-    bg.appendChild(media);
-    bg.appendChild(el('span', 'bg__scrim'));
+    bg = buildFilm(spec);
     document.body.insertBefore(bg, document.body.firstChild);
     document.body.classList.add('has-bg');
-
-    if (isFilm) {
-      var p = media.play();
-      if (p && p.catch) p.catch(function () { /* a still frame is fine */ });
-    } else if (media.complete) {
-      /* Served from cache: the load event already went by. */
-      bg.classList.add('is-ready');
-    }
   }
 
   /* ==================================================================

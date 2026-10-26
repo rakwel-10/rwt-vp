@@ -183,7 +183,7 @@ trailing commas, which strict JSON forbids.
   "zone": "Branch",             // organisational only
   "tone": "room",               // optional — a dark panel on the cream page
   "surface": "dark",            // optional — the whole page goes dark
-  "layout": "cinema",           // optional — "editorial" (default), "cinema" (full-bleed film), "split" (sign-in)
+  "layout": "cinema",           // optional — "editorial" (default), "cinema" (full-bleed film), "hero" (sign-in)
   "wide": true,                 // optional — wider measure, for tables
   "parked": true,               // optional — written but not wired up yet
   "note": "production note, only visible with ?debug=1",
@@ -449,8 +449,8 @@ The positions in the CSS look wrong until you remember the span is inset by
 screen. Equal percentages give an ellipse rather than a circle for the same
 reason, which is why the two numbers differ.
 
-The welcome screen is a two-column sign-in — the pitch on the left, a framed
-panel on the right — on the dark surface.
+The welcome screen is a single pinned column — the pitch and the sign-in
+panel both on the left — over a full-bleed photograph, on the light surface.
 
 ### The film
 
@@ -496,14 +496,16 @@ half seconds and then dissolves. The count is suppressed entirely under
 
 | File | Where it plays |
 |---|---|
-| `ID-rwt2.mp4` | Behind the sign-in, muted and looping |
+| `bg-spa-lounge.jpg` | Behind the sign-in |
 | `ID-J1.mp4` | S1, the hook |
 | `ID-J2.mp4` | S2, the room |
 | `ID-J3.mp4` | S6, the insider film |
 | `lounge.jpg` | S8 and S11c |
 | `home-evening.jpg` | S5 and S11b |
 | `home-living.jpg` | S11a |
-| `rwt-lounge.png` | The Radiant Wave Lounge lockup, on the sign-in |
+| `radiant-wave-lounge.png` | The Radiant Wave Lounge lockup, on the sign-in |
+| `ID-rwt2.mp4` | Unused — the sign-in's earlier film background |
+| `rwt-lounge.png` | Unused — the sign-in's earlier lockup |
 
 The stills came across from RhemaWave-v3. The lounge render was 2.2MB and is
 recompressed to 170KB; the evening shot is a frame lifted from that project's
@@ -515,8 +517,8 @@ A slide gets a background with `"background"`, and it takes either a film or
 a still:
 
 ```js
-"background": { "video": "assets/media/….mp4" }   // the sign-in
-"background": { "image": "assets/media/….jpg" }   // S1 and S2
+"background": { "video": "assets/media/….mp4" }   // S1 and S2
+"background": { "image": "assets/media/….jpg" }   // the sign-in
 ```
 
 Both sit in the same layer under the same scrim, so a slide can swap one for
