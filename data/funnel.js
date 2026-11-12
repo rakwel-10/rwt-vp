@@ -35,8 +35,8 @@ window.FUNNEL = {
      is not the room. */
   "music": {
     "volume": 0.4,
-    "duckTo": 0.08,
     "tracks": [
+      "assets/media/bgm/Number Frequency Energy Meditation Music.mp3",
       "assets/media/bgm/1.mp3",
       "assets/media/bgm/2.mp3",
       "assets/media/bgm/3.mp3",
@@ -57,7 +57,7 @@ window.FUNNEL = {
       "background": { "image": "assets/media/login-rwt.jpg" },
       "note": "Hard gate: no skip, both fields required. Every visitor is named from the first screen, at the cost of whatever share of traffic will not give an email before seeing anything.",
       "blocks": [
-        { "type": "logo", "src": "assets/media/radiant-wave-lounge.png", "alt": "Radiant Wave Lounge — Members Only", "wide": true },
+        { "type": "logo", "src": "assets/media/rwt-lounge.png", "alt": "Radiant Wave Lounge — Members Only", "wide": true },
         {
           "type": "prose",
           "lede": true,
@@ -82,20 +82,19 @@ window.FUNNEL = {
     "S1": {
       "name": "Hook",
       "zone": "Spine",
+      "surface": "dark",
       "layout": "cinema",
-      "countdown": 5,
-      "note": "Room stays empty all 22 seconds. An empty room is an invitation; an occupied one is somebody else's hour.",
-      "eyebrow": "The most expensive thing in Richmond\nisn't what you think",
+      "note": "Room stays empty the whole film. An empty room is an invitation; an occupied one is somebody else's hour. No title card: the film starts the moment the visitor arrives from the sign-in.",
       "blocks": [
         {
           "type": "video",
           "id": "V1",
-          "src": "assets/media/RWT1.mp4",
+          "src": "assets/media/V1.mp4",
           "hold": true,
           "full": true,
-          "seconds": 33,
-          "words": 55,
-          "script": "There's one thing money keeps failing to buy you.\n\nAn hour that nobody can interrupt.\n\nNot a spa hour. Not a vacation hour, where you're still checking email from a beach chair.\n\nA real one. Dark. Quiet. No phone. No one who needs anything from you.\n\nRichmond — we built you a room."
+          "seconds": 39,
+          "words": 52,
+          "script": "There's one thing money keeps failing to buy you.\n\nAn hour that nobody can interrupt.\n\nNot a spa hour. Not a vacation hour, where you're still checking email from a beach chair.\n\nA real one. Dark. Quiet. No phone. No one who needs anything from you.\n\nRichmond, we built you a room."
         }
       ],
       "choices": [
@@ -107,7 +106,6 @@ window.FUNNEL = {
       "name": "The Room",
       "zone": "Spine",
       "surface": "dark",
-      "background": { "image": "assets/media/copper-bg.jpg" },
       "layout": "cinema",
       "countdown": 3,
       "note": "The 0:14 cut to rhema_3 is the most important edit in the deck. Hold it six full seconds — everything before it is cold, that cut makes it human.",
@@ -116,12 +114,12 @@ window.FUNNEL = {
         {
           "type": "video",
           "id": "V2",
-          "src": "assets/media/ID-J2.mp4",
+          "src": "assets/media/V2.mp4",
           "hold": true,
           "full": true,
-          "seconds": 43,
-          "words": 76,
-          "script": "Sixteen screens. One room. And a combination that didn't exist two years ago.\n\nColour, sound, motion and language, moving together across every screen at once. Not layered. Not taking turns. Together.\n\nYou sink into a recliner. The light drops. And for the next sixty minutes, you are genuinely unreachable.\n\nMost people fall asleep the first time. Almost everybody books a second one before they leave the building.\n\nThis is the Radiant Wave Lounge. Members only."
+          "seconds": 48,
+          "words": 86,
+          "script": "Sixteen screens. Not on a wall — in towers, facing each other, with you in the middle.\n\nColour, sound, motion and powerful proclamations, moving together across every screen at once. Not layered. Not taking turns. Together. That combination didn't exist two years ago.\n\nYou sink into a recliner. The light drops. And for the next sixty minutes you're in Radiant Waves — and genuinely unreachable.\n\nMost people fall asleep the first time. Almost everybody books a second one before they leave.\n\nRichmond's first Radiant Wave Lounge. Members only."
         }
       ],
       "choices": [
@@ -145,7 +143,7 @@ window.FUNNEL = {
         { "label": "I want one of these in my own house.", "to": "S4", "tag": "OWNER" },
         { "label": "Honestly? I just need to lie down somewhere quiet. Soon.", "to": "S5", "tag": "URGENT" },
         { "label": "I want in before everybody else finds out about it.", "to": "S6", "tag": "INSIDER" },
-        { "label": "I'm curious. Show me what it actually does.", "to": "S7", "tag": "CURIOUS" },
+        { "label": "I'm curious. Show me what it actually does.", "to": "S7a", "tag": "CURIOUS" },
         { "label": "I'm just looking around.", "to": "S3b", "tag": "COLD" }
       ]
     },
@@ -162,7 +160,7 @@ window.FUNNEL = {
         }
       ],
       "choices": [
-        { "label": "Give me two minutes", "to": "S7", "weight": "primary" },
+        { "label": "Give me two minutes", "to": "S7a", "weight": "primary" },
         { "label": "No thanks", "to": "S3c", "weight": "quiet" }
       ]
     },
@@ -216,7 +214,7 @@ window.FUNNEL = {
         { "label": "See the three residential systems", "to": "S11" },
         { "label": "Can I try one before I buy one?", "to": "S4b", "weight": "primary" },
         { "label": "Reserve my place in the delivery order", "to": "S13" },
-        { "label": "What does the Lounge feel like first?", "to": "S7", "weight": "quiet" }
+        { "label": "What does the Lounge feel like first?", "to": "S7a", "weight": "quiet" }
       ]
     },
 
@@ -240,8 +238,7 @@ window.FUNNEL = {
     "S5": {
       "name": "Trapped",
       "zone": "Branch",
-      "tone": "room",
-      "note": "Darkest slide in the deck. Two images, two choices, nothing else. Short dwell time here is success — she read it, recognised herself, clicked. Over 40 seconds means she's deliberating.",
+      "note": "A light slide like the rest (it was the dark room panel until November 2026). Two images, two choices, nothing else. Short dwell time here is success — she read it, recognised herself, clicked. Over 40 seconds means she's deliberating.",
       "heading": "You don't need a program. You need Tuesday at 4pm.",
       "blocks": [
         {
@@ -257,7 +254,7 @@ window.FUNNEL = {
       ],
       "choices": [
         { "label": "Get me in this week, show me times", "to": "S5b", "weight": "primary" },
-        { "label": "What is this room, actually?", "to": "S7" }
+        { "label": "What is this room, actually?", "to": "S7a" }
       ]
     },
 
@@ -286,8 +283,8 @@ window.FUNNEL = {
         }
       ],
       "choices": [
-        { "label": "Book three hours, $157", "to": "S14", "weight": "primary" },
-        { "label": "Just one hour first, $100", "to": "S14" },
+        { "label": "Book three hours, $157", "link": "pack-3", "to": "S14", "weight": "primary" },
+        { "label": "Just one hour first, $100", "link": "hour-1", "to": "S14" },
         { "label": "This week is already full", "to": "S5c", "weight": "quiet" }
       ]
     },
@@ -304,7 +301,7 @@ window.FUNNEL = {
         }
       ],
       "choices": [
-        { "label": "Get the pack, use it later", "to": "S14", "weight": "primary" },
+        { "label": "Get the pack, use it later", "link": "pack-3", "to": "S14", "weight": "primary" },
         {
           "label": "Send me a reminder instead",
           "weight": "quiet",
@@ -320,18 +317,18 @@ window.FUNNEL = {
       "surface": "dark",
       "layout": "cinema",
       "countdown": 3,
-      "note": "The eight-recliner pan at 0:11 to 0:17 is the proof shot. The viewer counts the chairs themselves, which turns scarcity from a claim into an observation.",
+      "note": "The November cut drops the eight-recliner count and the two-installations line. Scarcity now rests on the closing two lines alone; the middle sells the hosted experience - staff, blankets, a snack and a drink.",
       "eyebrow": "The part we don't put on the website",
       "blocks": [
         {
           "type": "video",
           "id": "V3",
-          "src": "assets/media/ID-J3.mp4",
+          "src": "assets/media/V3.mp4",
           "hold": true,
           "full": true,
           "seconds": 38,
-          "words": 69,
-          "script": "Here's the part we don't put on the website.\n\nScalar waves, sound, colour and proclamation — moving together as one. That combination was perfected in 2025, and there are two installations of it in the United States.\n\nThis is one of them.\n\nThe room has eight recliners. That's the entire constraint, and no amount of demand changes it.\n\nRight now, getting in is easy.\n\nThat is a temporary condition."
+          "words": 70,
+          "script": "Here's the part we don't put on the website.\n\nScalar waves, sound, colour and proclamations, moving together as one. That combination was perfected in 2025.\n\nThe room has soft, relaxing recliners. You're greeted by trained staff who know how much this private, uninterrupted time means to you, offering an elevated ambiance, including warm blankets, a snack and a beverage.\n\nRight now, getting in is easy.\n\nThat is a temporary condition."
         }
       ],
       "choices": [
@@ -353,7 +350,7 @@ window.FUNNEL = {
       ],
       "choices": [
         { "label": "Show me the membership tiers", "to": "S10", "weight": "primary" },
-        { "label": "What's actually in the room?", "to": "S7b" },
+        { "label": "What's actually in the room?", "to": "S7c" },
         { "label": "How many spots are left?", "to": "S6b" }
       ]
     },
@@ -384,6 +381,31 @@ window.FUNNEL = {
       ]
     },
 
+    "S7a": {
+      "name": "Every Part",
+      "zone": "Branch",
+      "surface": "dark",
+      "layout": "cinema",
+      "countdown": 3,
+      "note": "Sets up the focus menu: the six areas the film names are the six tiles on S7, so the visitor arrives there already holding the vocabulary.",
+      "eyebrow": "Every part of you",
+      "blocks": [
+        {
+          "type": "video",
+          "id": "V4",
+          "src": "assets/media/V4.mp4",
+          "hold": true,
+          "full": true,
+          "seconds": 46,
+          "words": 77,
+          "script": "Here's what makes this different from simply lying down anywhere else.\n\nLife isn't just one thing. It's emotional, mental, physical, social, spiritual, financial, and all of these are connected.\n\nInside the room, multiple proclamations unfold simultaneously. One designed around the bigger picture, others focused on more specific areas of life.\n\nIt's not about choosing just one. It's about making space for all the parts of you.\n\nSame room, same hour. An experience as multi-dimensional as life itself."
+        }
+      ],
+      "choices": [
+        { "label": "Choose what my hour is for", "to": "S7", "weight": "primary" }
+      ]
+    },
+
     "S7": {
       "name": "Focus Menu",
       "zone": "Branch",
@@ -397,6 +419,10 @@ window.FUNNEL = {
         {
           "type": "tiles",
           "tagPrefix": "FOCUS",
+          "screen": {
+            "video": ["assets/media/focus-screen.webm", "assets/media/focus-screen.mp4"],
+            "poster": "assets/media/focus-screen.jpg"
+          },
           "after": "Plus more than a hundred further focuses in the full library. Most systems offer sixteen programs. Your host walks you through the complete menu when you arrive.",
           "items": [
             {
@@ -434,8 +460,32 @@ window.FUNNEL = {
       ],
       "choices": [
         { "label": "Sounds like me", "to": "S8", "weight": "primary" },
-        { "label": "What's actually in the room?", "to": "S7b" },
+        { "label": "What's actually in the room?", "to": "S7c" },
         { "label": "Show me the memberships", "to": "S10" }
+      ]
+    },
+
+    "S7c": {
+      "name": "Mechanism",
+      "zone": "Depth",
+      "surface": "dark",
+      "layout": "cinema",
+      "countdown": 3,
+      "note": "The most matter-of-fact of the four scripts - no selling. \"You're not watching a screen. You're inside one.\" gets a full stop on both sides; the last line is almost a shrug, since refusing the claim closes a skeptic harder than asserting one.\n\nEdit sheet (reuses existing shots, no new setups): 0:00-0:05 wide, empty room (L5). 0:05-0:13 unbroken tilt down a tower (L2). 0:13-0:20 tower static, then cut to the opposite tower (L1 x2). 0:20-0:27 recliner from behind, glow ahead (L6). 0:27-0:35 slow pull back, gold lockup (L5 to L11). Requires two separate takes of L1, one of each opposing tower, so the middle stretch can cut between them - that cut is what makes \"facing each other\" visible rather than asserted.\n\nLives on its own slide rather than embedded in S7b: the panels template has no title-card/countdown path, so a video block dropped straight into it would try to autoplay the instant the slide renders, outside any click, and get refused under the no-silent-autoplay policy - landing as a bare play button with none of the build-up V1-V3 get. This keeps that same cinema treatment for V6.",
+      "eyebrow": "What's actually in the room",
+      "blocks": [
+        {
+          "type": "video",
+          "id": "V6",
+          "hold": true,
+          "full": true,
+          "seconds": 35,
+          "words": 87,
+          "script": "Here's what's actually happening in the room.\n\nSixteen screens, in towers, facing each other. The light comes from every direction at once, and it meets in the middle — which is where you're sitting.\n\nEach one is precisely engineered and individually programmed. Its own colour, its own sound, its own proclamations, moving through Fibonacci patterns.\n\nWhat fills the room, we call Radiant Waves. Nothing touches you. There's nothing to take.\n\nYou're not watching a screen. You're inside one.\n\nWhat that does for you is yours to find out."
+        }
+      ],
+      "choices": [
+        { "label": "Continue", "to": "S7b", "weight": "primary" }
       ]
     },
 
@@ -474,7 +524,8 @@ window.FUNNEL = {
       "choices": [
         { "label": "That's enough, show me times", "to": "S9", "weight": "primary" },
         { "label": "I have more questions", "to": "S12" }
-      ]
+      ],
+      "disclaimer": "Radiant Wave Technology does not diagnose, treat, prescribe, or cure anything, and makes no medical claims."
     },
 
     "S8": {
@@ -489,7 +540,7 @@ window.FUNNEL = {
         {
           "type": "plates",
           "items": [
-            { "src": "assets/media/lounge.jpg", "note": "The Lounge floor: recliners and screen towers." }
+            { "src": "assets/media/lounge-floor.jpg", "note": "The Lounge floor: recliners and screen towers." }
           ]
         }
       ],
@@ -529,6 +580,7 @@ window.FUNNEL = {
         {
           "type": "ladder",
           "label": "Hour packs",
+          "rowLabels": ["Price", "Per hour", "Good for"],
           "items": [
             { "id": "hour-1", "name": "Single hour", "price": 100, "unit": "$100 an hour", "note": "Walk in, see for yourself" },
             { "id": "pack-3", "name": "Three-hour pack", "price": 157, "unit": "$52 an hour", "note": "Most people start here", "default": true },
@@ -541,7 +593,7 @@ window.FUNNEL = {
         }
       ],
       "choices": [
-        { "label": "Book the {offer}", "note": "{offerPrice}", "to": "S14", "weight": "primary" },
+        { "label": "Book the {offer}", "note": "{offerPrice}", "link": "offer", "to": "S14", "weight": "primary" },
         { "label": "Compare memberships first", "to": "S10" }
       ]
     },
@@ -559,6 +611,7 @@ window.FUNNEL = {
         {
           "type": "ladder",
           "label": "Membership tiers",
+          "rowLabels": ["Price", "Hours", "What's included"],
           "items": [
             {
               "id": "vita-recharge",
@@ -589,7 +642,7 @@ window.FUNNEL = {
         }
       ],
       "choices": [
-        { "label": "Start {offer}", "note": "{offerPrice} a month, six-month minimum", "to": "S14", "weight": "primary" },
+        { "label": "Start {offer}", "note": "{offerPrice} a month, six-month minimum", "link": "offer", "to": "S14", "weight": "primary" },
         { "label": "I have a question first", "to": "S12" },
         { "label": "Show me the hour packs instead", "to": "S9", "weight": "quiet" }
       ]
@@ -653,12 +706,12 @@ window.FUNNEL = {
         {
           "type": "plates",
           "items": [
-            { "src": "assets/media/home-living.jpg", "note": "A residential system in a living room. Screen count varies by configuration." }
+            { "src": "assets/media/system-advanced.jpg", "whole": true, "alt": "The Advanced system: four 27-inch screens on stands, about 1,200 square inches of screen surface, $26,999 introductory, $22.50 per square inch." }
           ]
         }
       ],
       "choices": [
-        { "label": "Secure this system", "to": "S15", "weight": "primary" },
+        { "label": "Book a call about Advanced", "link": "call", "to": "S16", "weight": "primary", "set": { "system": "Advanced" } },
         { "label": "Compare with Elite II", "to": "S11c" }
       ]
     },
@@ -686,12 +739,12 @@ window.FUNNEL = {
         {
           "type": "plates",
           "items": [
-            { "src": "assets/media/home-evening.jpg", "note": "A residential system at home in the evening. Screen count varies by configuration." }
+            { "src": "assets/media/system-elite.jpg", "whole": true, "alt": "The Elite system: four 32-inch screens on stands, about 1,700 square inches of screen surface, $55,997 MSRP, $18.82 per square inch." }
           ]
         }
       ],
       "choices": [
-        { "label": "Secure this system", "to": "S15", "weight": "primary" },
+        { "label": "Book a call about Elite", "link": "call", "to": "S16", "weight": "primary", "set": { "system": "Elite" } },
         { "label": "Show me Elite II", "to": "S11c" }
       ]
     },
@@ -719,13 +772,13 @@ window.FUNNEL = {
         {
           "type": "plates",
           "items": [
-            { "src": "assets/media/lounge.jpg", "note": "The Lounge. Elite II brings the same architecture into a room at home." }
+            { "src": "assets/media/system-elite-2.jpg", "whole": true, "alt": "The Elite II system: eight 32-inch screens stacked in a wall, about 3,400 square inches of screen surface, $39,999 introductory, $11.76 per square inch." }
           ]
         }
       ],
       "choices": [
-        { "label": "Secure this system", "to": "S15", "weight": "primary" },
-        { "label": "Talk to someone first", "to": "S16" }
+        { "label": "Book a call about Elite II", "link": "call", "to": "S16", "weight": "primary", "set": { "system": "Elite II" } },
+        { "label": "Book three hours in the Lounge first, $157", "to": "S9", "weight": "quiet" }
       ]
     },
 
@@ -764,12 +817,7 @@ window.FUNNEL = {
       "choices": [
         { "label": "Book three hours, $157", "to": "S9", "weight": "primary" },
         { "label": "See all three tiers", "to": "S10" },
-        {
-          "label": "Send me what you have",
-          "weight": "quiet",
-          "endHeading": "On its way.",
-          "endText": "We'll send what we have and leave you to it."
-        }
+        { "label": "Book a call", "link": "call", "to": "S16" }
       ]
     },
 
@@ -855,6 +903,7 @@ window.FUNNEL = {
           "submit": "Confirm my spot",
           "consent": "Yes, contact me by phone, text and email. Reply STOP to opt out.",
           "consentRequired": true,
+          "footnote": "Radiant Wave Technology does not diagnose, treat, prescribe, or cure anything, and makes no medical claims.",
           "fields": [
             { "name": "firstName", "label": "First name", "required": true },
             { "name": "lastName", "label": "Last name", "required": true },
@@ -874,6 +923,7 @@ window.FUNNEL = {
 
     "S15": {
       "name": "Two Ways",
+      "parked": true,   // online system checkout; systems now go to a GHL call (config.js -> ghl.call)
       "zone": "Offer",
       "wide": true,
       "note": "Pricing is fixed, so the cash path can't be discounted. The incentive stack carries it instead, and the complimentary membership is nearly free to you and the strongest item on the list.",
@@ -900,8 +950,8 @@ window.FUNNEL = {
       "choices": [
         { "label": "Pay in full", "note": "First position in the delivery order", "to": "S17", "weight": "primary", "set": { "paymentPath": "Paid in full" } },
         { "label": "Reserve with half", "to": "S17", "set": { "paymentPath": "Reserve with half" } },
-        { "label": "Talk to someone first", "to": "S16" },
-        { "label": "Which system fits my space?", "to": "S16", "weight": "quiet" }
+        { "label": "Talk to someone first", "link": "call", "to": "S16" },
+        { "label": "Which system fits my space?", "link": "call", "to": "S16", "weight": "quiet" }
       ]
     },
 
@@ -945,6 +995,7 @@ window.FUNNEL = {
 
     "S17": {
       "name": "Order",
+      "parked": true,   // see S15
       "zone": "Capture",
       "note": "Final-sale terms go above the button, never below. High-ticket buyers accept them routinely when told up front; discovering it afterward is a chargeback.",
       "heading": "Before you order",
@@ -981,6 +1032,7 @@ window.FUNNEL = {
           "submit": "Complete my order",
           "consent": "I've read and agree to the purchase agreement, and I understand that system sales are final.",
           "consentRequired": true,
+          "footnote": "Radiant Wave Technology does not diagnose, treat, prescribe, or cure anything, and makes no medical claims.",
           "fields": [
             { "name": "firstName", "label": "First name", "required": true },
             { "name": "lastName", "label": "Last name", "required": true },

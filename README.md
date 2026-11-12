@@ -153,7 +153,49 @@ Map `tags` to GHL contact tags. Everything else is custom fields or a note.
 
 ### Timing
 
-Nothing leaves the browser until a form is submitted.
+Nothing leaves the browser until a form is submitted, or until a button
+sends the visitor to a GoHighLevel page (below).
+
+### GoHighLevel checkout and calendar pages
+
+Buying and booking happen on GHL, not in the funnel. `config.js -> ghl` holds
+every link in one place:
+
+| Link | Used by |
+|---|---|
+| `checkout['hour-1']`, `['pack-3']`, `['pack-10']` | Hour packs: S9, plus the fixed buttons on S5b and S5c |
+| `checkout['vita-recharge']`, `['vita-restore']`, `['vita-radiate']` | Memberships: S10 |
+| `call` | Home systems (S11a/b/c), "Book a call" on S12, "Talk to someone first" |
+
+A choice opts in with `"link"`: `"offer"` (whichever rung the price ladder
+has selected), `"call"`, or a fixed offer id such as `"pack-3"`. On click the
+engine:
+
+1. sends the lead to the webhook first (`capturedAt: "redirect"`, plus
+   `redirectTo`), so the path, tags and product reach GHL even if the checkout
+   is abandoned;
+2. appends `first_name`, `last_name`, `email` and `phone` (whatever is known)
+   and any `utm_*` parameters, so GHL forms and calendars open pre-filled. Turn
+   that off with `prefill: false`;
+3. opens the page in the same tab, so the browser's Back button returns the
+   visitor to the slide they left.
+
+**Until the GHL pages exist, every link points at `ghl-placeholder.html`**
+(`?for=pack-3`, `?for=call`, …). It is a stand-in landing page that names the
+GHL page that belongs there, shows the product, price and the details GHL
+would receive pre-filled, and has a button back to the slide the visitor left.
+Replace each link with the real GHL URL as that page goes live, and delete the
+placeholder once all seven are real.
+
+**A blank link is safe.** The button falls back to its `"to"`, which is the
+on-page form it always had (S14 for Lounge purchases, S16 for calls). Fill the
+links in one at a time as each GHL page goes live. Buttons that leave the site
+show a small ↗ only once their link is set.
+
+S15 (pay in full / reserve with half) and S17 (online system order) are
+`parked`: home systems now go to a sales call. With `?debug=1` a GHL button
+stops short and shows the payload and the destination URL instead of leaving.
+`tools/ghl.html` tests all of this with dummy links.
 
 The welcome screen is a hard gate: name and email required, no way past it.
 Every visitor is therefore named from the first screen, and every tag and fork
@@ -259,7 +301,8 @@ slides that do not exist, dead ends, and unreachable slides. Slides marked
 |---|---|
 | `S6b` | `remaining: 11` — update weekly with the real count. Never reset it. |
 | `S11`, `S11a-c` | "Ends 31 October 2026" — the introductory pricing deadline. |
-| Video weight | The three films are ~9.5 Mbps, about 3× what 1080p web delivery needs. Re-encoding at CRF 23 would take 120MB down to roughly 25MB with little visible loss. |
+| Video weight | The four films are ~9.5 Mbps, about 3× what 1080p web delivery needs. Re-encoding at CRF 23 would take 120MB down to roughly 25MB with little visible loss. |
+| `S7c` (V6) | No footage yet — runs as a timed placeholder. Record all four in one sitting; V6's edit sheet is in `S7c`'s build note. |
 | Music weight | `bgm/2.mp3` is 2h 17m and 89MB. It streams, so a visitor only downloads what they hear, but it is a third of the repository on its own. Worth trimming. |
 | Photography | The stills are borrowed from RhemaWave. Replace them with Richmond photographs when you have them: same `{ "src", "note" }` shape. |
 | `S8b` | Testimonials, parked until written releases are signed. |
@@ -328,7 +371,7 @@ depending on how many there are and how long the labels run. Full sentences
 get two across at most; short labels get more. Below 720px they stack, because
 that is genuinely the only thing that fits.
 
-An exit ("I'm just looking around", "Send me what you have") is not a button.
+An exit ("I'm just looking around", "Show me the hour packs instead") is not a button.
 It gets its own line, centred, with no plate at all, so it never competes with
 the real action.
 
@@ -384,12 +427,16 @@ simply stays out.
 It lives outside the stage, so it survives every slide change — it must never
 restart when the page moves on, and the test checks exactly that.
 
-**A film ducks it rather than stopping it.** The films carry narration and two
-voices at once is nobody's idea of calm, so the level drops to 8% and the
-capsule fades back, then both return when the film ends. Leaving a film
-part-way through also hands the level back.
+**A film silences it.** The films carry narration and two voices at once is
+nobody's idea of calm, so the music pauses the moment a film starts and the
+capsule fades back, then it resumes from the same spot, fading in, when the
+film ends. Leaving a film part-way through also brings it back. It pauses
+rather than turning down because iOS ignores a page's volume setting, so a
+quieter level would still play at full volume on an iPhone. `tools/duck.html` checks this in real time (serve the project and
+open it); `tools/music.html` runs on a virtual clock, which never really plays
+media.
 
-The playlist, the starting level and the ducked level are all in
+The playlist and the starting level are both in
 `data/funnel.js` under `music`, so they travel with the client rather than
 living in code. A finished track rolls into the next and wraps at the end, so
 there is sound throughout.
@@ -497,15 +544,29 @@ half seconds and then dissolves. The count is suppressed entirely under
 | File | Where it plays |
 |---|---|
 | `bg-spa-lounge.jpg` | Behind the sign-in |
-| `ID-J1.mp4` | S1, the hook |
-| `ID-J2.mp4` | S2, the room |
-| `ID-J3.mp4` | S6, the insider film |
-| `lounge.jpg` | S8 and S11c |
-| `home-evening.jpg` | S5 and S11b |
-| `home-living.jpg` | S11a |
-| `radiant-wave-lounge.png` | The Radiant Wave Lounge lockup, on the sign-in |
+| `V1.mp4` | S1, the hook |
+| `V2.mp4` | S2, the room |
+| `V3.mp4` | S6, the insider film |
+| `V4.mp4` | S7a, "every part of you", which leads into the focus menu |
+| `RWT1.mp4`, `ID-J1.mp4`, `ID-J2.mp4`, `ID-J3.mp4` | Unused: earlier cuts of the films, replaced by V1–V3 in November 2026 |
+| `lounge-floor.jpg` | S8: a real photo of the Lounge floor (web copy of `S8.png`) |
+| `system-advanced.jpg`, `system-elite.jpg`, `system-elite-2.jpg` | S11a, S11b, S11c: the system banners, shown whole (web copies of `advanced.png`, `elite1.png`, `elite 2.png`) |
+| `home-evening.jpg` | S5 |
+| `lounge.jpg`, `home-living.jpg` | Unused: earlier stand-in renders |
+| `rwt-lounge.png` | The Radiant Wave Lounge lockup, on the sign-in |
 | `ID-rwt2.mp4` | Unused — the sign-in's earlier film background |
-| `rwt-lounge.png` | Unused — the sign-in's earlier lockup |
+| `radiant-wave-lounge.png` | Unused — the sign-in's earlier lockup |
+
+**Film masters stay out of `assets/media`.** The full-resolution exports
+(2560×1440, 60fps, 155–200MB each) live in `footage-masters/`, which is
+git-ignored. What the page serves are web encodes: 1080p, 30fps, H.264 at
+CRF 23 capped at 6 Mbps, AAC 128k, with `faststart` so playback begins before
+the download finishes. For a new cut, drop the master in `footage-masters/`
+and run the command below. **V1 and V2 are cut 6 seconds short of their masters** (the end logo held too long): add `-t 38.861` for V1 or `-t 48.010` for V2 before the output file, plus `-af "afade=t=out:st=<t-0.5>:d=0.5"` so the sound eases out.
+
+```
+ffmpeg -i footage-masters/V1.mp4 -vf "scale=1920:1080:flags=lanczos,fps=30" -c:v libx264 -preset slow -crf 23 -maxrate 6M -bufsize 12M -profile:v high -pix_fmt yuv420p -c:a aac -b:a 128k -ac 2 -movflags +faststart assets/media/V1.mp4
+```
 
 The stills came across from RhemaWave-v3. The lounge render was 2.2MB and is
 recompressed to 170KB; the evening shot is a frame lifted from that project's
@@ -567,6 +628,8 @@ start. Second, this is a genuine trade-off against the ambient, nobody-has-
 to-touch-anything feel of the countdown: the price of "it may always need one
 click" is that the film is never shown muted without saying so.
 
-A **Skip** control sits in the corner while a film plays. Without it a visitor
+A **Skip** control sits in the corner while a film plays. Skipping is the
+same as pressing the slide's main button: the film stops and the visitor
+moves straight on to the next part, and the skip is noted on their record. Without it a visitor
 is held for 22 to 30 seconds with no way out, which is worse on a second visit
 than the pacing is worth. Say the word and I will take it out.

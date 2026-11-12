@@ -259,6 +259,8 @@
       play.addEventListener('click', function () { play.hidden = true; start(); });
 
       function start() {
+        /* never from a slide that is no longer on screen */
+        if (!v.isConnected) return;
         reel.classList.add('reel--playing');
         skip.hidden = false;
         controls.hidden = false;
@@ -299,7 +301,17 @@
       reel.addEventListener('film:start', run, { once: true });
     }
 
-    skip.addEventListener('click', finish);
+    /* Skip means "take me on": the film stops and the slide moves to
+       its next part, the same as pressing its main button. The slide
+       does that (it knows where "next" is) by cancelling the event;
+       a film with nowhere to go just ends where it is instead. */
+    skip.addEventListener('click', function () {
+      var vid = reel.querySelector('video');
+      if (vid) vid.pause();
+      var e = new CustomEvent('film:skip', { bubbles: true, cancelable: true });
+      if (reel.dispatchEvent(e)) finish();
+      else { finished = true; skip.hidden = true; }
+    });
 
     screen.appendChild(play);
     screen.appendChild(skip);
@@ -388,12 +400,16 @@
     items.forEach(function (item, i) {
       var src = typeof item === 'string' ? null : item.src;
       var note = typeof item === 'string' ? item : item.note;
-      var cell = el('figure', 'media__cell' + (i === 0 ? ' media__cell--lead' : ''));
+      /* "whole": a finished graphic with its own text in it (the system
+         banners). Shown at its own shape, never cropped to the frame. */
+      var whole = typeof item === 'object' && item.whole;
+      var cell = el('figure', 'media__cell' + (i === 0 ? ' media__cell--lead' : '') +
+        (whole ? ' media__cell--whole' : ''));
 
       if (src) {
         var img = document.createElement('img');
         img.src = src;
-        img.alt = note || '';
+        img.alt = (typeof item === 'object' && item.alt) || note || '';
         img.loading = 'lazy';
         cell.appendChild(img);
         /* A caption, not just alt text. These are renders and stills
@@ -435,11 +451,14 @@
     var frag = document.createDocumentFragment();
     var grid = el('div', 'tiles');
     var prefix = b.tagPrefix || 'FOCUS';
+    var screen = b.screen ? focusScreen(b, ctx, prefix) : null;
+    if (screen) frag.appendChild(screen.node);
 
     (b.items || []).forEach(function (t) {
       var tag = prefix + '_' + slug(t.name);
       var btn = el('button', 'tile');
       btn.type = 'button';
+      btn.dataset.tag = tag;
       btn.setAttribute('aria-pressed', ctx.record.hasTag(tag) ? 'true' : 'false');
 
       btn.appendChild(el('span', 'tile__name', t.name));
@@ -454,15 +473,173 @@
       }
 
       btn.addEventListener('click', function () {
+        /* a drag that just ended is not also a click */
+        if (btn.dataset.dragged) { delete btn.dataset.dragged; return; }
         var on = ctx.record.toggleTag(tag);
         btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (screen) screen.changed(on ? { tag: tag, name: t.name, from: btn } : null);
       });
+      if (screen) screen.draggable(btn, tag, t.name);
       grid.appendChild(btn);
     });
 
-    frag.appendChild(grid);
+    if (screen) {
+      /* the cards on the left, the screen beside them on the right */
+      var board = el('div', 'fboard');
+      board.appendChild(grid);
+      board.appendChild(screen.node);
+      frag.appendChild(board);
+    } else {
+      frag.appendChild(grid);
+    }
     if (b.after) frag.appendChild(el('p', 'tiles__after', b.after));
+    if (screen) screen.sync(grid);
     return frag;
+  }
+
+  /* ------------------------------------------------------------------
+     The focus screen. A picture of the device, running its own footage:
+     drag a focus card onto it (or tap the card) and it lands there. The
+     screen sits paused and dim while it is empty, comes alive with the
+     first focus, and runs a little livelier with each one after. A
+     picked card stays highlighted; tapping it again takes it off.
+     It only ever reads and writes the same FOCUS_ tags the cards do.
+     { "screen": { "video": ["a.webm","a.mp4"], "poster": "a.jpg" } }
+     ------------------------------------------------------------------ */
+  function focusScreen(b, ctx, prefix) {
+    var spec = b.screen;
+    var names = {};
+    (b.items || []).forEach(function (t) { names[prefix + '_' + slug(t.name)] = t.name; });
+
+    var node = el('div', 'fscreen');
+    var stage = el('div', 'fscreen__stage');
+    var v = document.createElement('video');
+    v.className = 'fscreen__video';
+    v.muted = true; v.loop = true; v.playsInline = true;
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    v.setAttribute('aria-hidden', 'true');
+    v.preload = 'auto';
+    if (spec.poster) v.poster = spec.poster;
+    [].concat(spec.video || []).forEach(function (src) {
+      var s = document.createElement('source');
+      s.src = src;
+      s.type = /\.webm$/i.test(src) ? 'video/webm' : 'video/mp4';
+      v.appendChild(s);
+    });
+    stage.appendChild(v);
+    var drop = el('span', 'fscreen__drop', 'Drop a focus here');
+    drop.setAttribute('aria-hidden', 'true');
+    stage.appendChild(drop);
+
+    node.appendChild(stage);
+
+    function chosen() {
+      return Object.keys(names).filter(function (tag) { return ctx.record.hasTag(tag); });
+    }
+
+    /* paint the screen from the record */
+    function paint(pulse) {
+      var on = chosen();
+      node.dataset.count = on.length;
+      node.classList.toggle('is-live', on.length > 0);
+
+      if (on.length) {
+        /* a little livelier with each focus, never frantic */
+        v.playbackRate = Math.min(1.6, 1 + 0.12 * (on.length - 1));
+        if (v.paused && v.isConnected) {
+          var p = v.play();
+          if (p && p.catch) p.catch(function () { /* still frame is fine */ });
+        }
+      } else if (!v.paused) {
+        v.pause();
+      }
+
+      if (pulse && !reduced()) {
+        node.classList.remove('is-pulse');
+        void node.offsetWidth;
+        node.classList.add('is-pulse');
+      }
+    }
+
+    /* A card "goes to the screen": a copy of its name flies from the
+       card into the middle of the screen, then the screen takes it. */
+    function fly(name, fromRect) {
+      if (reduced() || !fromRect) return;
+      var to = stage.getBoundingClientRect();
+      var ghost = el('span', 'fghost', name);
+      document.body.appendChild(ghost);
+      var gw = ghost.offsetWidth, gh = ghost.offsetHeight;
+      var x0 = fromRect.left + fromRect.width / 2 - gw / 2;
+      var y0 = fromRect.top + fromRect.height / 2 - gh / 2;
+      var x1 = to.left + to.width / 2 - gw / 2;
+      var y1 = to.top + to.height * 0.45 - gh / 2;
+      ghost.style.transform = 'translate(' + x0 + 'px,' + y0 + 'px)';
+      void ghost.offsetWidth;
+      ghost.classList.add('is-flying');
+      ghost.style.transform = 'translate(' + x1 + 'px,' + y1 + 'px) scale(.85)';
+      setTimeout(function () { ghost.classList.add('is-landed'); }, 520);
+      setTimeout(function () { ghost.remove(); }, 900);
+    }
+
+    /* Drag with a mouse or pen. On a touchscreen a card is tapped, not
+       dragged: a drag there would fight the page's own scrolling. */
+    function draggable(btn, tag, name) {
+      btn.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'touch' || e.button !== 0) return;
+        var sx = e.clientX, sy = e.clientY, ghost = null, over = false;
+
+        function move(ev) {
+          if (!ghost) {
+            if (Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) < 8) return;
+            ghost = el('span', 'fghost fghost--drag', name);
+            document.body.appendChild(ghost);
+            btn.classList.add('is-dragging');
+            node.classList.add('is-awaiting');
+          }
+          ghost.style.transform = 'translate(' + (ev.clientX - ghost.offsetWidth / 2) + 'px,' +
+            (ev.clientY - ghost.offsetHeight / 2) + 'px)';
+          var r = stage.getBoundingClientRect();
+          over = ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+          node.classList.toggle('is-over', over);
+        }
+        function up() {
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+          window.removeEventListener('pointercancel', up);
+          if (!ghost) return;                        /* a plain click */
+          btn.dataset.dragged = '1';                 /* swallow the click that follows */
+          setTimeout(function () { delete btn.dataset.dragged; }, 0);
+          ghost.remove();
+          btn.classList.remove('is-dragging');
+          node.classList.remove('is-awaiting', 'is-over');
+          if (over && !ctx.record.hasTag(tag)) {
+            ctx.record.toggleTag(tag);
+            btn.setAttribute('aria-pressed', 'true');
+            ctx.record.note('dropped', name);
+            paint(true);
+          }
+        }
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+        window.addEventListener('pointercancel', up);
+      });
+    }
+
+    return {
+      node: node,
+      draggable: draggable,
+      /* painted once now, and again once the slide is on the page -
+         a video can only start playing after it is in the document */
+      sync: function () { paint(); setTimeout(function () { paint(); }, 60); },
+      changed: function (added) {
+        if (added) fly(added.name, added.from.getBoundingClientRect());
+        paint(!!added);
+      }
+    };
+  }
+
+  function reduced() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   /* ==================================================================
@@ -495,11 +672,24 @@
          {"id":"pack-3","name":"3-Hour Pack","price":157,
           "unit":"$52 an hour","note":"Most people start here","default":true}]}
      ================================================================== */
+  /* Laid out as a comparison table: one column per option, side by
+     side, with the row labels ("rowLabels": price, unit, note rows)
+     down the left, and a whole column is the click target. Each rung
+     is still a single button, so selection and keyboard use are
+     unchanged; on a phone the columns fall back to stacked cards. */
   function ladder(b, ctx) {
-    var wrap = el('div', 'ladder');
+    var wrap = el('div', 'ladder ladder--table');
     wrap.setAttribute('role', 'group');
     if (b.label) wrap.setAttribute('aria-label', b.label);
+    wrap.style.setProperty('--cols', (b.items || []).length);
     var buttons = [];
+
+    var labels = b.rowLabels || ['Price', '', ''];
+    var side = el('div', 'ladder__labels');
+    side.setAttribute('aria-hidden', 'true');
+    side.appendChild(el('span', 'ladder__label ladder__label--head'));
+    labels.forEach(function (t) { side.appendChild(el('span', 'ladder__label', t)); });
+    wrap.appendChild(side);
 
     (b.items || []).forEach(function (item) {
       var btn = el('button', 'rung');
@@ -507,16 +697,19 @@
       var chosen = ctx.record.state.offer && ctx.record.state.offer.id === item.id;
       btn.setAttribute('aria-pressed', chosen ? 'true' : 'false');
 
-      btn.appendChild(el('span', 'rung__mark'));
-      btn.appendChild(el('span', 'rung__name', item.name));
+      var head = el('span', 'rung__head');
+      head.appendChild(el('span', 'rung__mark'));
+      head.appendChild(el('span', 'rung__name', item.name));
+      btn.appendChild(head);
       var p = el('span', 'rung__price');
       p.appendChild(document.createTextNode(money(item.price)));
       /* "a month" belongs next to the number, not in the fine print -
          a recurring price read as one-off is the costliest misread here. */
       if (item.period) p.appendChild(el('small', null, ' ' + item.period));
       btn.appendChild(p);
-      if (item.note) btn.appendChild(el('span', 'rung__note', item.note));
-      if (item.unit) btn.appendChild(el('span', 'rung__unit', item.unit));
+      /* every column fills every row, so the table never goes ragged */
+      btn.appendChild(el('span', 'rung__unit', item.unit || ''));
+      btn.appendChild(el('span', 'rung__note', item.note || ''));
 
       btn.addEventListener('click', function () {
         ctx.record.setOffer({ id: item.id, name: item.name, price: item.price, period: item.period || null });
@@ -528,8 +721,13 @@
       wrap.appendChild(btn);
     });
 
-    /* Pre-select the default, but only if nothing is chosen yet. */
-    if (!ctx.record.state.offer) {
+    /* Pre-select the default unless something on this ladder is
+       already chosen. A pick from a different ladder (a membership,
+       when this is the hour packs) does not count - otherwise the CTA
+       here would name, and check out, a product this page never showed. */
+    var current = ctx.record.state.offer;
+    var onThisLadder = current && (b.items || []).some(function (i) { return i.id === current.id; });
+    if (!onThisLadder) {
       var d = (b.items || []).filter(function (i) { return i.default; })[0];
       if (d) {
         ctx.record.setOffer({ id: d.id, name: d.name, price: d.price, period: d.period || null });

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>duck</title></head>
+<body>
+<pre id="out">running…</pre>
+<!-- Real time only: the music must actually play, stop for a film and
+     pick up again, which a virtual clock never does. Serve the project
+     (node serve.js) and open /tools/duck.html, or run headless with
+     --autoplay-policy=no-user-gesture-required --timeout=20000. -->
+<script src="../assets/js/music.js"></script>
+<script>
+const r = []; const ok = (n, c, d) => r.push((c ? 'PASS' : 'FAIL') + '  ' + n + (d ? '  [' + d + ']' : ''));
+const sleep = ms => new Promise(x => setTimeout(x, ms));
+const until = async (test, ms) => { const t = Date.now(); while (!test() && Date.now() - t < ms) await sleep(50); return test(); };
+
+(async () => {
+  try { sessionStorage.clear(); } catch (e) {}
+  Music.mount({ volume: 0.3, tracks: ['../assets/media/bgm/1.mp3'] });
+  const audio = document.querySelector('.bgm__media');
+
+  ok('the music starts', await until(() => !audio.paused && audio.currentTime > 0.3, 8000),
+     audio.currentTime.toFixed(1) + 's');
+
+  Music.duck(true); await sleep(300);
+  const at = audio.currentTime;
+  ok('a film pauses it', audio.paused);
+  await sleep(1200);
+  ok('it stays silent through the film', audio.paused && Math.abs(audio.currentTime - at) < 0.05);
+  Music.resume(); await sleep(300);
+  ok('a stray resume (a click to start the film) does not restart it', audio.paused);
+
+  Music.duck(false);
+  ok('it comes back when the film ends', await until(() => !audio.paused, 3000));
+  await sleep(1300);
+  ok('from where it left off', audio.currentTime > at && audio.currentTime < at + 3,
+     at.toFixed(1) + 's -> ' + audio.currentTime.toFixed(1) + 's');
+  ok('and fades back up to its level', Math.abs(audio.volume - 0.3) < 0.01, 'volume ' + audio.volume.toFixed(2));
+
+  Music.toggle(); await sleep(200);
+  ok('the visitor can stop it', audio.paused);
+  Music.duck(true); await sleep(200);
+  Music.duck(false); await sleep(800);
+  ok('a film never restarts music the visitor stopped', audio.paused);
+
+  const fails = r.filter(x => x.startsWith('FAIL'));
+  document.title = fails.length ? 'FAILED ' + fails.length : 'ALL PASS ' + r.length;
+  document.getElementById('out').textContent = document.title + '\n\n' + r.join('\n');
+})();
+</script>
+</body>
+</html>

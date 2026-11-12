@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>ghl</title></head>
+<body>
+<div id="log"></div>
+<script>
+  // GoHighLevel links: some filled, some blank, to prove both the
+  // redirect and the fallback. location.assign is intercepted so the
+  // test page never actually leaves.
+  window.IDECIDE_CONFIG = {
+    funnel: null,
+    handoff: { webhookUrl: 'http://localhost:9/collect', method: 'POST', timeoutMs: 3000, retry: false },
+    ghl: {
+      checkout: {
+        'hour-1': 'https://ghl.test/hour-1',
+        'pack-3': 'https://ghl.test/pack-3?ref=rwt',
+        'pack-10': '',
+        'vita-recharge': 'https://ghl.test/recharge',
+        'vita-restore': 'https://ghl.test/restore',
+        'vita-radiate': 'https://ghl.test/radiate'
+      },
+      call: 'https://ghl.test/calendar',
+      prefill: true
+    },
+    debug: { validateOnLoad: true }
+  };
+  var SENT = [];
+  var realFetch = window.fetch;
+  window.fetch = function (url, opts) {
+    if (String(url).indexOf('/collect') !== -1) {
+      SENT.push({ body: JSON.parse(opts.body), keepalive: opts.keepalive });
+      return Promise.resolve({ ok: true, status: 200 });
+    }
+    return realFetch.apply(this, arguments);
+  };
+  var WENT = null;
+  window.__assign = function (u) { WENT = u; };
+</script>
+<script src="../data/funnel.js"></script>
+<script src="../assets/js/blocks.js"></script>
+<script src="../assets/js/music.js"></script>
+<script>
+  // engine.js calls window.location.assign; Location is not writable,
+  // so swap the call site in the engine source before it runs.
+  (function () {
+    var x = new XMLHttpRequest();
+    x.open('GET', '../assets/js/engine.js', false);
+    x.send();
+    var src = x.responseText.replace('window.location.assign(dest)', 'window.__assign(dest)');
+    if (src === x.responseText) document.title = 'FAILED engine has no location.assign call';
+    var s = document.createElement('script');
+    s.textContent = src;
+    document.head.appendChild(s);
+  })();
+</script>
+<script>
+const results = [];
+const ok = (name, cond, detail) => results.push((cond ? 'PASS' : 'FAIL') + '  ' + name + (detail ? '  [' + detail + ']' : ''));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const byText = (sel, text) =>
+  [...document.querySelectorAll(sel)].find(n => n.textContent.includes(text));
+const reset = () => { WENT = null; SENT = []; };
+
+(async function () {
+  try { sessionStorage.clear(); } catch (e) {}
+  const warns = [];
+  const realWarn = console.warn;
+  console.warn = function () { warns.push([].join.call(arguments, ' ')); realWarn.apply(console, arguments); };
+
+  IDecide.start();
+  await sleep(700);
+  ok('funnel check has no link or routing problems', warns.length === 0, warns.join(' | '));
+
+  document.querySelector('input[name="firstName"]').value = 'Dana';
+  document.querySelector('input[name="email"]').value = 'dana+rw@example.com';
+  byText('.form .btn', 'Enter the Lounge').click();
+  await sleep(400);
+
+  // --- membership checkout ---------------------------------------
+  location.hash = '/S10'; await sleep(400);
+  ok('Vita Restore is the default', IDecide.record.state.offer.id === 'vita-restore');
+  let cta = byText('.choice--primary', 'Start');
+  ok('membership CTA shows the out arrow', cta && cta.classList.contains('choice--out'));
+  reset(); cta.click(); await sleep(400);
+  const u = WENT && new URL(WENT);
+  ok('membership goes to its GHL checkout', u && u.origin + u.pathname === 'https://ghl.test/restore', WENT);
+  ok('name prefilled', u && u.searchParams.get('first_name') === 'Dana');
+  ok('email prefilled', u && u.searchParams.get('email') === 'dana+rw@example.com');
+  ok('no empty params', u && !u.searchParams.has('last_name') && !u.searchParams.has('phone'));
+  ok('lead sent before leaving', SENT.length === 1 && SENT[0].body.capturedAt === 'redirect');
+  ok('lead carries destination and offer', SENT[0] && SENT[0].body.redirectTo === WENT &&
+     SENT[0].body.offer.id === 'vita-restore');
+  ok('webhook uses keepalive', SENT[0] && SENT[0].keepalive === true);
+  ok('stays on S10 (page would be gone)', location.hash === '#/S10');
+
+  // --- hour packs: filled + blank -------------------------------
+  location.hash = '/S9'; await sleep(400);
+  reset(); byText('.choice--primary', 'Book the').click(); await sleep(400);
+  ok('three-hour pack keeps its own query string', WENT && WENT.indexOf('https://ghl.test/pack-3?ref=rwt&first_name=Dana') === 0, WENT);
+
+  location.hash = '/S10'; await sleep(200);
+  location.hash = '/S9'; await sleep(400);
+  byText('.rung', 'Ten-hour pack').click(); await sleep(150);
+  cta = byText('.choice--primary', 'Book the');
+  ok('blank link hides the out arrow', !cta.classList.contains('choice--out'));
+  reset(); cta.click(); await sleep(500);
+  ok('blank link falls back to the on-page form', WENT === null && location.hash === '#/S14', location.hash);
+
+  // --- fixed-product buttons -------------------------------------
+  location.hash = '/S5b'; await sleep(400);
+  reset(); byText('.choice', 'Just one hour').click(); await sleep(400);
+  ok('S5b one hour goes to hour-1', WENT && WENT.indexOf('https://ghl.test/hour-1') === 0, WENT);
+
+  // --- systems go to the calendar --------------------------------
+  location.hash = '/S11c'; await sleep(400);
+  reset(); byText('.choice', 'Book a call about Elite II').click(); await sleep(400);
+  ok('system goes to the GHL calendar', WENT && WENT.indexOf('https://ghl.test/calendar') === 0, WENT);
+  ok('system choice recorded', IDecide.record.state.fields.system === 'Elite II');
+
+  location.hash = '/S12'; await sleep(400);
+  reset(); byText('.choice', 'Book a call').click(); await sleep(400);
+  ok('objections offer a call', WENT && WENT.indexOf('https://ghl.test/calendar') === 0, WENT);
+
+  // --- going back still works ------------------------------------
+  location.hash = '/S11'; await sleep(400);
+  ok('systems page still lists the three systems', !!byText('.choice', 'Elite II'));
+
+  const fails = results.filter(r => r.startsWith('FAIL'));
+  document.title = document.title.indexOf('FAILED') === 0 ? document.title :
+    (fails.length ? 'FAILED ' + fails.length : 'ALL PASS ' + results.length);
+  document.body.innerHTML = '<pre id="out">' + document.title + '\n\n' + results.join('\n') + '</pre>';
+})();
+</script>
+</body>
+</html>

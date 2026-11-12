@@ -6,13 +6,13 @@
    browser does not, it starts on the first thing the visitor clicks -
    which on this funnel is the sign-in button, a few seconds in.
 
-   It ducks rather than stops while a film is running, because the
-   films carry narration and two voices at once is nobody's idea of
-   calm.
+   It falls silent while a film is running, because the films carry
+   narration and two voices at once is nobody's idea of calm, and
+   picks up where it left off when the film ends.
 
    Public surface:
      Music.mount(spec)   build it and try to start
-     Music.duck(on)      pull the level down while a film plays
+     Music.duck(on)      pause for a film, resume after it
    ================================================================== */
 
 (function (window, document) {
@@ -50,7 +50,6 @@
     tracks: [],
     i: 0,
     level: 0.4,
-    duckTo: 0.08,
     ducked: false,
 
     mount: function (spec) {
@@ -58,7 +57,6 @@
 
       this.tracks = spec.tracks.slice();
       this.level = typeof spec.volume === 'number' ? spec.volume : 0.4;
-      this.duckTo = typeof spec.duckTo === 'number' ? spec.duckTo : 0.08;
 
       var saved = null;
       try { saved = JSON.parse(sessionStorage.getItem(KEY)); } catch (e) { /* private mode */ }
@@ -113,7 +111,7 @@
       vol.setAttribute('aria-label', 'Music volume');
       vol.addEventListener('input', function () {
         self.level = vol.value / 100;
-        if (!self.ducked) self.audio.volume = self.level;
+        self.audio.volume = self.level;
         self.paint();
         self.save();
       });
@@ -228,7 +226,7 @@
        than letting the track die mid-bar. */
     resume: function () {
       var self = this;
-      if (this.stoppedByHand || !this.audio.paused) return;
+      if (this.stoppedByHand || this.ducked || !this.audio.paused) return;
       var p = this.audio.play();
       if (p && p.catch) p.catch(function () {
         self.audio.muted = true;
@@ -240,7 +238,7 @@
 
     fadeUp: function () {
       var self = this;
-      var target = this.ducked ? this.duckTo : this.level;
+      var target = this.level;
       var t0 = (window.performance && performance.now()) || Date.now();
       this.audio.volume = 0;
 
@@ -248,12 +246,12 @@
         var now = (window.performance && performance.now()) || Date.now();
         var k = Math.min(1, (now - t0) / 900);
         /* ease out, so the last of it is gentle */
-        self.audio.volume = (self.ducked ? self.duckTo : self.level) * (1 - Math.pow(1 - k, 2));
+        self.audio.volume = self.level * (1 - Math.pow(1 - k, 2));
         if (k < 1) {
           if (window.requestAnimationFrame) requestAnimationFrame(step);
           else setTimeout(step, 32);
         } else {
-          self.audio.volume = self.ducked ? self.duckTo : self.level;
+          self.audio.volume = self.level;
         }
       })();
       return target;
@@ -263,7 +261,7 @@
       this.i = (i + this.tracks.length) % this.tracks.length;
       this.audio.src = this.tracks[this.i];
       this.started = false;
-      this.audio.volume = this.ducked ? this.duckTo : this.level;
+      this.audio.volume = this.level;
       this.save();
       this.paint();
     },
@@ -287,12 +285,25 @@
       }
     },
 
-    /* A film is speaking. Drop under it rather than stopping, so the
-       music is still there when the film finishes. */
+    /* A film is speaking. The music goes silent for the whole film -
+       paused, not turned down, because iOS ignores a page's volume and
+       would play it at full level under the narration - and picks up
+       where it left off, fading in, when the film ends. */
     duck: function (on) {
       if (!this.audio) return;
-      this.ducked = !!on;
-      this.audio.volume = this.ducked ? this.duckTo : this.level;
+      on = !!on;
+      if (on === this.ducked) return;
+      this.ducked = on;
+      if (on) {
+        this.pausedForFilm = !this.audio.paused;
+        if (this.pausedForFilm) this.audio.pause();
+      } else if (this.pausedForFilm) {
+        this.pausedForFilm = false;
+        if (!this.stoppedByHand) {
+          if (!this.audio.muted) this.fadeUp();
+          this.resume();
+        }
+      }
       if (this.root) this.root.classList.toggle('is-ducked', this.ducked);
     },
 

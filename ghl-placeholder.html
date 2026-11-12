@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoHighLevel page goes here</title>
+<meta name="robots" content="noindex">
+<!--
+  PLACEHOLDER. Stands in for the GoHighLevel checkout and calendar pages
+  until they exist. config.js -> ghl points every link here for now, with
+  ?for=<offer id> or ?for=call. Swap each link for the real GHL URL as the
+  page goes live; nothing else changes. Delete this file once all seven
+  links are real.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..500&display=swap">
+<style>
+  :root{
+    --paper:#EFE9DC; --paper-lift:#F6F2E9; --paper-deep:#E5DDCC; --paper-edge:#D3C8B2;
+    --ink:#231B14; --ink-mid:#5C4E42; --ink-soft:#6E5F52;
+    --copper:#9A5527; --copper-deep:#7E4218; --copper-lift:#B96C34; --copper-wash:#9A552710;
+    --lift-3:0 4px 10px #3A200C14, 0 22px 48px -20px #3A200C3D;
+    --serif:"Source Serif 4",Georgia,serif;
+    --ui:"Karla",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:ui-monospace,"Cascadia Code",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    min-height:100vh;
+    display:grid;
+    place-items:center;
+    padding:clamp(1.25rem,5vw,3rem) 16px;
+    background:
+      radial-gradient(60% 50% at 85% 90%,#B96C3426 0%,transparent 70%),
+      linear-gradient(160deg,var(--paper-lift) 0%,var(--paper) 55%,var(--paper-deep) 100%);
+    color:var(--ink);
+    font:400 1rem/1.6 var(--ui);
+  }
+  main{
+    width:min(100%,34rem);
+    background:var(--paper-lift);
+    border:1px solid var(--paper-edge);
+    border-radius:12px;
+    box-shadow:var(--lift-3);
+    padding:clamp(1.75rem,5vw,2.75rem);
+  }
+  .tag{
+    display:inline-block;
+    font:600 .72rem/1 var(--ui);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--copper-deep);
+    background:var(--copper-wash);
+    border:1px dashed var(--copper);
+    border-radius:999px;
+    padding:.5rem .8rem;
+    margin:0 0 1.5rem;
+  }
+  h1{
+    font:400 clamp(1.75rem,4.5vw,2.35rem)/1.15 var(--serif);
+    letter-spacing:-.01em;
+    margin:0 0 .75rem;
+  }
+  .lede{font:400 1.08rem/1.6 var(--serif);color:var(--ink-mid);margin:0 0 1.75rem}
+  dl{
+    margin:0 0 1.75rem;
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:.55rem 1.25rem;
+    padding:1.1rem 1.25rem;
+    border-radius:8px;
+    background:var(--paper);
+    border:1px solid var(--paper-edge);
+  }
+  dt{font-size:.82rem;font-weight:600;color:var(--ink-soft);letter-spacing:.02em}
+  dd{margin:0;font-size:.95rem;overflow-wrap:anywhere}
+  dd.price{color:var(--copper-deep);font-weight:600}
+  .note{font-size:.88rem;color:var(--ink-soft);margin:0 0 1.75rem}
+  .note code{font:.82rem var(--mono);background:var(--paper-deep);padding:.1rem .35rem;border-radius:4px}
+  .back{
+    display:inline-flex;align-items:center;gap:.5rem;
+    min-height:3.25rem;padding:0 1.9rem;
+    border:1px solid var(--copper-deep);border-radius:999px;
+    background:linear-gradient(180deg,var(--copper-lift) 0%,var(--copper) 52%,var(--copper-deep) 100%);
+    color:#FFF7EC;font:600 1rem var(--ui);cursor:pointer;
+    box-shadow:0 2px 4px #3A200C0F,0 10px 24px -14px #3A200C2E,inset 0 1px 0 #FFFFFF4D;
+    transition:translate 120ms ease;
+  }
+  .back:hover{translate:0 -2px}
+  .back:focus-visible{outline:2px solid var(--copper);outline-offset:3px}
+</style>
+</head>
+<body>
+<main>
+  <p class="tag">Placeholder page</p>
+  <h1 id="head">This is where the GoHighLevel page will go.</h1>
+  <p class="lede" id="lede">When the real page is live, visitors will land on it here instead of this one.</p>
+
+  <dl id="facts"></dl>
+
+  <p class="note">
+    Nothing has been charged or booked. To make this live, paste the real
+    GoHighLevel link into <code>config.js</code> under <code>ghl</code>
+    (<code id="key">checkout</code>).
+  </p>
+
+  <button class="back" type="button" id="back">&larr; Back to the Lounge</button>
+</main>
+
+<script src="data/funnel.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var what = q.get('for') || '';
+
+  /* Product names and prices come from the funnel itself, so this page
+     always agrees with what the visitor just picked. */
+  var offers = {};
+  try {
+    Object.keys(FUNNEL.slides).forEach(function (id) {
+      (FUNNEL.slides[id].blocks || []).forEach(function (b) {
+        if (b.type === 'ladder') (b.items || []).forEach(function (i) { offers[i.id] = i; });
+      });
+    });
+  } catch (e) { /* page still works without names */ }
+
+  var rows = [];
+  var add = function (k, v, cls) { if (v) rows.push([k, v, cls]); };
+  var name = [q.get('first_name'), q.get('last_name')].filter(Boolean).join(' ');
+
+  if (what === 'call') {
+    document.getElementById('head').textContent = 'Your GoHighLevel booking calendar goes here.';
+    document.getElementById('lede').textContent =
+      'When the real calendar is live, visitors pick a time for a call here.' +
+      (name ? ' ' + q.get('first_name') + ' would see it ready to book.' : '');
+    add('Page', 'Booking calendar');
+    document.getElementById('key').textContent = 'call';
+  } else {
+    var o = offers[what];
+    var price = o ? '$' + Number(o.price).toLocaleString('en-US') + (o.period ? ' ' + o.period : '') : '';
+    document.getElementById('head').textContent =
+      'Your GoHighLevel checkout' + (o ? ' for ' + o.name : '') + ' goes here.';
+    document.getElementById('lede').textContent =
+      'When the real checkout is live, visitors pay for ' + (o ? 'the ' + o.name : 'this') + ' here.';
+    add('Page', 'Checkout');
+    add('Product', o ? o.name : what);
+    add('Price', price, 'price');
+    document.getElementById('key').textContent = "checkout['" + what + "']";
+  }
+
+  /* What the funnel passes along, so GHL can open pre-filled. */
+  add('Name', name);
+  add('Email', q.get('email'));
+  add('Phone', q.get('phone'));
+
+  var dl = document.getElementById('facts');
+  rows.forEach(function (r) {
+    var dt = document.createElement('dt'); dt.textContent = r[0];
+    var dd = document.createElement('dd'); dd.textContent = r[1];
+    if (r[2]) dd.className = r[2];
+    dl.appendChild(dt); dl.appendChild(dd);
+  });
+  if (!rows.length) dl.hidden = true;
+
+  /* Back returns to the exact slide they left; a direct visit with no
+     history goes to the start of the funnel instead. */
+  document.getElementById('back').addEventListener('click', function () {
+    if (history.length > 1) history.back();
+    else location.href = 'index.html';
+  });
+})();
+</script>
+</body>
+</html>

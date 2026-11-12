@@ -160,6 +160,7 @@
       var body = this.payload();
       body.capturedAt = formBlock.role;
       body.capturedOn = currentId;
+      if (formBlock.redirectTo) body.redirectTo = formBlock.redirectTo;
 
       var url = (CFG.handoff && CFG.handoff.webhookUrl) || '';
 
@@ -194,6 +195,9 @@
       method: (CFG.handoff && CFG.handoff.method) || 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      /* lets the request finish even when the page is leaving for a
+         GoHighLevel checkout or calendar */
+      keepalive: true,
       signal: ctrl.signal
     }).then(function (res) {
       clearTimeout(t);
@@ -269,6 +273,9 @@
 
     if (!leaving || reduceMotion()) { paint(slideId, slide); return; }
 
+    /* Silence the old slide the instant the visitor moves, not after
+       the fade. */
+    stopFilms(stage);
     document.body.classList.toggle('is-dark', slide.surface === 'dark');
     stage.classList.add('is-leaving');
 
@@ -280,6 +287,21 @@
     }, LEAVE_MS);
   }
 
+  /* Stop every film on the slide being left: pause it, and drop its
+     source so it stops downloading too. Leaving a film part-way also
+     hands the music back - the next film, if any, quiets it again
+     when it actually starts. */
+  function stopFilms(stage) {
+    Array.prototype.forEach.call(stage.querySelectorAll('.slide video'), function (v) {
+      try {
+        v.pause();
+        v.removeAttribute('src');
+        v.load();
+      } catch (e) { /* already gone */ }
+    });
+    if (window.Music) window.Music.duck(false);
+  }
+
   function paint(slideId, slide) {
     currentId = slideId;
     Record.visit(slideId);
@@ -288,13 +310,14 @@
       : funnel.meta.name;
 
     var stage = root.querySelector('.stage');
-    /* Leaving a film part-way through still has to hand the level
-       back, or the music stays quiet for the rest of the funnel. */
-    if (window.Music && slide.layout !== 'cinema') window.Music.duck(false);
+    /* A film plays only while its slide is on screen: stop and unload
+       anything still running before the slide is torn down. */
+    stopFilms(stage);
     stage.innerHTML = '';
     /* Cleared before blocks render, because a ladder's default selection
        fires an offer change while the new slide is still being built. */
     liveChoices = [];
+    outChoices = [];
 
     /* surface:dark takes the whole page, not just a panel. */
     document.body.classList.toggle('is-dark', slide.surface === 'dark');
@@ -435,7 +458,28 @@
           choices.hidden = false;
           choices.classList.add('choices--revealed');
         }, { once: true });
+
+        /* Skip is the same as pressing the slide's main button: the
+           film stops and the visitor moves straight on. */
+        var next = slide.choices.filter(function (c) { return c.to && c.weight === 'primary'; })[0] ||
+                   slide.choices.filter(function (c) { return c.to; })[0];
+        if (next) {
+          article.addEventListener('film:skip', function (e) {
+            e.preventDefault();
+            Record.note('skipped', slideId + ' film');
+            Record.choose(slideId, next);
+            navigate(next.to);
+          }, { once: true });
+        }
       }
+    }
+
+    /* The company disclaimer the compliance team requires, set once
+       and reused rather than a block type - it always sits under
+       whatever the visitor just pressed, never among the content
+       above it. */
+    if (slide.disclaimer) {
+      (choiceHost || host).appendChild(el('p', 'disclaimer', slide.disclaimer));
     }
 
     stage.appendChild(article);
@@ -469,13 +513,21 @@
   /* Choices whose text references a token are re-filled whenever the
      thing they reference changes, so a CTA never names a stale offer. */
   var liveChoices = [];
+  var outChoices = [];
 
   Record.onChange = function () {
     liveChoices.forEach(function (o) {
       o.text.firstChild.nodeValue = fill(o.choice.label);
       if (o.note) o.note.textContent = fill(o.choice.note);
     });
+    outChoices.forEach(markOut);
   };
+
+  function markOut(o) {
+    var live = !!ghlUrl(o.choice.link);
+    o.btn.classList.toggle('choice--out', live);
+    o.arrow.hidden = !live;
+  }
 
   function renderChoices(slideId, slide) {
     var wrap = el('div', 'choices');
@@ -511,9 +563,22 @@
         btn.setAttribute('aria-keyshortcuts', String(i + 1));
       }
 
+      /* A button that leaves for GoHighLevel says so - but only once its
+         link is actually filled in; until then it is an ordinary button. */
+      if (c.link) {
+        var arrow = el('span', 'choice__out', '↗');
+        arrow.setAttribute('aria-hidden', 'true');
+        text.insertBefore(arrow, note);
+        var out = { choice: c, btn: btn, arrow: arrow };
+        markOut(out);
+        /* "offer" follows the price ladder, so re-check on every pick */
+        if (c.link === 'offer') outChoices.push(out);
+      }
+
       btn.addEventListener('click', function () {
         commit(wrap, btn, function () {
           Record.choose(slideId, c);
+          if (c.link && goToGhl(c)) return;
           if (c.to) navigate(c.to);
           else endHere(btn, c);
         });
@@ -618,6 +683,9 @@
       if (rolled) return;
       rolled = true;
       timers.forEach(clearTimeout);
+      /* The visitor left during the countdown: the slide is gone, so
+         its film must not start playing off-screen. */
+      if (!reel.isConnected) return;
       if (film) {
         film.classList.remove('is-carding');
         film.classList.add('is-rolling');
@@ -708,6 +776,70 @@
     }
   }
 
+  /* ==================================================================
+     GOHIGHLEVEL PAGES
+     A choice with "link" leaves the funnel for a GHL checkout or
+     calendar (config.js -> ghl). "offer" means whichever product the
+     price ladder has selected, "call" the calendar, and anything else
+     is a fixed offer id. A blank link resolves to nothing, and the
+     button falls back to its "to" - the on-page form it always had.
+     ================================================================== */
+
+  function ghlUrl(link) {
+    var g = CFG.ghl || {};
+    if (link === 'call') return g.call || '';
+    var id = link === 'offer' ? (Record.state.offer && Record.state.offer.id) : link;
+    return (id && g.checkout && g.checkout[id]) || '';
+  }
+
+  function withParams(base) {
+    var url;
+    try { url = new URL(base, window.location.href); } catch (e) { return base; }
+    var add = function (k, v) { if (v && !url.searchParams.has(k)) url.searchParams.set(k, v); };
+
+    if (!CFG.ghl || CFG.ghl.prefill !== false) {
+      var id = Record.state.identity;
+      add('first_name', id.firstName);
+      add('last_name', id.lastName);
+      add('email', id.email);
+      add('phone', id.mobile || id.phone);
+    }
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(function (k) {
+      add(k, QS.get(k));
+    });
+    return url.toString();
+  }
+
+  function goToGhl(choice) {
+    var base = ghlUrl(choice.link);
+    if (!base) return false;
+    var dest = withParams(base);
+
+    /* The lead goes to GHL first, so the path, tags and product are on
+       the contact even if they walk away from the checkout. */
+    Record.handoff({ role: 'redirect', redirectTo: dest });
+
+    if (DEBUG_ON) {
+      /* In debug, stop short so the payload and URL can be read. */
+      console.info('[iDecide] would open', dest);
+      var panel = document.querySelector('.payload') || el('div', 'payload');
+      var go = el('a', null, 'Continue to GoHighLevel: ' + dest);
+      go.href = dest;
+      panel.insertBefore(go, panel.firstChild);
+      if (!panel.parentNode) document.body.appendChild(panel);
+      Array.prototype.forEach.call(document.querySelectorAll('.choices--committed'), function (w) {
+        w.classList.remove('choices--committed');
+        Array.prototype.forEach.call(w.querySelectorAll('.is-chosen'), function (b) {
+          b.classList.remove('is-chosen');
+        });
+      });
+      return true;
+    }
+
+    window.location.assign(dest);
+    return true;
+  }
+
   function goBack() {
     if (Record.state.path.length > 1) window.history.back();
   }
@@ -754,6 +886,15 @@
         if (!to) return;
         reached[to] = true;
         if (!f.slides[to]) problems.push(id + ' points to "' + to + '", which does not exist');
+      });
+
+      /* A "link" must name something config.js -> ghl knows about,
+         or a typo would quietly fall back to the on-page form forever. */
+      (s.choices || []).forEach(function (c) {
+        if (!c.link || c.link === 'offer' || c.link === 'call') return;
+        var known = CFG.ghl && CFG.ghl.checkout &&
+          Object.prototype.hasOwnProperty.call(CFG.ghl.checkout, c.link);
+        if (!known) problems.push(id + ' links to "' + c.link + '", which is not in config.js -> ghl.checkout');
       });
 
       var hasForm = (s.blocks || []).some(function (b) { return b.type === 'form'; });
@@ -852,6 +993,13 @@
 
     window.addEventListener('hashchange', function () {
       render(idFromHash() || f.meta.start);
+    });
+
+    /* Back from a GoHighLevel page can restore this page from the
+       back-forward cache with its buttons still locked mid-commit.
+       Paint the slide fresh so they work again. */
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted) render(idFromHash() || f.meta.start);
     });
 
     /* Resuming a session lands on the last slide, not the welcome. */

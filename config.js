@@ -27,6 +27,31 @@ window.IDECIDE_CONFIG = {
     retry: true
   },
 
+  /* GoHighLevel pages the funnel sends people to. --------------------
+     Buying an hour pack or a membership opens that product's GHL
+     checkout. Home systems and every "Book a call" open the calendar.
+
+     FOR NOW every link points at ghl-placeholder.html, a stand-in page
+     that says which GHL page belongs there. Replace each one with the
+     real GoHighLevel URL as that page goes live. A blank link ('') puts
+     that button back on the funnel's own on-page form instead.
+     The keys match the offer ids in data/funnel.js. */
+  ghl: {
+    checkout: {
+      'hour-1':        'ghl-placeholder.html?for=hour-1',         // Single hour, $100
+      'pack-3':        'ghl-placeholder.html?for=pack-3',         // Three-hour pack, $157
+      'pack-10':       'ghl-placeholder.html?for=pack-10',        // Ten-hour pack, $379
+      'vita-recharge': 'ghl-placeholder.html?for=vita-recharge',  // Vita Recharge, $397 a month
+      'vita-restore':  'ghl-placeholder.html?for=vita-restore',   // Vita Restore, $597 a month
+      'vita-radiate':  'ghl-placeholder.html?for=vita-radiate'    // Vita Radiate, $897 a month
+    },
+    call: 'ghl-placeholder.html?for=call',                         // GHL calendar: system sales calls and questions
+    /* Append first_name, last_name, email and phone (whatever the
+       visitor has already given) so GHL forms and calendars open
+       pre-filled. UTM parameters are passed through either way. */
+    prefill: true
+  },
+
   /* The welcome screen is currently a hard gate: no name and email,
      no entry. That lives in the funnel file, not here — the welcome
      slide's form fields carry "required": true, and it has no skip.

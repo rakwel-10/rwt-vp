@@ -52,7 +52,7 @@ const sleep=ms=>new Promise(x=>setTimeout(x,ms));
   /* ---------- the footage is real and it decodes ---------------- */
   const v=reel.querySelector('video');
   ok('S1 has a video element', !!v);
-  ok('S1 points at its file', v && /ID-J1\.mp4$/.test(v.getAttribute('src')),
+  ok('S1 points at its file', v && /V1\.mp4$/.test(v.getAttribute('src')),
      v ? v.getAttribute('src') : 'none');
   ok('the browser accepts the codec',
      v && v.canPlayType('video/mp4; codecs="avc1.42E01E"') !== '');
@@ -143,8 +143,8 @@ const sleep=ms=>new Promise(x=>setTimeout(x,ms));
   ok('but keeps a margin of dark', frame.top>8 && frame.left>8);
   ok('everything fits without scrolling', btn.bottom<=window.innerHeight+2);
 
-  /* ---------- the other two films ------------------------------- */
-  for (const [slide, file] of [['S2','ID-J2'], ['S6','ID-J3']]) {
+  /* ---------- the other three films ------------------------------- */
+  for (const [slide, file] of [['S2','V2'], ['S6','V3'], ['S7a','V4']]) {
     location.hash='/'+slide; await sleep(700);
     const el=document.querySelector('.reel video');
     ok(slide+' points at its file', !!el && new RegExp(file+'\\.mp4$').test(el.getAttribute('src')),
@@ -176,7 +176,7 @@ const sleep=ms=>new Promise(x=>setTimeout(x,ms));
      !document.querySelector('.bg video'));
   ok('the layer is marked as a still', !!document.querySelector('.bg.bg--still'));
   ok('it is hidden from assistive tech',
-     document.querySelector('.bg').getAttribute('aria-hidden') === 'true');
+     !!document.querySelector('.bg') && document.querySelector('.bg').getAttribute('aria-hidden') === 'true');
   ok('it carries no alt text to read out', still && still.getAttribute('alt') === '');
   ok('the page knows it has a background', document.body.classList.contains('has-bg'));
   ok('it sits under the scrim', !!document.querySelector('.bg--still .bg__scrim'));

@@ -266,6 +266,12 @@ img{max-width:100%;height:auto}
 /* a margin of dark all round, so the picture is framed rather than
    edge to edge */
 .stage:has(.slide--cinema){padding:clamp(1.25rem,4vh,3rem) clamp(1.25rem,3vw,3.5rem)}
+/* 16:9 that fits the window: as wide as the stage allows, but never so
+   wide that the frame runs taller than the screen. */
+.slide--cinema .film{
+  max-width:min(100%, calc((100vh - clamp(2.5rem,8vh,6rem)) * 16 / 9));
+  margin-inline:auto;
+}
 
 /* ---------- the quiet way back ------------------------------------
    No step counter, no breadcrumb. One ghost control that stays out of
@@ -314,8 +320,16 @@ img{max-width:100%;height:auto}
   padding:clamp(2rem,5vw,3.25rem);
 }
 .hero__content .logo--wide{
-  width:min(100%,16rem);
+  width:min(100%,20rem);
   margin:0 0 clamp(1rem,2.5vh,1.5rem);
+}
+/* rwt-lounge.png carries ~20% empty transparency above and below the
+   lettering; crop it to the ink so the lockup can be big without
+   pushing the form off the screen */
+.logo[src$="rwt-lounge.png"]{
+  aspect-ratio:900/320;
+  object-fit:cover;
+  object-position:50% 50%;
 }
 .hero__content .prose{max-width:22rem}
 .hero__content .prose--lede{
@@ -646,9 +660,11 @@ body.has-bg .aurora{opacity:0}
 }
 
 .reel--full{background:transparent;margin:0;box-shadow:none}
+/* The films are 16:9 and are shown whole: a true 16:9 frame, never
+   a taller box that crops the sides. On a short window the width gives
+   way so the full picture still fits on screen (see .slide--cinema .film). */
 .reel--full .reel__screen{
-  aspect-ratio:auto;
-  min-height:min(84vh,58rem);
+  aspect-ratio:16/9;
   border-radius:var(--radius);
   box-shadow:var(--lift-3),0 0 90px -30px #C8763C4D;
 }
@@ -970,6 +986,10 @@ body.has-bg .aurora{opacity:0}
 .media--3 .media__cell--lead{aspect-ratio:16/9;max-height:min(42vh,26rem)}
 .media__cell{position:relative}
 .media__cell img{width:100%;height:100%;object-fit:cover;display:block}
+/* a finished graphic with its own words in it: its full shape, no crop */
+.media--1 .media__cell--whole,
+.media__cell--whole{aspect-ratio:auto;max-height:none}
+.media__cell--whole img{height:auto;object-fit:contain}
 
 /* A caption that sits on the image rather than under it, so a row of
    pictures keeps its rhythm. Only shown where there is something
@@ -1198,6 +1218,16 @@ body.has-bg .aurora{opacity:0}
 .room .choice--quiet{color:var(--room-dim)}
 .room .choice--quiet:hover{color:var(--copper-lift);text-decoration-color:var(--copper-lift)}
 
+/* leaves for a GoHighLevel checkout or calendar */
+.choice__out{
+  display:inline-block;
+  margin-left:.4em;
+  font-size:.85em;
+  opacity:.75;
+  transition:translate var(--fast) var(--ease);
+}
+.choice--out:hover .choice__out{translate:2px -2px}
+
 .choice--end{cursor:default}
 .choice--end:hover{translate:0;box-shadow:var(--lift-2),inset 0 1px 0 #FFFFFFB8}
 
@@ -1209,6 +1239,98 @@ body.has-bg .aurora{opacity:0}
    gradient, and a selected state that tints rather than fills - the
    solid copper fill read as a primary button and confused the two.
    ================================================================== */
+/* ---------- the focus screen ---------------------------------------
+   The focus cards on the left, the device on the right, running its
+   own footage. The footage is encoded on the card colour
+   (--paper-lift), so only the screen and its shadow show. */
+.fboard{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(15rem,22rem);
+  align-items:start;
+  gap:1rem;
+  margin:1.75rem 0 1.25rem;
+}
+.fboard .tiles{margin:0;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))}
+.fscreen{
+  position:sticky;
+  top:1.5rem;
+  padding:1rem;
+  border:1px solid var(--paper-edge);
+  border-radius:var(--radius-sm);
+  background:var(--paper-lift);
+  box-shadow:var(--lift-1);
+  transition:border-color var(--base),box-shadow var(--base);
+}
+.fscreen__stage{
+  position:relative;
+  aspect-ratio:720/734;
+  border-radius:var(--radius-sm);
+  transition:transform var(--slow) var(--ease);
+}
+.fscreen__video{
+  width:100%;height:100%;
+  display:block;
+  object-fit:contain;
+}
+.fscreen__drop{
+  position:absolute;
+  left:50%;top:44%;
+  translate:-50% -50%;
+  padding:.5rem .9rem;
+  border-radius:999px;
+  background:#15100CCC;
+  color:#F4EDE3;
+  font:600 .8125rem var(--ui);
+  white-space:nowrap;
+  pointer-events:none;
+  transition:opacity var(--base);
+}
+.fscreen.is-live .fscreen__drop{opacity:0}
+.fscreen.is-live.is-awaiting .fscreen__drop{opacity:1}
+
+/* while a card is being dragged, the screen shows it is the target */
+.fscreen.is-awaiting{border-color:var(--copper);border-style:dashed}
+.fscreen.is-over{box-shadow:var(--lift-2),0 0 0 4px var(--copper-wash-2)}
+.fscreen.is-over .fscreen__stage{transform:scale(1.03)}
+
+/* a focus lands: the screen lifts and glows for a beat */
+.fscreen.is-pulse .fscreen__stage{animation:fscreen-take .7s var(--ease)}
+@keyframes fscreen-take{
+  0%{transform:scale(1)}
+  35%{transform:scale(1.045) translateY(-4px);filter:drop-shadow(0 0 18px #2E7BFF55)}
+  100%{transform:scale(1)}
+}
+
+/* the card's name, in flight or under the pointer */
+.fghost{
+  position:fixed;left:0;top:0;z-index:50;
+  padding:.5rem .95rem;
+  border-radius:999px;
+  background:var(--copper);
+  color:#FFF7EC;
+  font:600 .9375rem var(--ui);
+  box-shadow:var(--lift-3);
+  pointer-events:none;
+  white-space:nowrap;
+}
+.fghost.is-flying{transition:transform .52s cubic-bezier(.5,0,.25,1)}
+.fghost.is-landed{opacity:0;transition:opacity .3s,transform .3s;transform:var(--t,none)}
+.fghost--drag{cursor:grabbing;opacity:.95}
+.tile.is-dragging{opacity:.45}
+@media (hover:hover) and (pointer:fine){
+  .fboard .tile{cursor:grab}
+}
+
+/* narrow screens: the screen above the cards, still in view */
+@media (max-width:760px){
+  .fboard{grid-template-columns:minmax(0,1fr)}
+  .fscreen{order:-1;top:.5rem;z-index:2;padding:.6rem}
+  .fscreen__stage{width:min(100%,13rem);margin:0 auto}
+}
+@media (prefers-reduced-motion:reduce){
+  .fscreen.is-pulse .fscreen__stage{animation:none}
+}
+
 .tiles{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(14.5rem,1fr));
@@ -1362,40 +1484,87 @@ body.has-bg .aurora{opacity:0}
 /* ==================================================================
    LADDER - price options. Selecting one records the offer.
    ================================================================== */
-.ladder{margin:1.75rem 0;display:flex;flex-direction:column;gap:.5rem}
-.rung{
-  position:relative;
+/* A comparison table: row labels down the left, one column per option,
+   side by side. Each column is a single button spanning every row
+   (subgrid keeps the rows aligned across columns), so the whole column
+   is the click target and the selected one is outlined in copper. */
+.ladder{
+  margin:1.75rem 0;
   display:grid;
-  grid-template-columns:auto 1fr auto;
-  grid-template-areas:"mark name price" ". note unit";
-  align-items:baseline;
-  gap:.3rem 1rem;
-  text-align:left;
-  background:var(--paper-lift);
+  grid-template-columns:minmax(6.5rem,auto) repeat(var(--cols,3),minmax(0,1fr));
+  grid-template-rows:repeat(4,auto);
   border:1px solid var(--paper-edge);
   border-radius:var(--radius-sm);
-  padding:1.05rem 1.2rem;
-  cursor:pointer;
-  font-family:var(--serif);
-  color:var(--ink);
+  background:var(--paper-lift);
   box-shadow:var(--lift-1);
-  transition:background var(--fast),border-color var(--fast),box-shadow var(--fast),translate var(--fast);
+  font-family:var(--ui);
 }
-.rung:hover{border-color:var(--copper);box-shadow:var(--lift-2);translate:0 -1px}
-.rung:active{translate:0;box-shadow:var(--lift-1)}
-.rung[aria-pressed="true"]{
-  border-color:var(--copper);
-  background:var(--copper-wash);
-  box-shadow:var(--lift-2),inset 0 0 0 1px var(--copper);
+.ladder__labels{
+  grid-row:1 / -1;
+  display:grid;
+  grid-template-rows:subgrid;
+}
+.ladder__label{
+  padding:.85rem 1rem;
+  font-size:.8125rem;
+  color:var(--ink-soft);
+  border-top:1px solid var(--line);
+  display:flex;align-items:center;
+}
+/* the long last row reads from the top, like its cells */
+.ladder__label:last-child{align-items:flex-start;padding-top:1rem}
+.ladder__label--head{
+  border-top:0;
+  background:var(--paper-deep);
+  border-bottom:1px solid var(--paper-edge);
+  border-top-left-radius:var(--radius-sm);
 }
 
-/* a radio dot, so the selected rung is unambiguous */
+.rung{
+  position:relative;
+  grid-row:1 / -1;
+  display:grid;
+  grid-template-rows:subgrid;
+  text-align:left;
+  background:none;
+  border:0;
+  border-left:1px solid var(--line);
+  padding:0;
+  margin:0;
+  cursor:pointer;
+  font:inherit;
+  color:var(--ink);
+  transition:background var(--fast);
+}
+.rung:last-child .rung__head{border-top-right-radius:var(--radius-sm)}
+.rung:hover{background:var(--copper-wash)}
+.rung[aria-pressed="true"]{
+  background:var(--copper-wash);
+  box-shadow:inset 0 0 0 2px var(--copper);
+  z-index:1;
+}
+.rung:focus-visible{outline:2px solid var(--copper);outline-offset:-4px}
+.rung > *{padding:.85rem 1rem;border-top:1px solid var(--line)}
+.rung > .rung__head{border-top:0}
+
+/* the header band: radio dot and the option's name */
+.rung__head{
+  display:flex;align-items:center;gap:.6rem;
+  background:var(--paper-deep);
+  border-bottom:1px solid var(--paper-edge);
+  font-family:var(--serif);
+  font-size:1.125rem;
+  letter-spacing:-.012em;
+}
+.rung[aria-pressed="true"] .rung__head{background:#9A55271A}
+
+/* a radio dot, so the selected column is unambiguous */
 .rung__mark{
-  grid-area:mark;
-  align-self:center;
+  flex:none;
   width:17px;height:17px;
   border-radius:50%;
   border:1.5px solid var(--paper-edge);
+  background:var(--paper-lift);
   display:grid;place-items:center;
   transition:border-color var(--fast);
 }
@@ -1411,41 +1580,53 @@ body.has-bg .aurora{opacity:0}
 .rung[aria-pressed="true"] .rung__mark{border-color:var(--copper)}
 .rung[aria-pressed="true"] .rung__mark::after{scale:1}
 
-.rung__name{grid-area:name;font-size:1.1875rem;letter-spacing:-.012em}
 .rung__price{
-  grid-area:price;
-  font-size:1.1875rem;
+  font-family:var(--serif);
+  font-size:1.3125rem;
   color:var(--copper);
-  white-space:nowrap;
-  text-align:right;
   font-weight:600;
 }
-.rung__price small{font-family:var(--ui);font-size:.72rem;font-weight:500;color:var(--ink-soft)}
+.rung__price small{font-family:var(--ui);font-size:.75rem;font-weight:500;color:var(--ink-soft)}
+.rung__unit{font-size:.9375rem;color:var(--ink)}
+/* centred in the row, so each value sits level with its label */
+.rung__price,.rung__unit{
+  display:flex;flex-wrap:wrap;
+  align-items:baseline;align-content:center;
+  column-gap:.3em;
+}
 .rung__note{
-  grid-area:note;
-  font-family:var(--ui);
   font-size:.875rem;
   line-height:1.55;
   color:var(--ink-soft);
-  margin:0;
   white-space:pre-line;
 }
-.rung__unit{
-  grid-area:unit;
-  font-family:var(--ui);
-  font-size:.875rem;
-  color:var(--ink-soft);
-  text-align:right;
-  white-space:nowrap;
-}
-@media (max-width:560px){
-  .rung{
-    grid-template-columns:auto 1fr;
-    grid-template-areas:"mark name" ". price" ". note" ". unit";
-    gap:.2rem .85rem;
+
+/* A phone has no room for three columns plus labels: the columns
+   stack into cards, and the row labels step aside. */
+@media (max-width:640px){
+  .ladder{
+    display:flex;flex-direction:column;gap:.5rem;
+    border:0;background:none;box-shadow:none;
   }
-  .rung__price,.rung__unit{text-align:left}
-  .rung__unit{white-space:normal}
+  .ladder__labels{display:none}
+  .rung{
+    display:grid;
+    grid-template-columns:1fr auto;
+    grid-template-areas:"head price" "unit unit" "note note";
+    border:1px solid var(--paper-edge);
+    border-radius:var(--radius-sm);
+    background:var(--paper-lift);
+    box-shadow:var(--lift-1);
+    padding:.95rem 1.1rem;
+    gap:.3rem .85rem;
+  }
+  .rung > *{padding:0;border:0}
+  .rung__head{grid-area:head;background:none;border:0}
+  .rung[aria-pressed="true"] .rung__head{background:none}
+  .rung__price{grid-area:price;justify-content:flex-end;white-space:nowrap;font-size:1.1875rem}
+  .rung__unit{grid-area:unit;padding-left:calc(17px + .6rem);font-size:.875rem;color:var(--ink-soft)}
+  .rung__note{grid-area:note;padding-left:calc(17px + .6rem)}
+  .rung__unit:empty,.rung__note:empty{display:none}
 }
 
 /* ---------- a single headline price ---------- */
@@ -1694,6 +1875,17 @@ table.compare caption{
   border-top:1px solid var(--paper-edge);
 }
 .form__status{font-family:var(--ui);font-size:.875rem;color:var(--warn);margin:.9rem 0 0}
+
+/* The required company disclaimer - same quiet weight as a form's own
+   footnote, wherever it ends up sitting instead. */
+.disclaimer{
+  font-family:var(--ui);
+  font-size:.8125rem;
+  line-height:1.6;
+  color:var(--ink-soft);
+  margin:1.5rem 0 0;
+  max-width:38rem;
+}
 
 /* ==================================================================
    CONFIRMATION

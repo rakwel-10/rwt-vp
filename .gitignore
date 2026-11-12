@@ -10,3 +10,14 @@ desktop.ini
 
 # nothing here is built, but in case tooling is ever added
 node_modules/
+
+# full-resolution film masters; assets/media holds the web encodes
+footage-masters/
+
+# source images/video kept locally; the pages use the web copies made from them
+assets/media/S8.png
+assets/media/advanced.png
+assets/media/elite1.png
+assets/media/elite 2.png
+assets/media/rhemawave device.webm
+assets/media/rwt-device.png
