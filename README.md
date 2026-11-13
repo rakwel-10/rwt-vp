@@ -558,11 +558,19 @@ half seconds and then dissolves. The count is suppressed entirely under
 | `radiant-wave-lounge.png` | Unused — the sign-in's earlier lockup |
 
 **Film masters stay out of `assets/media`.** The full-resolution exports
-(2560×1440, 60fps, 155–200MB each) live in `footage-masters/`, which is
+(2560×1440, 60fps, 150–205MB each) live in `footage-masters/`, which is
 git-ignored. What the page serves are web encodes: 1080p, 30fps, H.264 at
 CRF 23 capped at 6 Mbps, AAC 128k, with `faststart` so playback begins before
 the download finishes. For a new cut, drop the master in `footage-masters/`
-and run the command below. **V1 and V2 are cut 6 seconds short of their masters** (the end logo held too long): add `-t 38.861` for V1 or `-t 48.010` for V2 before the output file, plus `-af "afade=t=out:st=<t-0.5>:d=0.5"` so the sound eases out.
+and run the command below.
+
+V1–V4 were re-cut and re-uploaded on 13 November 2026 (the earlier masters
+are kept as `footage-masters/V1-prev-2026-11-12.mp4` etc.). The new V1 and V2
+masters are already trimmed to length at the edit, so the old `-t 38.861` /
+`-t 48.010` workaround for a held end logo no longer applies — encode the
+full file. If a future cut holds the end logo too long again, trim with
+`-t <seconds>` before the output file, plus
+`-af "afade=t=out:st=<t-0.5>:d=0.5"` so the sound eases out.
 
 ```
 ffmpeg -i footage-masters/V1.mp4 -vf "scale=1920:1080:flags=lanczos,fps=30" -c:v libx264 -preset slow -crf 23 -maxrate 6M -bufsize 12M -profile:v high -pix_fmt yuv420p -c:a aac -b:a 128k -ac 2 -movflags +faststart assets/media/V1.mp4
