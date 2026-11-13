@@ -21,6 +21,27 @@
     return n;
   }
 
+  /* Two markers, used anywhere copy is set from funnel.js:
+       **ink bold**   -> <strong>, the existing plain emphasis
+       _copper bold_  -> <span class="accent">, the one color accent
+     A string with neither marker comes back as a single text node,
+     so dynamic re-fills (choice labels with a {token}) still work by
+     reassigning that node's value - see engine.js's Record.onChange. */
+  function richText(text) {
+    var frag = document.createDocumentFragment();
+    var s = String(text);
+    var re = /\*\*([^*]+)\*\*|_([^_]+)_/g;
+    var last = 0, m;
+    while ((m = re.exec(s))) {
+      if (m.index > last) frag.appendChild(document.createTextNode(s.slice(last, m.index)));
+      if (m[1] != null) frag.appendChild(el('strong', null, m[1]));
+      else frag.appendChild(el('span', 'accent', m[2]));
+      last = re.lastIndex;
+    }
+    if (last < s.length) frag.appendChild(document.createTextNode(s.slice(last)));
+    return frag;
+  }
+
   /* Paragraph splitting on blank lines. Single newlines are kept as
      line breaks so address blocks and schedules survive intact. */
   function paragraphs(text, className) {
@@ -29,11 +50,18 @@
       var p = el('p', className);
       chunk.split('\n').forEach(function (line, i) {
         if (i) p.appendChild(document.createElement('br'));
-        p.appendChild(document.createTextNode(line));
+        p.appendChild(richText(line));
       });
       frag.appendChild(p);
     });
     return frag;
+  }
+
+  /* The same two markers, stripped rather than rendered - for the
+     record (and anything sent on to GoHighLevel), which wants the
+     words a visitor picked, not the markup that colored them. */
+  function plainText(text) {
+    return String(text).replace(/\*\*([^*]+)\*\*/g, '$1').replace(/_([^_]+)_/g, '$1');
   }
 
   function money(n) {
@@ -1062,7 +1090,9 @@
       return fn(block, ctx);
     },
     el: el,
-    paragraphs: paragraphs
+    paragraphs: paragraphs,
+    richText: richText,
+    plainText: plainText
   };
 
 })(window, document);

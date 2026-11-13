@@ -54,6 +54,7 @@
   --gap:clamp(1.25rem,4vw,2.75rem);
   --radius:10px;
   --radius-sm:7px;
+  --radius-lg:16px;
 
   /* one speed vocabulary: nothing here waits on an animation */
   --fast:120ms;
@@ -392,7 +393,7 @@ img{max-width:100%;height:auto}
 
 .head{
   font-family:var(--serif);
-  font-weight:300;
+  font-weight:400;
   font-size:clamp(2.05rem,5vw,3.7rem);
   line-height:1.08;
   letter-spacing:-.025em;
@@ -400,6 +401,27 @@ img{max-width:100%;height:auto}
   text-wrap:balance;
 }
 .slide--entry .head{font-size:clamp(2.15rem,5.4vw,4rem)}
+
+/* a kicker line, set from a "\n" in the heading text - smaller and
+   quieter than the line it introduces */
+.head__lead{
+  display:block;
+  font-size:.42em;
+  font-weight:400;
+  letter-spacing:-.005em;
+  color:var(--ink-mid);
+  margin-bottom:.25em;
+}
+
+/* the one color accent, set from _underscores_ anywhere copy comes
+   from funnel.js - a soft italic in a heading, bold wherever it runs
+   alongside normal text */
+.accent{color:var(--copper)}
+.head .accent{font-style:italic;font-weight:400}
+.prose .accent,
+.choice__text .accent{font-weight:700}
+.choice--primary .accent{color:#FFF3E4}
+.room .accent{color:var(--copper-lift)}
 
 .prose{margin:0 0 1.15rem;max-width:38rem;color:var(--ink-mid)}
 .prose:last-child{margin-bottom:0}
@@ -1065,10 +1087,13 @@ body.has-bg .aurora{opacity:0}
 .choices[data-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
 /* full sentences need room to breathe; two across, never three */
 .choices[data-longest="long"]{grid-template-columns:repeat(auto-fit,minmax(23rem,1fr))}
+/* a sort with this many full-sentence options reads as a single
+   list, not a grid - one plate per row, the width it was given */
+.choices[data-count="5"]{grid-template-columns:minmax(0,1fr)}
 
 /* Three across is right when there is room for three. Between the
    point the two columns appear and the point the screen is actually
-   wide, there is not - and three pills squeezed into a third of a
+   wide, there is not - and three plates squeezed into a third of a
    narrow column each turn into three lines of text. Let them fall
    to two and wrap. */
 @media (max-width:1180px){
@@ -1098,23 +1123,23 @@ body.has-bg .aurora{opacity:0}
 .choice{
   position:relative;
   display:flex;
-  flex-direction:column;
+  flex-direction:row;
   align-items:center;
-  justify-content:center;
-  gap:.1rem;
+  justify-content:space-between;
+  gap:1rem;
   width:100%;
   min-height:clamp(3.9rem,1.1vw + 3.45rem,4.6rem);
-  text-align:center;
+  text-align:left;
   font-family:var(--ui);
   font-size:clamp(1.0125rem,.34vw + .85rem,1.2rem);
-  font-weight:600;
-  line-height:1.35;
-  padding:clamp(1rem,.4vw + .84rem,1.25rem) clamp(1.9rem,.9vw + 1.55rem,2.5rem);
+  font-weight:500;
+  line-height:1.4;
+  padding:clamp(1rem,.4vw + .84rem,1.25rem) clamp(1.1rem,.6vw + .9rem,1.5rem) clamp(1rem,.4vw + .84rem,1.25rem) clamp(1.35rem,.8vw + 1.1rem,1.85rem);
   cursor:pointer;
   border:1px solid transparent;
-  /* A pill. Nothing else in the build is this shape, so a button is
-     never mistaken for a card you can select. */
-  border-radius:999px;
+  /* A rounded plate, not a pill - room for the text to sit left and
+     the arrow to land on its own at the right. */
+  border-radius:var(--radius-lg,16px);
   background:none;
   color:var(--ink);
   isolation:isolate;
@@ -1127,7 +1152,7 @@ body.has-bg .aurora{opacity:0}
     translate var(--fast) var(--ease);
 }
 
-.choice__text{display:block}
+.choice__text{display:block;flex:1 1 auto;min-width:0}
 .choice__note{
   display:block;
   font-weight:500;
@@ -1137,9 +1162,29 @@ body.has-bg .aurora{opacity:0}
   margin-top:.2rem;
 }
 
+/* the circle at the end of every plate that actually goes somewhere */
+.choice__arrow{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:2.15rem;
+  height:2.15rem;
+  border-radius:50%;
+  border:1.5px solid var(--copper);
+  color:var(--copper);
+  font-size:1rem;
+  line-height:1;
+  transition:
+    background var(--fast) var(--ease),
+    border-color var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    translate var(--fast) var(--ease);
+}
+.choice:hover .choice__arrow{translate:2px 0}
+
 /* --- weights ---------------------------------------------------- */
 
-/* Secondary: a raised pill in paper, lit from the top edge. */
+/* Secondary: a quiet paper card, lit from the top edge. */
 .choice--secondary{
   background:linear-gradient(180deg,#FFFFFF 0%,var(--paper-lift) 46%,var(--paper-deep) 100%);
   border-color:var(--paper-edge);
@@ -1165,8 +1210,10 @@ body.has-bg .aurora{opacity:0}
   box-shadow:var(--lift-3),inset 0 1px 0 #FFFFFF66,0 0 0 5px var(--copper-wash-2);
   translate:0 -2px;
 }
+.choice--primary .choice__arrow{border-color:#FFFFFF80;color:#FFF7EC}
+.choice--primary:hover .choice__arrow{border-color:#FFFFFFB3}
 
-/* An exit is not a button: no pill, no weight, its own line. */
+/* An exit is not a button: no plate, no weight, its own line. */
 .choice--quiet{
   grid-column:1/-1;
   min-height:0;
@@ -1176,6 +1223,8 @@ body.has-bg .aurora{opacity:0}
   color:var(--ink-soft);
   font-size:.9375rem;
   font-weight:500;
+  justify-content:center;
+  text-align:center;
   padding:.7rem .35rem;
   text-decoration:underline;
   text-underline-offset:4px;
@@ -1235,7 +1284,7 @@ body.has-bg .aurora{opacity:0}
    TILES - the focus menu.
 
    These are things you select, not places you go, so they must not
-   look like the pills. Square corners, a flat card surface, no
+   look like the choice plates. Square corners, a flat card surface, no
    gradient, and a selected state that tints rather than fills - the
    solid copper fill read as a primary button and confused the two.
    ================================================================== */

@@ -255,15 +255,26 @@ trailing commas, which strict JSON forbids.
 }
 ```
 
-Weight is visible on the page. `primary` is a filled copper button,
-`secondary` is a raised one, `quiet` is an exit on its own centred line with
-no button at all. A sorting slide like S3 should use no primary — you are
-sorting, not steering.
+Weight is visible on the page. `primary` is a filled copper plate,
+`secondary` is a raised paper one, `quiet` is an exit on its own centred
+line with no button at all. Both `primary` and `secondary` set the label
+left and close with a small arrow circle, since they go somewhere; a
+terminal choice (no `"to"`) gets no arrow. A sorting slide like S3 should
+use no primary — you are sorting, not steering.
 
 A label or note may name what the visitor already chose. `"Start {offer}"`
 renders as "Start Vita Restore", and re-renders the moment they pick a
 different tier. Available tokens: `{offer}`, `{offerPrice}`, `{system}`,
 `{firstName}`. Each falls back to a neutral word when nothing is set yet.
+
+Any heading, prose or choice label may also carry two markers:
+`**ink bold**` for plain emphasis, and `_one copper accent_` for the single
+color the page uses to point at a word — italic in a heading, bold wherever
+it sits in a sentence. A heading that starts with a short line and a `\n`
+gets that first line set smaller, as a kicker above the one it introduces —
+that's how S3 reads "Before we go further," above the question itself.
+Both markers are stripped back to plain words before anything is recorded
+or sent to the CRM.
 
 ### Block types
 
@@ -275,7 +286,7 @@ different tier. Available tokens: `{offer}`, `{offerPrice}`, `{system}`,
 | `video` | Starts itself, with no title, duration or production chrome on screen. `"full": true` fills the screen; `"hold": true` keeps the slide's choices hidden until it finishes; `advanceTo` skips straight on instead. |
 | `plan` | The room drawn to its actual configuration. `"screens": 16`. |
 | `plates` | Big images. One fills the column, two sit side by side, three put the lead on top. Named slots until the photography lands. |
-| `tiles` | The focus menu. Square cards with checkboxes, deliberately unlike the pills. Every tick is tagged `FOCUS_<NAME>`. |
+| `tiles` | The focus menu. Square cards with checkboxes, deliberately unlike the choice plates. Every tick is tagged `FOCUS_<NAME>`. |
 | `panels` | Accordion. Mechanism and objections — always behind a click. |
 | `ladder` | Price options. Selecting one records the offer. Give recurring items `"period": "a month"` so the number never reads as one-off. |
 | `price` | One headline price with its strike-through. |
@@ -356,9 +367,9 @@ paragraph is deliberate.
 **The type is fluid, but only upward.** The base is
 `clamp(17px,0.6vw + 12px,20px)`, which resolves to exactly the old 17px below
 about 830px and climbs to 20px on a desktop. Phones get nothing new, so none
-of the narrow layouts had to move. Headings and pills carry their own clamps
-for the same reason — they are set in `rem`, which is the root size, and would
-not otherwise have followed.
+of the narrow layouts had to move. Headings and choice plates carry their own
+clamps for the same reason — they are set in `rem`, which is the root size,
+and would not otherwise have followed.
 
 Three actions sit three across only where three fit. Between 1000px and
 1180px they fall to two and wrap, because a third of a narrow column turns a
@@ -375,17 +386,20 @@ An exit ("I'm just looking around", "Show me the hour packs instead") is not a b
 It gets its own line, centred, with no plate at all, so it never competes with
 the real action.
 
-Buttons are pills, and nothing else in the build is that shape. That matters
+Choice plates are a rounded rectangle, text left, with a small arrow circle
+closing the right edge — nothing else in the build is that shape. That matters
 on the focus menu, where six selectable cards sit directly above three
 navigation buttons: the square card with a checkbox is something you tick, the
-rounded pill is somewhere you go. They were previously the same control drawn
-twice, which is what made that screen confusing.
+plate with the arrow is somewhere you go. They were previously the same
+control drawn twice, which is what made that screen confusing. A terminal
+choice (no `"to"`) gets no arrow — there is nowhere for it to point.
 
-Each pill carries a soft top-to-bottom gradient and a hairline of light along
+Each plate carries a soft top-to-bottom gradient and a hairline of light along
 its top edge, so it reads as a raised surface rather than a flat swatch.
-Primary is copper, secondary is paper. Hovering lifts it two pixels and puts a
-soft copper ring around it. Pressing it brightens the pill, fades the others
-to 22%, and only then moves the page — 170ms, short enough to read as
+Primary is copper, secondary is paper, and the arrow circle matches: copper
+on paper, cream on copper. Hovering lifts the plate two pixels and nudges the
+arrow a little further right. Pressing it brightens the plate, fades the
+others to 22%, and only then moves the page — 170ms, short enough to read as
 responsiveness, long enough to confirm the pick.
 
 | Key | Does |

@@ -61,13 +61,13 @@ window.FUNNEL = {
         {
           "type": "prose",
           "lede": true,
-          "text": "Thirty-two members. Admission is by membership or invitation, and the room stays that small on purpose."
+          "text": "Eleven seats. Admission is by membership or invitation, and the room stays that small on purpose."
         },
         {
           "type": "form",
           "role": "identity",
           "then": "S1",
-          "title": "Member access",
+          "title": "Register to proceed",
           "intro": "Leave your name and we will open the door. It also keeps your place if you come back.",
           "submit": "Enter the Lounge",
           "footnote": "We use this to hold your place and nothing else. No list, no forwarding, no third parties.",
@@ -131,20 +131,20 @@ window.FUNNEL = {
       "name": "The Sort",
       "zone": "Spine",
       "note": "Every lead passes through here. All five choices carry equal weight — no primary. You are sorting, not steering.",
-      "heading": "Before we go further, which one is actually you?",
+      "heading": "Before we go further,\nwhich one is _actually you?_",
       "blocks": [
         {
           "type": "prose",
           "lede": true,
-          "text": "There's no wrong answer. But there is a right one for you, and the rest of this changes based on what you pick."
+          "text": "There's **no wrong answer**. But there is a _right one for you,_ and the rest of this changes based on what you pick."
         }
       ],
       "choices": [
-        { "label": "I want one of these in my own house.", "to": "S4", "tag": "OWNER" },
-        { "label": "Honestly? I just need to lie down somewhere quiet. Soon.", "to": "S5", "tag": "URGENT" },
-        { "label": "I want in before everybody else finds out about it.", "to": "S6", "tag": "INSIDER" },
-        { "label": "I'm curious. Show me what it actually does.", "to": "S7a", "tag": "CURIOUS" },
-        { "label": "I'm just looking around.", "to": "S3b", "tag": "COLD" }
+        { "label": "I want one of these in _my own house._", "to": "S4", "tag": "OWNER" },
+        { "label": "Honestly? I just need to lie down somewhere _quiet. Soon._", "to": "S5", "tag": "URGENT" },
+        { "label": "I want in _before everybody else_ finds out about it.", "to": "S6", "tag": "INSIDER" },
+        { "label": "I'm curious. Show me _what it actually does._", "to": "S7a", "tag": "CURIOUS" },
+        { "label": "I'm _just looking around._", "to": "S3b", "tag": "COLD" }
       ]
     },
 
@@ -345,7 +345,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
-          "text": "Two installations in the country. Eight recliners in this one. Four members each.\n\nThirty-two people.\n\nThat's not a marketing number, it's the room. When we add chairs, we'll open a second class at higher rates.\n\nEveryone in the Founding Class is locked at their rate permanently. When prices go up, yours doesn't.\n\nThere is no second founding class at these prices."
+          "text": "Richmond, Virginia. Eleven seats, eight of them recliners.\n\nNot a marketing number — the room. And we aren't adding chairs.\n\nFounding Members stay two hours. Everyone else gets one. First call on every hour, and your rate holds for as long as you're a member.\n\nEvery founding seat takes twice the room, so the class is capped. There is no second Founding Class at these prices."
         }
       ],
       "choices": [
@@ -369,11 +369,11 @@ window.FUNNEL = {
         },
         {
           "type": "prose",
-          "text": "Eight recliners. Four members each. That's the room, not a marketing number.\n\nThere are two installations of this technology in the United States. Ours is in Richmond. The other is in North Carolina. That's the whole map."
+          "text": "Eleven seats, eight of them recliners. That's the room, not a marketing number.\n\nThere are two installations of this technology in the United States. Ours is in Richmond. The other is in North Carolina. That's the whole map."
         },
         {
           "type": "aside",
-          "text": "Why we cap it: you're paying for an uncrowded room. Fill it past comfortable and we've sold you something else. Four members per recliner means you get the hour you actually want, not the hour that's left.\n\nWhen chairs nine through twelve go in, we open Class Two at higher rates. The Founding Class stays at 32 permanently."
+          "text": "Why we cap it: you're paying for an uncrowded room. Founding Members stay two hours, so every founding seat takes twice the room. Fill it past comfortable and we've sold you something else.\n\nWe aren't adding chairs. There is no second Founding Class at these prices."
         }
       ],
       "choices": [
@@ -606,7 +606,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
-          "text": "All memberships require autopay with a six-month minimum. Founding rates are locked for life."
+          "text": "All memberships require autopay with a six-month minimum. Founding rates hold for as long as you're a member."
         },
         {
           "type": "ladder",

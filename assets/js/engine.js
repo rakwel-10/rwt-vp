@@ -94,7 +94,7 @@
     choose: function (slideId, choice) {
       this.state.choices.push({
         slide: slideId,
-        label: choice.label,
+        label: B.plainText(choice.label),
         to: choice.to || null,
         tag: choice.tag || null,
         at: new Date().toISOString()
@@ -373,7 +373,22 @@
     }
 
     if (slide.heading) {
-      var h = el(slide.kind === 'entry' ? 'h1' : 'h2', 'head', slide.heading);
+      var h = el(slide.kind === 'entry' ? 'h1' : 'h2', 'head');
+      /* A heading with a "\n" gets a small kicker line above the full
+         size one - the same split the eyebrow uses. The kicker is its
+         own block, so only the lines after it need a <br> between them. */
+      var headLines = String(slide.heading).split('\n');
+      var bodyLines = headLines;
+      if (headLines.length > 1) {
+        var lead = el('span', 'head__lead');
+        lead.appendChild(B.richText(headLines[0]));
+        h.appendChild(lead);
+        bodyLines = headLines.slice(1);
+      }
+      bodyLines.forEach(function (line, i) {
+        if (i > 0) h.appendChild(document.createElement('br'));
+        h.appendChild(B.richText(line));
+      });
       h.id = 'slide-head';
       host.appendChild(h);
     }
@@ -537,7 +552,7 @@
     var acting = slide.choices.filter(function (c) { return (c.weight || 'secondary') !== 'quiet'; });
     wrap.dataset.count = acting.length;
     wrap.dataset.longest = acting.reduce(function (n, c) {
-      return Math.max(n, String(c.label).length);
+      return Math.max(n, B.plainText(c.label).length);
     }, 0) > 42 ? 'long' : 'short';
 
     slide.choices.forEach(function (c, i) {
@@ -549,13 +564,21 @@
       btn.style.setProperty('--i', i);
 
       var text = el('span', 'choice__text');
-      text.appendChild(document.createTextNode(fill(c.label)));
+      text.appendChild(B.richText(fill(c.label)));
       var note = c.note ? el('span', 'choice__note', fill(c.note)) : null;
       if (note) text.appendChild(note);
       if (/\{/.test(c.label) || (c.note && /\{/.test(c.note))) {
         liveChoices.push({ choice: c, text: text, note: note });
       }
       btn.appendChild(text);
+
+      /* A choice that goes on to another slide gets a trailing arrow
+         plate - the out-link ones already carry their own mark below. */
+      if (weight !== 'quiet' && c.to && !c.link) {
+        var onward = el('span', 'choice__arrow', '→');
+        onward.setAttribute('aria-hidden', 'true');
+        btn.appendChild(onward);
+      }
 
       /* Number keys still select, but nothing on the button says so -
          the keycaps were clutter on a page that is mostly buttons. */
