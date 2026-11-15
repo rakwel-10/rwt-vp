@@ -1024,6 +1024,7 @@
           }
         });
       } else {
+        if (b.role === 'identity') ctx.register();
         ctx.navigate(b.then);
       }
     });
@@ -1131,6 +1132,7 @@
       advanced = true;
       window.removeEventListener('message', onMessage);
       ctx.record.note('ghl-form-submit', b.formId);
+      ctx.register();
       ctx.navigate(b.then);
     }
     window.addEventListener('message', onMessage);

@@ -294,7 +294,7 @@ or sent to the CRM.
 | `counter` | Real scarcity. Edit by hand, weekly. Never reset it. |
 | `compare` | A table. Put the slide on `"wide": true`. |
 | `form` | `role: "identity"` names the visitor; `role: "capture"` sends the payload. `title`, `intro` and `footnote` turn it into a labelled sign-in panel. |
-| `ghlForm` | A GoHighLevel-hosted form embedded as an iframe (`src`, `scriptSrc`, `formId`, `formName`, `height`). The lead is captured by GHL the instant it's submitted, independent of this funnel. Advances to `then` when the iframe posts what looks like a submit event — see the comment above `ghlForm` in `assets/js/blocks.js` for the caveat on that detection. |
+| `ghlForm` | A GoHighLevel-hosted form embedded as an iframe (`src`, `scriptSrc`, `formId`, `formName`, `height`). The lead is captured by GHL the instant it's submitted, independent of this funnel. Advances to `then` when the iframe posts what looks like a submit event — see the comment above `ghlForm` in `assets/js/blocks.js` for the caveat on that detection. Submitting sets `idecide:registered` in localStorage; until it is set, any slide past the welcome sends the visitor back to it (`REGISTRATION GATE` in `assets/js/engine.js`). Clear that key to test the gate again. |
 
 Full parameter lists are in the comment above each renderer in
 `assets/js/blocks.js`.

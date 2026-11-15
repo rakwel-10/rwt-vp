@@ -244,8 +244,28 @@
      RENDER
      ================================================================== */
 
+  /* ==================================================================
+     REGISTRATION GATE
+     Set when the welcome form is submitted; every slide past the
+     entry checks it, so a shared or bookmarked #/S5 link still goes
+     through the welcome first. Lives in the browser, so it stops
+     casual skipping, not someone editing localStorage.
+     ================================================================== */
+  var REG_KEY = 'idecide:registered';
+  var registeredThisPage = false;
+
+  function markRegistered() {
+    registeredThisPage = true;
+    try { localStorage.setItem(REG_KEY, new Date().toISOString()); } catch (e) { /* private mode */ }
+  }
+
+  function isRegistered() {
+    if (registeredThisPage) return true;
+    try { return !!localStorage.getItem(REG_KEY); } catch (e) { return false; }
+  }
+
   function ctx() {
-    return { record: Record, navigate: navigate, debug: debug, funnel: funnel };
+    return { record: Record, navigate: navigate, debug: debug, funnel: funnel, register: markRegistered };
   }
 
   /* ==================================================================
@@ -263,6 +283,11 @@
     var slide = funnel.slides[slideId];
     if (!slide) {
       console.warn('[iDecide] no slide "' + slideId + '", falling back to start');
+      navigate(funnel.meta.start);
+      return;
+    }
+
+    if (slide.kind !== 'entry' && slideId !== funnel.meta.start && !isRegistered()) {
       navigate(funnel.meta.start);
       return;
     }
@@ -1073,6 +1098,7 @@
 
   window.IDecide = {
     record: Record,
+    register: markRegistered,
     start: function () {
       /* A GHL form's "redirect after submit" can land the funnel inside
          the form's own iframe. Same site as the parent, so hand the
@@ -1080,6 +1106,8 @@
       if (window.top !== window.self) {
         try {
           if (window.top.location.origin === window.location.origin) {
+            markRegistered();
+            if (window.top.IDecide) window.top.IDecide.register();
             window.top.location.hash = window.location.hash || '#/S1';
             return;
           }
