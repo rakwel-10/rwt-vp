@@ -477,9 +477,10 @@ window.FUNNEL = {
         {
           "type": "video",
           "id": "V6",
+          "src": "assets/media/V6.mp4",
           "hold": true,
           "full": true,
-          "seconds": 35,
+          "seconds": 76,
           "words": 87,
           "script": "Here's what's actually happening in the room.\n\nSixteen screens, in towers, facing each other. The light comes from every direction at once, and it meets in the middle — which is where you're sitting.\n\nEach one is precisely engineered and individually programmed. Its own colour, its own sound, its own proclamations, moving through Fibonacci patterns.\n\nWhat fills the room, we call Radiant Waves. Nothing touches you. There's nothing to take.\n\nYou're not watching a screen. You're inside one.\n\nWhat that does for you is yours to find out."
         }

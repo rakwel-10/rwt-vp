@@ -562,6 +562,7 @@ half seconds and then dissolves. The count is suppressed entirely under
 | `V2.mp4` | S2, the room |
 | `V3.mp4` | S6, the insider film |
 | `V4.mp4` | S7a, "every part of you", which leads into the focus menu |
+| `V6.mp4` | S7c, the Mechanism cinema film ("what's actually in the room") |
 | `RWT1.mp4`, `ID-J1.mp4`, `ID-J2.mp4`, `ID-J3.mp4` | Unused: earlier cuts of the films, replaced by V1–V3 in November 2026 |
 | `lounge-floor.jpg` | S8: a real photo of the Lounge floor (web copy of `S8.png`) |
 | `system-advanced.jpg`, `system-elite.jpg`, `system-elite-2.jpg` | S11a, S11b, S11c: the system banners, shown whole (web copies of `advanced.png`, `elite1.png`, `elite 2.png`) |
@@ -577,6 +578,13 @@ git-ignored. What the page serves are web encodes: 1080p, 30fps, H.264 at
 CRF 23 capped at 6 Mbps, AAC 128k, with `faststart` so playback begins before
 the download finishes. For a new cut, drop the master in `footage-masters/`
 and run the command below.
+
+V6 (S7c, the Mechanism film) was delivered and encoded on 15 November 2026.
+The edit sheet in S7c's slide note estimated ~35s; the delivered cut runs
+76s, so `"seconds"` on that block was updated to match. That field only
+drives the placeholder-pacing timer used before a block has a `"src"`
+(`assets/js/blocks.js`), so the longer runtime has no other effect now that
+V6 has one.
 
 V1–V4 were re-cut and re-uploaded on 13 November 2026 (the earlier masters
 are kept as `footage-masters/V1-prev-2026-11-12.mp4` etc.). The new V1 and V2
