@@ -2013,9 +2013,10 @@ table.compare caption{
   z-index:11;
   display:flex;
   align-items:center;
-  flex-wrap:wrap;
+  flex-wrap:nowrap;
+  white-space:nowrap;
   gap:.5rem;
-  max-width:min(92vw,26rem);
+  max-width:none;
   font-family:var(--ui);
   font-size:.75rem;
   line-height:1.4;
@@ -2039,10 +2040,12 @@ body.is-dark .legal a:hover,body.is-dark .legal a:focus-visible{color:var(--copp
     right:clamp(1rem,2.5vw,1.6rem);
     bottom:calc(clamp(1rem,2.5vh,1.6rem) + 2.65rem);
     max-width:none;
+    flex-wrap:wrap;
+    white-space:normal;
     justify-content:center;
     text-align:center;
   }
-  .legal__copy{display:none}
+  .legal__copy,.legal__copy + .legal__sep{display:none}
 }
 
 /* ==================================================================

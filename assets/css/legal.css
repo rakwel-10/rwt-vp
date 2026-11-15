@@ -79,5 +79,6 @@
     justify-content:flex-start;
     text-align:left;
   }
-  .legal--static .legal__copy{display:inline}
+  .legal--static .legal__copy,
+  .legal--static .legal__copy + .legal__sep{display:inline}
 }
