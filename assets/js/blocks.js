@@ -1072,9 +1072,10 @@
      GHL's form_embed.js does not publish a documented postMessage
      contract, so the "form_submit" match below is the commonly
      observed shape, not a guaranteed one. Every message from the
-     form's own origin is logged to the console so a real submission
-     can be checked against it and the match adjusted if GHL's
-     payload turns out to look different. */
+     form's iframe is logged to the console so a real submission
+     can be checked against it. The dependable path is the form's
+     own "redirect after submit" setting pointed at this funnel's
+     #/S1 - engine.js handles that landing inside the iframe. */
   var ghlScriptsLoaded = {};
 
   function loadGhlScript(src) {
@@ -1115,18 +1116,17 @@
 
     loadGhlScript(b.scriptSrc);
 
-    var formOrigin = (function () { try { return new URL(b.src).origin; } catch (e) { return null; } })();
     var advanced = false;
 
+    /* Matched by sender, not origin: the widget can end up served from
+       a different GHL domain than the one in its src. */
     function onMessage(ev) {
-      if (formOrigin && ev.origin !== formOrigin) return;
-      console.debug('[iDecide] message from GHL form', ev.origin, ev.data);
+      if (ev.source !== iframe.contentWindow) return;
+      console.log('[iDecide] message from GHL form', ev.origin, ev.data);
       if (advanced) return;
       var d = ev.data;
-      var isSubmit = d && typeof d === 'object' &&
-        (d.type === 'form_submit' || d.event === 'form_submit' ||
-         (typeof d.type === 'string' && d.type.indexOf('submit') !== -1));
-      if (!isSubmit) return;
+      var text = typeof d === 'string' ? d : (function () { try { return JSON.stringify(d); } catch (e) { return ''; } })();
+      if (!/form[_-]?submit|submitted|submit[_-]?success/i.test(text || '')) return;
       advanced = true;
       window.removeEventListener('message', onMessage);
       ctx.record.note('ghl-form-submit', b.formId);

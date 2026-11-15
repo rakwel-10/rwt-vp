@@ -1074,6 +1074,18 @@
   window.IDecide = {
     record: Record,
     start: function () {
+      /* A GHL form's "redirect after submit" can land the funnel inside
+         the form's own iframe. Same site as the parent, so hand the
+         destination to the real page and stop. */
+      if (window.top !== window.self) {
+        try {
+          if (window.top.location.origin === window.location.origin) {
+            window.top.location.hash = window.location.hash || '#/S1';
+            return;
+          }
+        } catch (e) { /* cross-origin parent: carry on as normal */ }
+      }
+
       /* data/funnel.js assigns window.FUNNEL with a plain <script> tag,
          which is what lets the whole thing run from a file:// URL. The
          fetch path stays as a fallback for anyone who would rather keep
