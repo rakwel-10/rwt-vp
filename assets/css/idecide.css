@@ -1928,12 +1928,10 @@ table.compare caption{
 .ghl-embed__frame{
   position:relative;
   width:100%;
-  min-height:432px;
   border-radius:var(--radius-sm);
   overflow:hidden;
-  background:var(--paper-lift);
 }
-.ghl-embed__frame iframe{display:block;width:100%;height:100%;border:none}
+.ghl-embed__frame iframe{display:block;width:100%;border:none;border-radius:8px}
 
 /* The required company disclaimer - same quiet weight as a form's own
    footnote, wherever it ends up sitting instead. */

@@ -73,7 +73,7 @@ window.FUNNEL = {
           "scriptSrc": "https://app.vitapureinfusions.com/js/form_embed.js",
           "formId": "fuWFOlmAiyHxwGXZPYPi",
           "formName": "RW Lounge Capture Form",
-          "height": 432
+          "height": 240
         }
       ]
     },

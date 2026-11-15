@@ -1097,6 +1097,7 @@
     iframe.src = b.src;
     iframe.id = 'inline-' + b.formId;
     iframe.title = b.formName || 'Embedded form';
+    iframe.style.height = (b.height || 432) + 'px';
     iframe.setAttribute('data-layout', "{'id':'INLINE'}");
     iframe.setAttribute('data-trigger-type', 'alwaysShow');
     iframe.setAttribute('data-trigger-value', '');
