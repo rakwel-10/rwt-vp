@@ -1014,6 +1014,27 @@
        change; it must never restart when the page moves on. */
     if (window.Music) window.Music.mount(f.music);
 
+    /* The legal line lives outside the stage for the same reason:
+       it must read on every slide without being part of any one of
+       them. Three static pages, not funnel slides - ad platforms and
+       payment processors expect to find them without clicking
+       through a quiz first. */
+    var legal = el('nav', 'legal');
+    legal.setAttribute('aria-label', 'Legal');
+    var legalYear = el('span', 'legal__copy', '© ' + new Date().getFullYear() + ' Radiant Wave Lounge');
+    legal.appendChild(legalYear);
+    [
+      ['privacy.html', 'Privacy Policy'],
+      ['terms.html', 'Terms & Conditions'],
+      ['refund.html', 'Refund Policy']
+    ].forEach(function (pair, i) {
+      legal.appendChild(el('span', 'legal__sep', '·'));
+      var a = el('a', null, pair[1]);
+      a.href = pair[0];
+      legal.appendChild(a);
+    });
+    document.body.appendChild(legal);
+
     window.addEventListener('hashchange', function () {
       render(idFromHash() || f.meta.start);
     });
