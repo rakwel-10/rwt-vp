@@ -294,6 +294,7 @@ or sent to the CRM.
 | `counter` | Real scarcity. Edit by hand, weekly. Never reset it. |
 | `compare` | A table. Put the slide on `"wide": true`. |
 | `form` | `role: "identity"` names the visitor; `role: "capture"` sends the payload. `title`, `intro` and `footnote` turn it into a labelled sign-in panel. |
+| `ghlForm` | A GoHighLevel-hosted form embedded as an iframe (`src`, `scriptSrc`, `formId`, `formName`, `height`). The lead is captured by GHL the instant it's submitted, independent of this funnel. Advances to `then` when the iframe posts what looks like a submit event — see the comment above `ghlForm` in `assets/js/blocks.js` for the caveat on that detection. |
 
 Full parameter lists are in the comment above each renderer in
 `assets/js/blocks.js`.
@@ -313,11 +314,11 @@ slides that do not exist, dead ends, and unreachable slides. Slides marked
 | `S6b` | `remaining: 11` — update weekly with the real count. Never reset it. |
 | `S11`, `S11a-c` | "Ends 31 October 2026" — the introductory pricing deadline. |
 | Video weight | The four films are ~9.5 Mbps, about 3× what 1080p web delivery needs. Re-encoding at CRF 23 would take 120MB down to roughly 25MB with little visible loss. |
-| `S7c` (V6) | No footage yet — runs as a timed placeholder. Record all four in one sitting; V6's edit sheet is in `S7c`'s build note. |
 | Music weight | `bgm/2.mp3` is 2h 17m and 89MB. It streams, so a visitor only downloads what they hear, but it is a third of the repository on its own. Worth trimming. |
 | Photography | The stills are borrowed from RhemaWave. Replace them with Richmond photographs when you have them: same `{ "src", "note" }` shape. |
 | `S8b` | Testimonials, parked until written releases are signed. |
 | `config.js` | The GHL webhook URL. |
+| Welcome screen `ghlForm` | Submit a real test entry once live and check the browser console for the `[iDecide] message from GHL form` log — confirm it actually matches the `isSubmit` check in `ghlForm` (`assets/js/blocks.js`) before relying on it, since GHL's postMessage shape on submit isn't documented. |
 
 ---
 

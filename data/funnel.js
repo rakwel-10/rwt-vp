@@ -55,7 +55,7 @@ window.FUNNEL = {
       "surface": "light",
       "layout": "hero",
       "background": { "image": "assets/media/login-rwt.jpg" },
-      "note": "Hard gate: no skip, both fields required. Every visitor is named from the first screen, at the cost of whatever share of traffic will not give an email before seeing anything.",
+      "note": "Hard gate: no skip. The form is a GHL-hosted embed (RW Lounge Capture Form) rather than the funnel's own fields, so the lead is saved in GoHighLevel the moment they submit - before the visitor ever sees S1. Trade-off: because the form lives in GHL's iframe, this.record never learns their name/email, so {firstName} personalisation later in the funnel falls back to \"there\" and GHL checkout/calendar prefill has nothing to prefill with.",
       "blocks": [
         { "type": "logo", "src": "assets/media/rwt-lounge.png", "alt": "Radiant Wave Lounge — Members Only", "wide": true },
         {
@@ -64,17 +64,16 @@ window.FUNNEL = {
           "text": "Eleven seats. Admission is by membership or invitation, and the room stays that small on purpose."
         },
         {
-          "type": "form",
-          "role": "identity",
+          "type": "ghlForm",
           "then": "S1",
           "title": "Register to proceed",
           "intro": "Leave your name and we will open the door. It also keeps your place if you come back.",
-          "submit": "Enter the Lounge",
           "footnote": "We use this to hold your place and nothing else. No list, no forwarding, no third parties.",
-          "fields": [
-            { "name": "firstName", "label": "First name", "required": true },
-            { "name": "email", "label": "Email", "type": "email", "required": true }
-          ]
+          "src": "https://app.vitapureinfusions.com/widget/form/fuWFOlmAiyHxwGXZPYPi",
+          "scriptSrc": "https://app.vitapureinfusions.com/js/form_embed.js",
+          "formId": "fuWFOlmAiyHxwGXZPYPi",
+          "formName": "RW Lounge Capture Form",
+          "height": 432
         }
       ]
     },

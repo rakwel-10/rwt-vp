@@ -1059,6 +1059,84 @@
     return n;
   }
 
+  /* ---------- embedded GHL form ----------------------------------
+     A form built and hosted in GoHighLevel, dropped into the funnel
+     as an iframe. The visitor's name/email never reach our own
+     record - GHL has already captured the lead by the time the
+     iframe tells us submission happened, which is the whole point:
+     the lead exists in the CRM even if they close the tab a second
+     later. That trade means {firstName} personalisation further
+     into the funnel falls back to its default ("there") here,
+     since this.record never learns a name.
+
+     GHL's form_embed.js does not publish a documented postMessage
+     contract, so the "form_submit" match below is the commonly
+     observed shape, not a guaranteed one. Every message from the
+     form's own origin is logged to the console so a real submission
+     can be checked against it and the match adjusted if GHL's
+     payload turns out to look different. */
+  var ghlScriptsLoaded = {};
+
+  function loadGhlScript(src) {
+    if (!src || ghlScriptsLoaded[src]) return;
+    ghlScriptsLoaded[src] = true;
+    var s = document.createElement('script');
+    s.src = src;
+    s.async = true;
+    document.body.appendChild(s);
+  }
+
+  function ghlForm(b, ctx) {
+    var wrap = el('div', 'form ghl-embed');
+    if (b.title) wrap.appendChild(el('p', 'form__title', b.title));
+    if (b.intro) wrap.appendChild(el('p', 'form__intro', b.intro));
+
+    var frameWrap = el('div', 'ghl-embed__frame');
+    var iframe = document.createElement('iframe');
+    iframe.src = b.src;
+    iframe.id = 'inline-' + b.formId;
+    iframe.title = b.formName || 'Embedded form';
+    iframe.setAttribute('data-layout', "{'id':'INLINE'}");
+    iframe.setAttribute('data-trigger-type', 'alwaysShow');
+    iframe.setAttribute('data-trigger-value', '');
+    iframe.setAttribute('data-activation-type', 'alwaysActivated');
+    iframe.setAttribute('data-activation-value', '');
+    iframe.setAttribute('data-deactivation-type', 'neverDeactivate');
+    iframe.setAttribute('data-deactivation-value', '');
+    iframe.setAttribute('data-form-name', b.formName || '');
+    iframe.setAttribute('data-height', String(b.height || 432));
+    iframe.setAttribute('data-layout-iframe-id', 'inline-' + b.formId);
+    iframe.setAttribute('data-form-id', b.formId);
+    iframe.setAttribute('data-cookie-consent', 'true');
+    iframe.setAttribute('data-cookie-consent-provider', 'auto');
+    frameWrap.appendChild(iframe);
+    wrap.appendChild(frameWrap);
+    if (b.footnote) wrap.appendChild(el('p', 'form__footnote', b.footnote));
+
+    loadGhlScript(b.scriptSrc);
+
+    var formOrigin = (function () { try { return new URL(b.src).origin; } catch (e) { return null; } })();
+    var advanced = false;
+
+    function onMessage(ev) {
+      if (formOrigin && ev.origin !== formOrigin) return;
+      console.debug('[iDecide] message from GHL form', ev.origin, ev.data);
+      if (advanced) return;
+      var d = ev.data;
+      var isSubmit = d && typeof d === 'object' &&
+        (d.type === 'form_submit' || d.event === 'form_submit' ||
+         (typeof d.type === 'string' && d.type.indexOf('submit') !== -1));
+      if (!isSubmit) return;
+      advanced = true;
+      window.removeEventListener('message', onMessage);
+      ctx.record.note('ghl-form-submit', b.formId);
+      ctx.navigate(b.then);
+    }
+    window.addEventListener('message', onMessage);
+
+    return wrap;
+  }
+
   /* ================================================================== */
 
   var BLOCKS = {
@@ -1076,7 +1154,8 @@
     summary: summary,
     counter: counter,
     compare: compare,
-    form: form
+    form: form,
+    ghlForm: ghlForm
   };
 
   window.IDecideBlocks = {
