@@ -27,18 +27,40 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # The same hosting account also serves bostonc.com. Before uploading,
-      # log in and look at the target folder. Refuse if it is the top of the
-      # hosting account (contains public_html) or already has a homepage that
-      # is not this funnel - either way it is not radiantwavelounge.com's folder.
-      - name: Check target folder
+      # Secrets pasted into GitHub easily pick up a stray space, line break
+      # or ftp:// prefix. Tidy them once here; later steps read the tidy
+      # copies from env (still masked in logs).
+      - name: Tidy FTP settings
         env:
           SERVER: ${{ secrets.FTP_SERVER }}
           USER: ${{ secrets.FTP_USERNAME }}
           PASS: ${{ secrets.FTP_PASSWORD }}
           DIR: ${{ secrets.FTP_SERVER_DIR }}
         run: |
+          trim() { printf '%s' "$1" | tr -d '\r\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//'; }
+          RAW="$SERVER"
+          SERVER=$(trim "$SERVER" | sed 's#^[a-zA-Z]*://##; s#/.*$##; s#:21$##')
+          USER=$(trim "$USER"); PASS=$(printf '%s' "$PASS" | tr -d '\r\n')
+          DIR=$(trim "$DIR"); [ -z "$DIR" ] && DIR=/
+          case "$DIR" in /*) ;; *) DIR="/$DIR" ;; esac
           case "$DIR" in */) ;; *) DIR="$DIR/" ;; esac
+          echo "::add-mask::$USER"; echo "::add-mask::$PASS"
+          [ "$RAW" != "$SERVER" ] && echo "::notice::FTP_SERVER had extra characters (spaces, line breaks or ftp://) - tidied."
+          echo "FTP_SERVER is ${#SERVER} characters; ends in secureserver.net: $(case "$SERVER" in *.secureserver.net) echo yes;; *) echo no;; esac)"
+          {
+            echo "FTP_HOST=$SERVER"
+            echo "FTP_USER=$USER"
+            echo "FTP_PASS<<__END_FTP_PASS__"; echo "$PASS"; echo "__END_FTP_PASS__"
+            echo "FTP_DIR=$DIR"
+          } >> "$GITHUB_ENV"
+
+      # The same hosting account also serves bostonc.com. Before uploading,
+      # log in and look at the target folder. Refuse if it is the top of the
+      # hosting account (contains public_html) or already has a homepage that
+      # is not this funnel - either way it is not radiantwavelounge.com's folder.
+      - name: Check target folder
+        run: |
+          SERVER="$FTP_HOST"; USER="$FTP_USER"; PASS="$FTP_PASS"; DIR="$FTP_DIR"
           printf 'machine %s login %s password %s\n' "$SERVER" "$USER" "$PASS" > "$RUNNER_TEMP/netrc"
           FTP="curl -sS --ssl-reqd --netrc-file $RUNNER_TEMP/netrc"
 
@@ -68,10 +90,10 @@ jobs:
 
       - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          server: ${{ env.FTP_HOST }}
+          username: ${{ env.FTP_USER }}
+          password: ${{ env.FTP_PASS }}
+          server-dir: ${{ env.FTP_DIR }}
           protocol: ftps
           port: 21
           timeout: 600000
