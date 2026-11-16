@@ -866,6 +866,7 @@ window.FUNNEL = {
         {
           "type": "panels",
           "open": true,
+          "openFirst": true,
           "items": [
             {
               "q": "I don't know if it'll do anything for me.",

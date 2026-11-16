@@ -686,14 +686,28 @@
        for objections someone should be able to read without hunting. */
     if (b.open) {
       var qa = el('div', 'qa');
-      (b.items || []).forEach(function (item) {
-        var art = el('section', 'qa__item');
+      /* One group name makes it a true accordion: opening a question
+         closes the one that was open. "openFirst" starts with the first
+         answer showing. */
+      var group = 'qa-' + Math.random().toString(36).slice(2, 7);
+      (b.items || []).forEach(function (item, i) {
+        var art = el('details', 'qa__item');
+        art.setAttribute('name', group);
+        if (b.openFirst && i === 0) art.open = true;
+        var sum = el('summary', 'qa__sum');
         var q = el('h3', 'qa__q');
         q.appendChild(richText(item.q));
-        art.appendChild(q);
+        sum.appendChild(q);
+        var mark = el('span', 'qa__mark');
+        mark.setAttribute('aria-hidden', 'true');
+        sum.appendChild(mark);
+        art.appendChild(sum);
         var ans = el('div', 'qa__a');
         ans.appendChild(paragraphs(item.a));
         art.appendChild(ans);
+        art.addEventListener('toggle', function () {
+          if (art.open) ctx.record.note('opened', item.q);
+        });
         qa.appendChild(art);
       });
       return qa;

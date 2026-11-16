@@ -2815,3 +2815,43 @@ body:not(.is-dark)::after{display:none}
   .slide--display .cols:has(.qa){align-items:start}
   .slide--display .cols:has(.qa) .cols__head{position:sticky;top:clamp(3.5rem,8vh,5.5rem)}
 }
+
+/* S12 accordion: questions stay large, answers fold away */
+.qa__item{padding:0}
+.qa__item:first-child{border-top:0}
+.qa__sum{
+  list-style:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1.25rem;
+  padding:clamp(1.15rem,2.2vh,1.6rem) 0;
+  cursor:pointer;
+}
+.qa__item:first-child .qa__sum{padding-top:0}
+.qa__sum::-webkit-details-marker{display:none}
+.qa__sum .qa__q{margin:0;transition:color var(--fast) var(--ease)}
+.qa__sum:hover .qa__q{color:var(--copper-deep)}
+.qa__sum:focus-visible{outline:2px solid var(--copper-deep);outline-offset:4px;border-radius:6px}
+.qa__mark{
+  flex:0 0 auto;
+  width:2.5rem;height:2.5rem;
+  border:1.6px solid var(--copper-deep);
+  border-radius:50%;
+  position:relative;
+  transition:transform var(--base) var(--ease),background var(--fast);
+}
+.qa__mark::before,.qa__mark::after{
+  content:"";
+  position:absolute;left:50%;top:50%;
+  width:.9rem;height:1.6px;
+  background:var(--copper-deep);
+  translate:-50% -50%;
+}
+.qa__mark::after{rotate:90deg;transition:rotate var(--base) var(--ease)}
+.qa__item[open] .qa__mark::after{rotate:0deg}
+.qa__item[open] .qa__mark{background:var(--copper-wash)}
+.qa__a{padding:0 0 clamp(1.2rem,2.4vh,1.75rem)}
+@media (prefers-reduced-motion:reduce){
+  .qa__mark,.qa__mark::after{transition:none}
+}
