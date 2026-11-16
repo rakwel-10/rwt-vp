@@ -5,8 +5,8 @@
 #   FTP_SERVER      e.g. ftp.radiantwavelounge.com  (host only, no ftp://)
 #   FTP_USERNAME    the cPanel FTP account
 #   FTP_PASSWORD    its password
-#   FTP_SERVER_DIR  the site folder as FileZilla shows it, ending in a slash,
-#                   e.g. /public_html/radiantwavelounge.com/
+#   FTP_SERVER_DIR  the site folder as FileZilla shows it, ending in a slash -
+#                   "/" when the FTP account opens straight into the site folder
 #
 # Only changed files are sent: the action keeps .ftp-deploy-sync-state.json on
 # the server to know what is already there. It never deletes files it did not
@@ -27,17 +27,35 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # The same hosting account also serves bostonc.com. Refuse to deploy
-      # unless the target folder is clearly the radiantwavelounge.com one, so
-      # a mistyped secret can never overwrite the other site.
+      # The same hosting account also serves bostonc.com. Before uploading,
+      # log in and look at the target folder. Refuse if it is the top of the
+      # hosting account (contains public_html) or already has a homepage that
+      # is not this funnel - either way it is not radiantwavelounge.com's folder.
       - name: Check target folder
         env:
+          SERVER: ${{ secrets.FTP_SERVER }}
+          USER: ${{ secrets.FTP_USERNAME }}
+          PASS: ${{ secrets.FTP_PASSWORD }}
           DIR: ${{ secrets.FTP_SERVER_DIR }}
         run: |
-          case "$DIR" in
-            */radiantwavelounge.com/) echo "Deploying to $DIR" ;;
-            *) echo "::error::FTP_SERVER_DIR must end in /radiantwavelounge.com/ (got '$DIR')"; exit 1 ;;
-          esac
+          case "$DIR" in */) ;; *) DIR="$DIR/" ;; esac
+          printf 'machine %s login %s password %s\n' "$SERVER" "$USER" "$PASS" > "$RUNNER_TEMP/netrc"
+          FTP="curl -sS --ssl-reqd --netrc-file $RUNNER_TEMP/netrc"
+
+          if ! LIST=$($FTP --list-only "ftp://$SERVER$DIR"); then
+            echo "::error::Could not log in and list $DIR over FTPS - check the FTP secrets."; exit 1
+          fi
+          echo "Folder contents:"; echo "$LIST"
+
+          if echo "$LIST" | grep -qx 'public_html'; then
+            echo "::error::$DIR is the top of the hosting account, not the radiantwavelounge.com site folder."; exit 1
+          fi
+          if echo "$LIST" | grep -qx 'index.html\|index.php'; then
+            if ! $FTP "ftp://$SERVER${DIR}index.html" 2>/dev/null | grep -q 'IDecide.start'; then
+              echo "::error::$DIR already has a homepage that is not this funnel - refusing to overwrite it."; exit 1
+            fi
+          fi
+          echo "Target folder looks right: $DIR"
 
       - uses: actions/checkout@v4
 
