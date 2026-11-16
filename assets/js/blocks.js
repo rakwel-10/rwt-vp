@@ -1125,7 +1125,8 @@
        a different GHL domain than the one in its src. */
     function onMessage(ev) {
       if (ev.source !== iframe.contentWindow) return;
-      console.log('[iDecide] message from GHL form', ev.origin, ev.data);
+      var shown; try { shown = typeof ev.data === 'string' ? ev.data : JSON.stringify(ev.data); } catch (e) { shown = ev.data; }
+      console.log('[iDecide] message from GHL form', ev.origin, shown);
       if (advanced) return;
       var d = ev.data;
       /* What a submission actually sends (read from form_embed.js):
