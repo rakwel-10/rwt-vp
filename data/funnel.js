@@ -17,14 +17,14 @@ window.FUNNEL = {
   },
 
   "theme": {
-    "paper": "#F3EEE3",
-    "paper-deep": "#EAE2D3",
-    "paper-edge": "#C7A984",
-    "ink": "#302922",
-    "ink-soft": "#6B5D50",
-    "copper": "#A97243",
-    "copper-deep": "#8F5837",
-    "copper-lift": "#B98457",
+    "paper": "#F2EBE0",
+    "paper-deep": "#E9DFD0",
+    "paper-edge": "#C79E74",
+    "ink": "#27140C",
+    "ink-soft": "#6A5546",
+    "copper": "#AA6A2E",
+    "copper-deep": "#84401A",
+    "copper-lift": "#BC7A38",
     "patina": "#4E6F66",
     "room": "#16110E"
   },
@@ -153,7 +153,9 @@ window.FUNNEL = {
       "name": "Soft Takeaway",
       "zone": "Branch",
       "note": "Expect 50-60% to take the two minutes and rejoin as Curious. Naming the objection and then declining to sell is what makes it work.",
-      "heading": "Fair enough.",
+      "heading": "Fair _enough._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -170,7 +172,9 @@ window.FUNNEL = {
       "name": "Soft Exit",
       "zone": "Capture",
       "note": "Terminal. Never call a COLD tag — they told you not to, and in a market Richmond's size that person talks.",
-      "heading": "No problem at all.",
+      "heading": "No problem\n_at all._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -179,6 +183,7 @@ window.FUNNEL = {
         {
           "type": "form",
           "role": "capture",
+          "panel": true,
           "submit": "Keep me posted",
           "fields": [
             { "name": "email", "label": "Email", "type": "email", "full": true }
@@ -226,7 +231,9 @@ window.FUNNEL = {
       "parked": true,
       "zone": "Depth",
       "note": "Telling a five-figure prospect not to buy yet is the most credible thing you can say to them. Never soften that first line.",
-      "heading": "Yes. And frankly, you should.",
+      "heading": "Yes. And frankly,\n_you should._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -243,7 +250,9 @@ window.FUNNEL = {
       "name": "Trapped",
       "zone": "Branch",
       "note": "A light slide like the rest (it was the dark room panel until November 2026). Two images, two choices, nothing else. Short dwell time here is success — she read it, recognised herself, clicked. Over 40 seconds means she's deliberating.",
-      "heading": "You don't need a program. You need Tuesday at 4pm.",
+      "heading": "You don't need a program.\n_You need Tuesday at 4pm._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -266,7 +275,9 @@ window.FUNNEL = {
       "name": "The Times",
       "zone": "Depth",
       "note": "Routes straight to the close, skipping the pricing ladder. She asked for times, not a price ladder. Show availability windows, never a live calendar — visible gaps read as an empty business.",
-      "heading": "This week.",
+      "heading": "This _week._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -297,7 +308,9 @@ window.FUNNEL = {
       "name": "Soft Landing",
       "zone": "Depth",
       "note": "Her most common stall isn't price or doubt, it's that this week is genuinely full. Decoupling purchase from scheduling removes the only real obstacle. Highest-ROI recovery in the funnel.",
-      "heading": "If this week is too soon, that's alright.",
+      "heading": "If this week is too soon,\n_that's alright._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -345,7 +358,9 @@ window.FUNNEL = {
       "zone": "Depth",
       "surface": "dark",
       "note": "Same dark surface as S6 so the split reads as one continuous moment rather than two slides.",
-      "heading": "Founding Class",
+      "heading": "Founding\n_Class_",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -363,7 +378,9 @@ window.FUNNEL = {
       "name": "The Counter",
       "zone": "Depth",
       "note": "Update the remaining count weekly, real numbers only. If nobody joined, it doesn't move. Never reset it — reset it once and this lead type is gone permanently.",
-      "heading": "The Founding Class is capped at 32.",
+      "heading": "The Founding Class\n_is capped at 32._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "counter",
@@ -414,7 +431,9 @@ window.FUNNEL = {
       "name": "Focus Menu",
       "zone": "Branch",
       "note": "Every tile tap is tagged FOCUS_. These taps tell your booking desk how to open the call and tell you which category to build the next ad campaign around.",
-      "heading": "You don't just book an hour. You choose what it's for.",
+      "heading": "You don't just book an hour.\n_You choose what it's for._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -498,7 +517,9 @@ window.FUNNEL = {
       "name": "In The Room",
       "zone": "Depth",
       "note": "Mechanism lives here and nowhere else — always optional, always behind a click, never in the main path.",
-      "heading": "What's actually in the room",
+      "heading": "What's actually\n_in the room_",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -536,7 +557,9 @@ window.FUNNEL = {
     "S8": {
       "name": "Proof",
       "zone": "Depth",
-      "heading": "What actually happens in there",
+      "heading": "What actually\n_happens in there_",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -560,7 +583,9 @@ window.FUNNEL = {
       "zone": "Depth",
       "parked": true,
       "note": "PARKED until written releases are signed. Three maximum, experience only — no conditions, no symptoms, no before-and-afters. \"I slept like I haven't in a year\" is fine. \"My back pain went away\" is not, cut it even if she said it. Attribution reads: Karen M., Midlothian.",
-      "heading": "What members say",
+      "heading": "What members\n_say_",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -678,7 +703,9 @@ window.FUNNEL = {
       "name": "Systems",
       "zone": "Offer",
       "wide": true,
-      "heading": "Bring it home.",
+      "heading": "Bring it\n_home._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -712,7 +739,9 @@ window.FUNNEL = {
     "S11a": {
       "name": "Advance",
       "zone": "Offer",
-      "heading": "Advance Residential System",
+      "heading": "Advance\n_Residential System_",
+      "display": true,
+      "kicker": false,
       "blocks": [
         { "type": "spec", "text": "Four 27-inch screens, around 1,200 square inches, built for medium rooms" },
         {
@@ -745,7 +774,9 @@ window.FUNNEL = {
     "S11b": {
       "name": "Elite",
       "zone": "Offer",
-      "heading": "Elite Residential System",
+      "heading": "Elite\n_Residential System_",
+      "display": true,
+      "kicker": false,
       "blocks": [
         { "type": "spec", "text": "Four 32-inch screens, around 1,700 square inches, built for larger rooms" },
         {
@@ -778,7 +809,9 @@ window.FUNNEL = {
     "S11c": {
       "name": "Elite 2",
       "zone": "Offer",
-      "heading": "Elite 2 Residential System",
+      "heading": "Elite 2\n_Residential System_",
+      "display": true,
+      "kicker": false,
       "blocks": [
         { "type": "spec", "text": "Eight 32-inch screens, double-stacked, around 3,400 square inches, extra-large rooms" },
         {
@@ -812,7 +845,9 @@ window.FUNNEL = {
       "name": "Objections",
       "zone": "Recovery",
       "note": "The most valuable non-offer slide in the build. It sits under S10 catching everyone who hesitates at the price and recovers 30-40% of them. Every panel concedes before reframing, and every panel offers a smaller step.",
-      "heading": "What's holding you back?",
+      "heading": "What's holding\n_you back?_",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -851,7 +886,9 @@ window.FUNNEL = {
       "name": "Spouse",
       "zone": "Recovery",
       "note": "The only slide that manufactures new leads. Every share is a fresh entry at the welcome screen with pre-built social proof. Reached from the S14 confirmation.",
-      "heading": "Good. You should.",
+      "heading": "Good.\n_You should._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -949,7 +986,9 @@ window.FUNNEL = {
       "name": "Close",
       "zone": "Capture",
       "note": "Five fields maximum. Every extra one costs conversions.",
-      "heading": "Welcome to the Lounge.",
+      "heading": "Welcome to\n_the Lounge._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -959,6 +998,7 @@ window.FUNNEL = {
         {
           "type": "form",
           "role": "capture",
+          "panel": true,
           "submit": "Confirm my spot",
           "consent": "Yes, contact me by phone, text and email. Reply STOP to opt out.",
           "consentRequired": true,
@@ -986,7 +1026,9 @@ window.FUNNEL = {
       "zone": "Offer",
       "wide": true,
       "note": "Pricing is fixed, so the cash path can't be discounted. The incentive stack carries it instead, and the complimentary membership is nearly free to you and the strongest item on the list.",
-      "heading": "Two ways to own it.",
+      "heading": "Two ways\n_to own it._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -1017,7 +1059,9 @@ window.FUNNEL = {
     "S16": {
       "name": "Talk First",
       "zone": "Capture",
-      "heading": "Let's make sure it fits the room.",
+      "heading": "Let's make sure\n_it fits the room._",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "prose",
@@ -1026,6 +1070,7 @@ window.FUNNEL = {
         {
           "type": "form",
           "role": "capture",
+          "panel": true,
           "submit": "Request the call",
           "consent": "Yes, contact me by phone, text and email. Reply STOP to opt out.",
           "consentRequired": true,
@@ -1057,7 +1102,9 @@ window.FUNNEL = {
       "parked": true,   // see S15
       "zone": "Capture",
       "note": "Final-sale terms go above the button, never below. High-ticket buyers accept them routinely when told up front; discovering it afterward is a chargeback.",
-      "heading": "Before you order",
+      "heading": "Before\n_you order_",
+      "display": true,
+      "kicker": false,
       "blocks": [
         {
           "type": "panels",
@@ -1088,6 +1135,7 @@ window.FUNNEL = {
         {
           "type": "form",
           "role": "capture",
+          "panel": true,
           "submit": "Complete my order",
           "consent": "I've read and agree to the purchase agreement, and I understand that system sales are final.",
           "consentRequired": true,

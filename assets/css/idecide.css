@@ -13,23 +13,29 @@
   color-scheme: light;
 
   /* ground */
-  --paper:#F3EEE3;           /* warm cream ground */
-  --paper-lift:#FBF8F2;      /* warm ivory surfaces */
-  --paper-deep:#EAE2D3;
-  --paper-sink:#E9DCC8;
-  --paper-edge:#C7A984;      /* fine copper borders and separators */
-  --paper-edge-soft:#DDC9AE; /* the same line, one step quieter */
+  --paper:#F2EBE0;           /* warm cream ground (sampled from the mockups) */
+  --paper-lift:#F8F3EA;      /* ivory cards and panels */
+  --paper-deep:#E9DFD0;
+  --paper-sink:#E6D6C2;
+  --paper-edge:#C79E74;      /* card and panel border */
+  --paper-edge-soft:#DCC4A6; /* the same line, one step quieter */
   --line:#00000012;
 
   /* ink */
-  --ink:#302922;             /* espresso */
-  --ink-mid:#4A4037;
-  --ink-soft:#6B5D50;
+  --ink:#27140C;             /* near-black brown: headlines */
+  --ink-mid:#3A2820;         /* body copy */
+  --ink-soft:#6A5546;
 
   /* copper and its patina */
-  --copper:#A97243;          /* copper-gold: headline accents */
-  --copper-deep:#8F5837;     /* small accents, filled buttons */
-  --copper-lift:#B98457;
+  --copper:#AA6A2E;          /* bronze: the italic in a headline */
+  --copper-deep:#84401A;     /* bold copper words in running text */
+  --copper-lift:#BC7A38;
+  --bronze-top:#BE7B37;      /* the italic's light-to-dark grade */
+  --bronze-low:#9C5C26;
+  --btn-top:#AC6233;         /* filled button grade, sampled */
+  --btn-low:#934F23;
+  --rule:#A35A24;            /* the short rule and dividers */
+  --eyebrow:#6B2A0E;
   --copper-glow:#D6A070;
   --copper-wash:#A9724312;
   --copper-wash-2:#A9724324;
@@ -47,8 +53,8 @@
   --lift-2:0 2px 4px #3A200C0F, 0 10px 24px -14px #3A200C2E;
   --lift-3:0 4px 10px #3A200C14, 0 22px 48px -20px #3A200C3D;
 
-  --serif:"Cormorant Garamond","Cormorant",Garamond,Georgia,"Times New Roman",serif;
-  --ui:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --ui:"Albert Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:ui-monospace,"Cascadia Code",Consolas,monospace;
 
   --measure:36rem;
@@ -2574,3 +2580,181 @@ body:not(.is-dark)::after{display:none}
   .slide--banner .head{font-size:clamp(2.2rem,9.5vw,3rem)}
   .offers--cards .offer{padding:1.4rem 1.1rem}
 }
+
+/* ==================================================================
+   THE MOCKUP TYPE, EVERYWHERE
+   Newsreader at display size for every headline: tight, high
+   contrast, the closing words in a graded bronze italic. Albert
+   Sans for everything read or pressed, set large enough to read
+   from arm's length. Colours are sampled from the approved
+   mockups. Every editorial slide uses it ("display": true).
+   ================================================================== */
+
+.head{
+  font-family:var(--serif);
+  font-optical-sizing:auto;
+  font-weight:400;
+  letter-spacing:-.03em;
+  color:var(--ink);
+}
+.slide--display .head{
+  font-weight:400;
+  font-size:clamp(2.8rem,5vw + .5rem,6.4rem);
+  line-height:.98;
+  letter-spacing:-.035em;
+}
+/* long two-line headlines step down so each line holds */
+.slide--display .head--long{font-size:clamp(2.5rem,3.7vw + .5rem,4.9rem);line-height:1.02}
+.slide--display .head__lead{
+  font-size:.6em;
+  letter-spacing:-.025em;
+  font-weight:400;
+  color:var(--ink);
+  margin-bottom:.06em;
+}
+
+/* the bronze italic, graded top to bottom like the mockup */
+.head .accent,
+.slide--display .head .accent{
+  font-style:italic;
+  font-weight:400;
+  letter-spacing:-.025em;
+  color:var(--copper);
+  background:linear-gradient(180deg,var(--bronze-top) 10%,var(--bronze-low) 95%);
+  -webkit-background-clip:text;
+          background-clip:text;
+  -webkit-text-fill-color:transparent;
+  padding-right:.06em;            /* the italic overhang stays inside the clip */
+  -webkit-box-decoration-break:clone;
+          box-decoration-break:clone;
+}
+@media (forced-colors:active){
+  .head .accent{-webkit-text-fill-color:currentColor;background:none}
+}
+
+.slide--display:not(.slide--banner) .cols__head::before{background:var(--rule);height:2px}
+.slide--display .eyebrow{color:var(--eyebrow);font-weight:500;letter-spacing:.28em}
+.eyebrow__mark{color:var(--copper-deep)}
+
+/* --- running text: big, warm, easy to read ---------------------- */
+.prose .accent,
+.choice__text .accent{color:var(--copper-deep);font-weight:800}
+.prose strong{font-weight:800;color:#1F0C06}
+
+.slide--display .cols__head .prose,
+.slide--display .cols__head .prose--lede{
+  font-size:clamp(1.12rem,.55vw + .95rem,1.55rem);
+  line-height:1.5;
+  color:var(--ink-mid);
+}
+.slide--display .cols__body .prose{
+  font-size:clamp(1.06rem,.42vw + .92rem,1.38rem);
+  line-height:1.55;
+  color:var(--ink-mid);
+  max-width:40rem;
+}
+.slide--display .cols__body .prose--lede{color:var(--ink)}
+.prose--title{font-weight:800;letter-spacing:-.01em;color:var(--ink)}
+.prose--fact{border-top-color:var(--rule)}
+
+/* --- answer cards ------------------------------------------------ */
+.slide--display .choice{border-radius:26px}
+.choice--secondary{
+  background:var(--paper-lift);
+  border-color:var(--paper-edge);
+  box-shadow:0 1px 2px #3A200C0A,0 12px 28px -20px #3A200C40;
+  color:var(--ink);
+}
+.slide--display .choice--secondary{
+  font-size:clamp(1.08rem,.55vw + .9rem,1.5rem);
+  font-weight:400;
+  letter-spacing:.005em;
+}
+.choice__arrow{
+  border:1.6px solid var(--copper-deep);
+  color:var(--copper-deep);
+  width:2.75rem;height:2.75rem;
+  font-size:1.15rem;
+}
+
+/* --- buttons: graded copper, white text -------------------------- */
+.choice--primary,
+.btn,
+.btn--fill{
+  background:linear-gradient(180deg,var(--btn-top) 0%,var(--btn-low) 100%);
+  border-color:var(--btn-low);
+  color:#FFFFFF;
+  box-shadow:0 2px 4px #3A200C14,0 16px 30px -18px #5A2E1099;
+}
+.choice--primary:hover,
+.btn:hover{
+  background:linear-gradient(180deg,#B66B3A 0%,#8A4920 100%);
+  box-shadow:0 2px 4px #3A200C1A,0 20px 34px -18px #5A2E10AA;
+}
+.slide--display .choice--primary{font-weight:700;font-size:clamp(1.08rem,.55vw + .9rem,1.5rem)}
+.choice--primary .choice__arrow{border-color:#FFFFFFCC;color:#FFFFFF}
+.btn--outline,
+.choice--outline{background:#FAF2E6;border:1px solid #CC916C;color:var(--ink)}
+.btn--outline:hover,.choice--outline:hover{background:#FDF8F0;border-color:var(--copper-deep)}
+.slide--display .choice--outline{font-weight:700;font-size:clamp(1.05rem,.5vw + .9rem,1.45rem)}
+.choice--outline .choice__arrow{color:#B76C27}
+.slide--display .choice--link{font-size:clamp(1.02rem,.45vw + .9rem,1.35rem)}
+.choice--link .choice__arrow--bare{color:#A35A24}
+.choice--quiet{font-size:clamp(.98rem,.3vw + .9rem,1.15rem);color:var(--ink-soft)}
+
+/* --- panels, cards and the type inside them --------------------- */
+.form--panel,.explore{background:var(--paper-lift);border-color:var(--paper-edge)}
+.form--panel .form__title,
+.explore__title,
+.offers__title,
+.offer__name{font-family:var(--serif);font-weight:500;letter-spacing:-.025em}
+.offer__amount,.member-note__big{font-family:var(--serif);font-weight:600;letter-spacing:-.02em}
+.member-note__italic{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--copper)}
+.offer__hours-main,.offers__intro{color:var(--copper-deep)}
+.offers--cards .offer--emphasis{border-color:var(--btn-low)}
+.offer__features li::before{background:var(--copper-deep)}
+
+/* --- the rest of the funnel in the same layout ------------------- */
+/* content-heavy right columns (tables, panels, tiles, images, plain
+   forms) read top-down: the headline holds the top of the left
+   column while the right scrolls */
+@media (min-width:1000px){
+  .slide--display .cols:has(.compare-wrap,.panels,.tiles,.media,.counter,.price,.summary,.form:not(.form--panel)){
+    align-items:start;
+  }
+  .slide--display .cols:has(.compare-wrap,.panels,.tiles,.media,.counter,.price,.summary) .cols__head{
+    position:sticky;
+    top:clamp(3.5rem,8vh,5.5rem);
+  }
+  /* tables need the width */
+  .slide--display.slide--wide .cols{grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr)}
+}
+.slide--display .cols__body .aside{font-size:clamp(1rem,.3vw + .9rem,1.2rem)}
+.slide--display .cols__body .choices{margin-top:clamp(1.75rem,3vh,2.5rem)}
+/* plain forms on these slides sit in the ivory panel too */
+.slide--display .cols__body .form--panel{margin-top:1.75rem}
+.slide--display .cols__body > .form--panel:first-child{margin-top:0}
+
+/* fine-tuning against the mockups */
+.slide--display .head{font-size:clamp(2.8rem,5.5vw + .4rem,7rem);line-height:1.02}
+.slide--display .head--long{font-size:clamp(2.3rem,2.9vw + .55rem,4.4rem);line-height:1.04}
+.slide--split-third .head,
+.slide--banner .head{line-height:1.02}
+.slide--display .cols__body .prose--title{
+  font-size:clamp(1.4rem,.9vw + 1.05rem,2.15rem);
+  line-height:1.2;
+  font-weight:800;
+  color:var(--ink);
+  margin-bottom:.5rem;
+}
+.choice__arrow.choice__arrow--bare{border:0;width:auto;height:auto;font-size:1.3rem}
+@media (min-width:1000px){
+  .slide--display.slide--split-third .head{font-size:clamp(2.5rem,2.9vw + .3rem,4.1rem)}
+}
+.slide--display.slide--banner .head{font-size:clamp(2.6rem,4.4vw + .4rem,5.4rem)}
+@media (max-width:520px){
+  .slide--display .head{font-size:clamp(2.4rem,11vw,3.4rem)}
+  .slide--display .head--long{font-size:clamp(2.05rem,8.6vw,2.7rem)}
+  .slide--display.slide--banner .head{font-size:clamp(2.2rem,9.5vw,3rem)}
+}
+.slide--display.slide--banner .cols__body .prose--center{max-width:none}

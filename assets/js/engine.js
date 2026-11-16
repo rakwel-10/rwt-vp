@@ -440,6 +440,11 @@
         if (i > 0) h.appendChild(document.createElement('br'));
         h.appendChild(B.richText(line));
       });
+      /* a headline with a long line steps down a size so each line holds */
+      var longest = bodyLines.reduce(function (n, line) {
+        return Math.max(n, B.plainText(line).length);
+      }, 0);
+      if (slide.display && longest > 21) h.classList.add('head--long');
       h.id = 'slide-head';
       host.appendChild(h);
     }
