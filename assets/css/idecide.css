@@ -2855,3 +2855,19 @@ body:not(.is-dark)::after{display:none}
 @media (prefers-reduced-motion:reduce){
   .qa__mark,.qa__mark::after{transition:none}
 }
+
+/* --- the smaller pieces, in the same family ----------------------- */
+/* note boxes: ivory with a copper edge, not the old green */
+.aside{background:var(--paper-lift);border:1px solid var(--paper-edge-soft);border-radius:18px;color:var(--ink-mid)}
+.aside::before{background:var(--rule) !important}
+/* a hardware line under a system headline */
+.slide--display .cols__head .spec{margin:clamp(1.1rem,2vh,1.5rem) 0 0;font-size:clamp(.98rem,.3vw + .9rem,1.15rem);color:var(--copper-deep);font-weight:600;letter-spacing:.01em}
+/* system price: the ivory panel, the number in the headline serif */
+.price{background:var(--paper-lift);border:1px solid var(--paper-edge);border-radius:22px;padding:clamp(1.1rem,2vw,1.6rem) clamp(1.25rem,2.2vw,1.9rem);box-shadow:0 1px 3px #3A200C08,0 22px 44px -36px #3A200C40}
+.price__now{font-family:var(--serif);font-weight:500;letter-spacing:-.025em;color:var(--ink);font-variant-numeric:lining-nums;font-size:clamp(2.6rem,2.2vw + 1.5rem,3.8rem);line-height:1}
+.price__was{font-family:var(--ui);color:var(--ink-soft)}
+.price__sub{color:var(--ink-mid);font-size:.95rem}
+/* the founding counter */
+.counter__n{font-family:var(--serif);font-weight:500;color:var(--copper);letter-spacing:-.03em;font-variant-numeric:lining-nums}
+.counter__n small{font-family:var(--ui);color:var(--ink-mid);font-weight:500}
+.counter__label{color:var(--ink-mid)}

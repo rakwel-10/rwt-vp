@@ -159,6 +159,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "The Lounge holds a limited number of members and we're not in a hurry to fill it.\n\nBut in our experience, \"just looking\" usually means \"don't sell me anything.\" So we won't. Two more minutes, no pitch, and you can decide for yourself."
         }
       ],
@@ -178,6 +179,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "If you'd like to hear when we open founding memberships, we'll write once. Or nothing at all, ever. That's entirely your call."
         },
         {
@@ -237,6 +239,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "Nobody should spend residential-system money on an experience they've never had. Come use ours.\n\nThree hours in the Lounge is $157. If you reserve a residential system within 90 days, we credit the full $157 toward it.\n\nThat's a trial with a deposit attached, which is the only kind that filters for people who are actually serious.\n\nYou'll also see the sixteen-screen configuration running — about 6,800 square inches of screen surface, double our largest home system."
         }
       ],
@@ -282,6 +285,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "Weekday afternoons are the quietest. Most people find 2 to 5 the easiest hour to protect.\n\nWeekends fill first."
         },
         {
@@ -295,6 +299,7 @@ window.FUNNEL = {
         },
         {
           "type": "prose",
+          "side": "head",
           "text": "Three hours is $157, used however you want across 90 days. Most people take one hour a week for three weeks."
         }
       ],
@@ -315,6 +320,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "The pack is good for 90 days. Buy it now, use the first hour whenever the week lets you.\n\nNothing expires next Tuesday."
         }
       ],
@@ -392,10 +398,12 @@ window.FUNNEL = {
         },
         {
           "type": "prose",
+          "side": "head",
           "text": "Eleven seats, eight of them recliners. That's the room, not a marketing number.\n\nThere are two installations of this technology in the United States. Ours is in Richmond. The other is in North Carolina. That's the whole map."
         },
         {
           "type": "aside",
+          "side": "head",
           "text": "Why we cap it: you're paying for an uncrowded room. Founding Members stay two hours, so every founding seat takes twice the room. Fill it past comfortable and we've sold you something else.\n\nWe aren't adding chairs. There is no second Founding Class at these prices."
         }
       ],
@@ -525,13 +533,17 @@ window.FUNNEL = {
       "heading": "What's actually\n_in the room_",
       "display": true,
       "kicker": false,
+      "choicesRow": true,
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "You don't need to understand any of this to feel it. But people ask, so here it is.\n\nSystems like this have existed for about thirty years. Most of them run light and affirmations as separate layers: one thing, then another thing.\n\nThis one doesn't. Colour, sound, motion and language move together across all sixteen screens as a single continuous thing. That's the part that's new, and it's the part you feel."
         },
         {
           "type": "panels",
+          "open": true,
+          "openFirst": true,
           "items": [
             {
               "q": "The screens face each other",
@@ -595,6 +607,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "This slide is not built yet. It goes live once releases are signed."
         }
       ],
@@ -751,7 +764,7 @@ window.FUNNEL = {
       "display": true,
       "kicker": false,
       "blocks": [
-        { "type": "spec", "text": "Four 27-inch screens, around 1,200 square inches, built for medium rooms" },
+        { "type": "spec", "side": "head", "text": "Four 27-inch screens, around 1,200 square inches, built for medium rooms" },
         {
           "type": "price",
           "was": "MSRP $49,997",
@@ -760,10 +773,12 @@ window.FUNNEL = {
         },
         {
           "type": "prose",
+          "side": "head",
           "text": "Fully wireless, with full audio. The entry point into ownership, and the configuration most people choose for a spare room, a den, or a bedroom.\n\nIncluded: four 27-inch screens and mounting hardware, full wireless audio, professional delivery and installation, on-site setup and training, the full library of more than a hundred focuses, a one-year manufacturer warranty, and ongoing support."
         },
         {
           "type": "aside",
+          "side": "head",
           "text": "Considering the step up? Elite 2 delivers nearly three times this screen surface for $13,000 more, at roughly half the cost per square inch."
         },
         {
@@ -786,7 +801,7 @@ window.FUNNEL = {
       "display": true,
       "kicker": false,
       "blocks": [
-        { "type": "spec", "text": "Four 32-inch screens, around 1,700 square inches, built for larger rooms" },
+        { "type": "spec", "side": "head", "text": "Four 32-inch screens, around 1,700 square inches, built for larger rooms" },
         {
           "type": "price",
           "was": "MSRP $55,997",
@@ -795,10 +810,12 @@ window.FUNNEL = {
         },
         {
           "type": "prose",
+          "side": "head",
           "text": "Same four-screen architecture as Advance, stepped up to 32-inch panels. About 40% more screen surface, for a room that can carry it."
         },
         {
           "type": "aside",
+          "side": "head",
           "text": "Before you decide: Elite 2 is $8,000 more and delivers double this screen surface. If you have the room, it's the better buy, and we'd rather tell you that now."
         },
         {
@@ -821,7 +838,7 @@ window.FUNNEL = {
       "display": true,
       "kicker": false,
       "blocks": [
-        { "type": "spec", "text": "Eight 32-inch screens, double-stacked, around 3,400 square inches, extra-large rooms" },
+        { "type": "spec", "side": "head", "text": "Eight 32-inch screens, double-stacked, around 3,400 square inches, extra-large rooms" },
         {
           "type": "price",
           "was": "MSRP $69,997",
@@ -830,10 +847,12 @@ window.FUNNEL = {
         },
         {
           "type": "prose",
+          "side": "head",
           "text": "Our largest residential configuration, and the closest thing to the Lounge you can put in a house. Eight 32-inch screens in a double-stacked opposing arrangement, twice the surface of Elite at 25% more.\n\nHalf the Lounge, in your own room, on your own schedule."
         },
         {
           "type": "aside",
+          "side": "head",
           "text": "The value case: $11.76 per square inch of screen surface, against $22.50 for Advance. Elite 2 is the least expensive way to own this technology at scale."
         },
         {
@@ -904,6 +923,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "Send them this. The link works for them too, and it'll answer their questions better than a summary over dinner will.\n\nAnd if it's easier, bring them. Vita Restore and Radiate both include guest passes, so their first hour is on us."
         }
       ],
@@ -1004,6 +1024,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "One more step and you're in. Someone from our Richmond team will reach out within one business day to get your first hour on the calendar and walk you through choosing your focus."
         },
         { "type": "summary" },
@@ -1044,6 +1065,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "Reserve with half: 50% today, balance in three equal monthly payments, thirty days apart, no interest, card or ACH on file."
         },
         {
@@ -1057,6 +1079,7 @@ window.FUNNEL = {
         },
         {
           "type": "aside",
+          "side": "head",
           "text": "Paid in full: one payment, first position in the delivery order.\n\nAlso receives priority delivery, an extended warranty, a second training session, complimentary Lounge membership until your system is installed, and Founding Owner designation."
         }
       ],
@@ -1077,6 +1100,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "Five-figure systems shouldn't be bought off a web page. Tell us about your space and someone will call within one business day."
         },
         {
@@ -1117,9 +1141,12 @@ window.FUNNEL = {
       "heading": "Before\n_you order_",
       "display": true,
       "kicker": false,
+      "choicesRow": true,
       "blocks": [
         {
           "type": "panels",
+          "open": true,
+          "openFirst": true,
           "items": [
             {
               "q": "What your deposit reserves",
@@ -1141,6 +1168,7 @@ window.FUNNEL = {
         },
         {
           "type": "aside",
+          "side": "head",
           "text": "Not certain? Book three hours in the Lounge first for $157, credited in full toward any system reserved within 90 days."
         },
         { "type": "summary" },
