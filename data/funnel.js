@@ -568,6 +568,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "Nothing dramatic. That's rather the point.\n\nYou arrive. You pick your focus. You get a recliner, a blanket, and low light. The screens come up. Somebody brings you something warm.\n\nThen for sixty minutes, the only thing on your calendar is nothing.\n\nMost first-timers fall asleep. Most are a little embarrassed about it. We tell them that's the highest compliment the room gets."
         },
         {
