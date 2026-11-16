@@ -38,9 +38,9 @@ window.IDECIDE_CONFIG = {
      The keys match the offer ids in data/funnel.js. */
   ghl: {
     checkout: {
-      'hour-1':        'ghl-placeholder.html?for=hour-1',         // Single hour, $100
-      'pack-3':        'ghl-placeholder.html?for=pack-3',         // Three-hour pack, $157
-      'pack-10':       'ghl-placeholder.html?for=pack-10',        // Ten-hour pack, $379
+      'hour-1':        'ghl-placeholder.html?for=hour-1',         // One-Hour Pass, $100 total, use within 60 days of purchase
+      'pack-3':        'ghl-placeholder.html?for=pack-3',         // Three-Hour Pack, $157 total, use within 90 days
+      'pack-10':       'ghl-placeholder.html?for=pack-10',        // Ten-Hour Pack, $379 total, use within 90 days
       'vita-recharge': 'ghl-placeholder.html?for=vita-recharge',  // Vita Recharge, $397 a month
       'vita-restore':  'ghl-placeholder.html?for=vita-restore',   // Vita Restore, $597 a month
       'vita-radiate':  'ghl-placeholder.html?for=vita-radiate'    // Vita Radiate, $897 a month

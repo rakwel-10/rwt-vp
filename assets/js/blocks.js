@@ -78,8 +78,15 @@
      { "type":"prose", "text":"...", "lede":true }
      ================================================================== */
   function prose(b) {
+    /* "style":"title" is a heading inside the column, not a paragraph */
+    if (b.style === 'title') {
+      var h = el('h3', 'prose prose--title');
+      h.appendChild(richText(b.text));
+      return h;
+    }
     var wrap = document.createDocumentFragment();
-    wrap.appendChild(paragraphs(b.text, 'prose' + (b.lede ? ' prose--lede' : '')));
+    wrap.appendChild(paragraphs(b.text, 'prose' + (b.lede ? ' prose--lede' : '') +
+      (b.style ? ' prose--' + b.style : '')));
     return wrap;
   }
 
@@ -833,7 +840,7 @@
 
   /* ==================================================================
      BLOCK: compare
-     { "type":"compare", "columns":["","Advanced","Elite","Elite II"],
+     { "type":"compare", "columns":["","Advance","Elite","Elite 2"],
        "rows":[["Screens","Four 27in","Four 32in","Eight 32in"]] }
      ================================================================== */
   function compare(b) {
@@ -878,7 +885,7 @@
      { "type":"form", "role":"identity"|"capture",
        "fields":[{"name":"firstName","label":"First name","required":true},
                  {"name":"system","label":"Which system?","type":"select",
-                  "options":["Advanced","Elite","Elite II","Not sure yet"]}],
+                  "options":["Not sure yet","Elite","Elite 2","Advance"]}],
        "consent":"Yes, contact me by phone, text and email...",
        "consentRequired":true,
        "submit":"Confirm my spot",
@@ -890,12 +897,13 @@
      role:"capture"   - assembles the whole payload and hands it off.
      ================================================================== */
   function form(b, ctx) {
-    var f = el('form', 'form');
+    var f = el('form', 'form' + (b.panel ? ' form--panel' : ''));
     f.noValidate = true;
 
     /* A titled form reads as a sign-in panel rather than a stray pair
-       of fields at the bottom of a page. */
-    if (b.title) f.appendChild(el('p', 'form__title', b.title));
+       of fields at the bottom of a page. As a panel the title is a
+       real heading under the slide's own. */
+    if (b.title) f.appendChild(el(b.panel ? 'h3' : 'p', 'form__title', b.title));
     if (b.intro) f.appendChild(el('p', 'form__intro', b.intro));
 
     var grid = el('div', 'form__grid');
@@ -922,7 +930,8 @@
         if (spec.type === 'email') input.autocomplete = 'email';
         if (spec.name === 'firstName') input.autocomplete = 'given-name';
         if (spec.name === 'lastName') input.autocomplete = 'family-name';
-        if (spec.type === 'tel') input.autocomplete = 'tel';
+        if (spec.type === 'tel') { input.autocomplete = 'tel'; input.inputMode = 'tel'; }
+        if (spec.type === 'email') input.inputMode = 'email';
       }
       input.id = id;
       input.name = spec.name;
@@ -962,8 +971,9 @@
     status.setAttribute('role', 'status');
 
     var row = el('div', 'form__submit');
-    var submit = el('button', 'btn', b.submit || 'Continue');
+    var submit = el('button', 'btn' + (b.panel ? ' btn--block' : ''), b.submit || 'Continue');
     submit.type = 'submit';
+    if (b.panel) submit.appendChild(arrowMark(true));
     row.appendChild(submit);
 
     if (b.skip) {
@@ -1013,12 +1023,16 @@
         submit.dataset.busy = '1';
         submit.textContent = 'Sending';
         ctx.record.handoff(b).then(function (result) {
-          if (result.ok) {
+          if (result.ok && b.done && b.done.slide) {
+            ctx.markDone(ctx.slideId);
+            ctx.navigate(b.done.slide);
+          } else if (result.ok) {
             f.replaceWith(confirmation(b.done, ctx));
           } else {
             submit.disabled = false;
             delete submit.dataset.busy;
             submit.textContent = b.submit || 'Continue';
+            if (b.panel) submit.appendChild(arrowMark(true));
             status.textContent = result.message;
             status.hidden = false;
           }
@@ -1152,6 +1166,187 @@
     return wrap;
   }
 
+  /* ---------- shared: the arrow, and a button for any action ------- */
+
+  /* The circled arrow from the design: drawn, not a glyph, so it sits
+     on the same line in every font. circle:false gives the bare arrow
+     used on the smaller outlined buttons. */
+  function arrowMark(circle) {
+    var n = el('span', 'arrow' + (circle ? ' arrow--circle' : ''));
+    n.setAttribute('aria-hidden', 'true');
+    n.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+      (circle ? '<circle cx="12" cy="12" r="10.5"/>' : '') +
+      '<path d="M7 12h10M13 8l4 4-4 4"/></svg>';
+    return n;
+  }
+
+  /* { "label":"...", "to":"S10" | "link":"pack-3" | "href":"https://...",
+       "weight":"primary"|"outline", "circle":true } */
+  function actionButton(a, ctx, extra) {
+    var btn = el('button', 'btn' + (a.weight === 'outline' ? ' btn--outline' : '') +
+      (extra ? ' ' + extra : ''));
+    btn.type = 'button';
+    btn.appendChild(el('span', 'btn__label', a.label));
+    btn.appendChild(arrowMark(a.circle !== false && a.weight !== 'outline'));
+    btn.addEventListener('click', function () {
+      ctx.record.note('action', B_plain(a.label));
+      ctx.go(a);
+    });
+    return btn;
+  }
+  function B_plain(t) { return plainText(t); }
+
+  /* ==================================================================
+     BLOCK: offers - products side by side, each with its own button
+     to that product's page. Two looks:
+       "variant":"cards"    rounded cards (memberships)
+       "variant":"columns"  open columns with fine dividers (passes)
+     Every item fills every row, so names, prices and buttons line up
+     across the row whatever the copy length.
+
+     { "type":"offers", "variant":"cards", "title":"...", "intro":"...",
+       "items":[{ "id":"vita-restore", "name":"Vita Restore",
+                  "price":597, "per":"/month", "hours":"36 Lounge hours",
+                  "hoursNote":"(per month)", "rate":"$16.58 per hour*",
+                  "text":"...", "features":["Priority booking"],
+                  "validity":"...", "cta":"Choose Vita Restore",
+                  "emphasis":true, "period":"a month" }],
+       "footnotes":["*..."] }
+     ================================================================== */
+  var OFFER_ROWS = ['name', 'price', 'hours', 'rate', 'text', 'features', 'validity', 'cta'];
+
+  function offers(b, ctx) {
+    var section = el('section', 'offers offers--' + (b.variant || 'cards'));
+    var titleId = null;
+    if (b.title) {
+      var t = el('h3', 'offers__title', b.title);
+      titleId = t.id = 'offers-' + Math.random().toString(36).slice(2, 7);
+      section.appendChild(t);
+      section.setAttribute('aria-labelledby', titleId);
+    }
+    if (b.intro) section.appendChild(el('p', 'offers__intro', b.intro));
+
+    /* Only the rows some item actually uses become grid rows. */
+    var rows = OFFER_ROWS.filter(function (r) {
+      if (r === 'name' || r === 'price' || r === 'cta') return true;
+      return (b.items || []).some(function (i) {
+        return r === 'features' ? (i.features && i.features.length) : i[r];
+      });
+    });
+
+    var list = el('ul', 'offers__list');
+    list.style.setProperty('--rows', rows.length);
+    list.style.setProperty('--cols', (b.items || []).length);
+
+    (b.items || []).forEach(function (item) {
+      var li = el('li', 'offer' + (item.emphasis ? ' offer--emphasis' : ''));
+      rows.forEach(function (r) {
+        var cell;
+        if (r === 'name') {
+          cell = el(b.title ? 'h4' : 'h3', 'offer__name', item.name);
+        } else if (r === 'price') {
+          cell = el('p', 'offer__price');
+          cell.appendChild(el('span', 'offer__amount', money(item.price)));
+          if (item.per) cell.appendChild(el('span', 'offer__per', item.per));
+        } else if (r === 'hours') {
+          cell = el('p', 'offer__hours');
+          if (item.hours) cell.appendChild(el('span', 'offer__hours-main', item.hours));
+          if (item.hoursNote) cell.appendChild(el('span', 'offer__hours-note', item.hoursNote));
+        } else if (r === 'rate') {
+          cell = el('p', 'offer__rate', item.rate || '');
+        } else if (r === 'text') {
+          cell = el('p', 'offer__text', item.text || '');
+        } else if (r === 'features') {
+          cell = el('ul', 'offer__features');
+          (item.features || []).forEach(function (f) {
+            var fi = el('li');
+            fi.appendChild(richText(f));
+            cell.appendChild(fi);
+          });
+        } else if (r === 'validity') {
+          cell = el('p', 'offer__validity', item.validity || '');
+        } else {
+          cell = el('div', 'offer__action');
+          var btn = el('button', 'btn ' + (item.emphasis ? 'btn--fill' : 'btn--outline'));
+          btn.type = 'button';
+          btn.appendChild(el('span', 'btn__label', item.cta || ('View ' + item.name)));
+          btn.appendChild(arrowMark(false));
+          btn.addEventListener('click', function () {
+            ctx.record.note('chose-offer', item.id);
+            var offer = { id: item.id, name: item.name, price: item.price, period: item.period || null };
+            if (!ctx.leave(item.link || item.id, offer) && item.to) ctx.navigate(item.to);
+          });
+          cell.appendChild(btn);
+        }
+        cell.classList.add('offer__cell', 'offer__cell--' + r);
+        li.appendChild(cell);
+      });
+      list.appendChild(li);
+    });
+    section.appendChild(list);
+
+    (b.footnotes || []).forEach(function (fn) {
+      section.appendChild(el('p', 'offers__footnote', fn));
+    });
+    return section;
+  }
+
+  /* ==================================================================
+     BLOCK: memberNote - the membership worth knowing about, set beside
+     the hour passes: the saving, what it is measured against, and
+     the terms, kept together so none of it reads without the rest.
+
+     { "type":"memberNote", "kicker":"...", "text":"...",
+       "big":"more than 1/2 OFF", "bigAfter":"our standard $100 hourly rate.",
+       "detail":"**Discounted hourly rate:** ...", "italic":"...",
+       "terms":"line\nline", "action":{"label":"...","to":"S10"} }
+     ================================================================== */
+  function memberNote(b, ctx) {
+    var n = el('section', 'member-note');
+    if (b.kicker) n.appendChild(el('h3', 'member-note__kicker', b.kicker));
+    if (b.text) n.appendChild(paragraphs(b.text, 'member-note__text'));
+    if (b.big) {
+      var save = el('p', 'member-note__save');
+      save.appendChild(el('span', 'member-note__big', b.big));
+      if (b.bigAfter) save.appendChild(el('span', 'member-note__vs', b.bigAfter));
+      n.appendChild(save);
+    }
+    if (b.detail) n.appendChild(paragraphs(b.detail, 'member-note__detail'));
+    if (b.italic) n.appendChild(el('p', 'member-note__italic', b.italic));
+    if (b.terms) n.appendChild(paragraphs(b.terms, 'member-note__terms'));
+    if (b.action) n.appendChild(actionButton(b.action, ctx, 'member-note__action'));
+    return n;
+  }
+
+  /* ==================================================================
+     BLOCK: explore - a panel that points to everything at once: a
+     heading, a few informational rows (not buttons), and one action.
+
+     { "type":"explore", "title":"...", "intro":"...",
+       "rows":[{"h":"Residential systems","t":"..."}],
+       "action":{"label":"Explore all options","href":"https://..."},
+       "caption":"access.radiantwavelounge.com" }
+     ================================================================== */
+  function explore(b, ctx) {
+    var n = el('section', 'explore');
+    if (b.title) n.appendChild(el('h3', 'explore__title', b.title));
+    if (b.intro) n.appendChild(el('p', 'explore__intro', b.intro));
+    if (b.rows && b.rows.length) {
+      var dl = el('dl', 'explore__rows');
+      b.rows.forEach(function (r) {
+        var row = el('div', 'explore__row');
+        row.appendChild(el('dt', null, r.h));
+        row.appendChild(el('dd', null, r.t));
+        dl.appendChild(row);
+      });
+      n.appendChild(dl);
+    }
+    if (b.action) n.appendChild(actionButton(b.action, ctx, 'btn--block'));
+    if (b.caption) n.appendChild(el('p', 'explore__caption', b.caption));
+    return n;
+  }
+
   /* ================================================================== */
 
   var BLOCKS = {
@@ -1170,7 +1365,10 @@
     counter: counter,
     compare: compare,
     form: form,
-    ghlForm: ghlForm
+    ghlForm: ghlForm,
+    offers: offers,
+    memberNote: memberNote,
+    explore: explore
   };
 
   window.IDecideBlocks = {

@@ -17,14 +17,14 @@ window.FUNNEL = {
   },
 
   "theme": {
-    "paper": "#EFE9DC",
-    "paper-deep": "#E4DCCB",
-    "paper-edge": "#D6CCB8",
-    "ink": "#241C16",
-    "ink-soft": "#6E5F52",
-    "copper": "#9A5527",
-    "copper-deep": "#874818",
-    "copper-lift": "#B2683A",
+    "paper": "#F3EEE3",
+    "paper-deep": "#EAE2D3",
+    "paper-edge": "#C7A984",
+    "ink": "#302922",
+    "ink-soft": "#6B5D50",
+    "copper": "#A97243",
+    "copper-deep": "#8F5837",
+    "copper-lift": "#B98457",
     "patina": "#4E6F66",
     "room": "#16110E"
   },
@@ -129,11 +129,13 @@ window.FUNNEL = {
     "S3": {
       "name": "The Sort",
       "zone": "Spine",
-      "note": "Every lead passes through here. All five choices carry equal weight — no primary. You are sorting, not steering.",
-      "heading": "Before we go further,\nwhich one is _actually you?_",
+      "display": true,
+      "note": "Every lead passes through here. All five choices carry equal weight — no primary. You are sorting, not steering. Wording on this screen is fixed by the brief; restyle only.",
+      "heading": "Before we go further,\nwhich one is\n_actually you?_",
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "lede": true,
           "text": "There's **no wrong answer**. But there is a _right one for you,_ and the rest of this changes based on what you pick."
         }
@@ -201,24 +203,27 @@ window.FUNNEL = {
     "S4": {
       "name": "Owner",
       "zone": "Branch",
-      "note": "The trial choice is the money button — nobody buys $40,000 off a presentation. What you're competing for is a visit, which is why it sits second and carries the only primary weight.",
-      "heading": "You're not looking for an appointment.",
+      "display": true,
+      "kicker": false,
+      "note": "Someone weighing a home system values control: their space, their time, their terms. No pricing on this screen - verified prices live on the system pages.",
+      "eyebrow": "Radiant Wave at home",
+      "heading": "Your space.\nYour time.\n_Your terms._",
       "blocks": [
-        {
-          "type": "prose",
-          "text": "You're looking for the thing itself. In your house. On your schedule. No booking, no driving, no sharing it with anyone.\n\nWe understand completely. It's why we built the Lounge in the first place.\n\nWe're an authorized distributor for all three residential configurations, and we schedule delivery in the order systems are reserved."
-        }
+        { "type": "prose", "side": "head", "style": "benefit", "text": "No bookings. No driving. No shared space." },
+        { "type": "prose", "style": "title", "text": "A residential system of your own." },
+        { "type": "prose", "lede": true, "text": "Enjoy in the privacy of your own home and the freedom to use your system on your schedule." },
+        { "type": "prose", "style": "fact", "text": "Three residential systems\nAuthorized distributor for all three configurations." }
       ],
       "choices": [
-        { "label": "See the three residential systems", "to": "S11" },
-        { "label": "Can I try one before I buy one?", "to": "S4b", "weight": "primary" },
-        { "label": "Reserve my place in the delivery order", "to": "S13" },
-        { "label": "What does the Lounge feel like first?", "to": "S7a", "weight": "quiet" }
+        { "label": "Compare the three systems", "to": "S11", "weight": "primary" },
+        { "label": "Experience the Lounge first", "to": "S9", "weight": "outline" },
+        { "label": "View reservation details", "to": "S13", "weight": "link" }
       ]
     },
 
     "S4b": {
       "name": "Credited Trial",
+      "parked": true,
       "zone": "Depth",
       "note": "Telling a five-figure prospect not to buy yet is the most credible thing you can say to them. Never soften that first line.",
       "heading": "Yes. And frankly, you should.",
@@ -229,7 +234,7 @@ window.FUNNEL = {
         }
       ],
       "choices": [
-        { "label": "Book the three hours, $157", "to": "S9", "weight": "primary" },
+        { "label": "View the Lounge Experience Passes", "to": "S9", "weight": "primary" },
         { "label": "See the systems first", "to": "S11" }
       ]
     },
@@ -282,7 +287,7 @@ window.FUNNEL = {
         }
       ],
       "choices": [
-        { "label": "Book three hours, $157", "link": "pack-3", "to": "S14", "weight": "primary" },
+        { "label": "View three-hour pack, $157", "link": "pack-3", "to": "S14", "weight": "primary" },
         { "label": "Just one hour first, $100", "link": "hour-1", "to": "S14" },
         { "label": "This week is already full", "to": "S5c", "weight": "quiet" }
       ]
@@ -568,84 +573,105 @@ window.FUNNEL = {
     },
 
     "S9": {
-      "name": "A La Carte",
+      "name": "Lounge Experience Passes",
       "zone": "Offer",
-      "note": "Volunteering the better deal costs a little pack margin and buys a lot of trust, which you convert at S10.",
-      "heading": "Try it before you commit to anything.",
+      "display": true,
+      "split": "third",
+      "kicker": false,
+      "note": "One-time passes on the right; the membership worth knowing about on the left. 'more than 1/2 OFF' compares the membership's full-use rate with the standard $100 hour only - never with the packs. No street address or domain on this screen.",
+      "eyebrow": "Radiant Wave Lounge · Richmond, Virginia",
+      "heading": "Let the world wait.\nMake time\n_for yourself._",
       "blocks": [
         {
-          "type": "prose",
-          "text": "Standard Lounge access is $100 an hour. These packs must be used within 90 days."
+          "type": "memberNote",
+          "side": "head",
+          "kicker": "Worth knowing before you choose",
+          "text": "Vita Recharge membership is our limited-time thank-you to founding members.",
+          "big": "more than 1/2 OFF",
+          "bigAfter": "our standard $100 hourly rate.",
+          "detail": "**Discounted hourly rate:** $19.85/hour when all 20 monthly hours are used.",
+          "italic": "Try three hours, then decide.",
+          "terms": "$397/month for 20 Lounge hours.\nRenews monthly. Six-month minimum.",
+          "action": { "label": "Explore membership packages", "to": "S10" }
         },
         {
-          "type": "ladder",
-          "label": "Hour packs",
-          "rowLabels": ["Price", "Per hour", "Good for"],
+          "type": "offers",
+          "variant": "columns",
+          "title": "Lounge Experience Passes",
+          "intro": "One-time purchases. No monthly renewal.",
           "items": [
-            { "id": "hour-1", "name": "Single hour", "price": 100, "unit": "$100 an hour", "note": "Walk in, see for yourself" },
-            { "id": "pack-3", "name": "Three-hour pack", "price": 157, "unit": "$52 an hour", "note": "Most people start here", "default": true },
-            { "id": "pack-10", "name": "Ten-hour pack", "price": 379, "unit": "$38 an hour", "note": "Best value before membership" }
+            {
+              "id": "hour-1", "name": "One-Hour Pass", "price": 100, "per": "total",
+              "hours": "1 Lounge hour",
+              "text": "An introduction to the Lounge.",
+              "validity": "Use within 60 days of purchase",
+              "cta": "View one-hour pass"
+            },
+            {
+              "id": "pack-3", "name": "Three-Hour Pack", "price": 157, "per": "total",
+              "hours": "3 Lounge hours", "rate": "About $52.33 per hour",
+              "text": "More time to explore the experience.",
+              "validity": "Use within 90 days",
+              "cta": "View three-hour pack", "emphasis": true
+            },
+            {
+              "id": "pack-10", "name": "Ten-Hour Pack", "price": 379, "per": "total",
+              "hours": "10 Lounge hours", "rate": "$37.90 per hour",
+              "text": "The lowest hourly rate of these packs.",
+              "validity": "Use within 90 days",
+              "cta": "View ten-hour pack"
+            }
           ]
-        },
-        {
-          "type": "aside",
-          "text": "Worth knowing before you choose: Vita Recharge is $397 a month for 20 hours. That's less per hour than any pack above, and it renews.\n\nMost people buy the three-hour pack, come back twice, and switch to membership within the month. We'd rather tell you now than let you find out later."
         }
-      ],
-      "choices": [
-        { "label": "Book the {offer}", "note": "{offerPrice}", "link": "offer", "to": "S14", "weight": "primary" },
-        { "label": "Compare memberships first", "to": "S10" }
       ]
     },
 
     "S10": {
-      "name": "Memberships",
+      "name": "Founding Memberships",
       "zone": "Offer",
-      "note": "Restore wins because it's flanked: Recharge makes it look generous, Radiate makes it look sensible, and the guest pass gives it a feature Recharge lacks. Expect around 55% here.",
-      "heading": "Three ways to belong.",
+      "layout": "banner",
+      "display": true,
+      "kicker": false,
+      "note": "Vita Restore carries the visual emphasis only - no 'most popular' claim, nothing preselected. Recurring billing terms are shown at checkout, not on this banner. No numeric scarcity.",
+      "eyebrow": "Radiant Wave Lounge · Richmond, Virginia",
+      "heading": "Your time to unwind.\n_Your rate to keep._",
       "blocks": [
+        { "type": "prose", "style": "center", "lede": true, "text": "Limited founding memberships. Your rate stays fixed for as long as you remain a member." },
+        { "type": "prose", "style": "terms", "text": "Six-month minimum" },
         {
-          "type": "prose",
-          "text": "All memberships require autopay with a six-month minimum. Founding rates hold for as long as you're a member."
-        },
-        {
-          "type": "ladder",
-          "label": "Membership tiers",
-          "rowLabels": ["Price", "Hours", "What's included"],
+          "type": "offers",
+          "variant": "cards",
           "items": [
             {
-              "id": "vita-recharge",
-              "name": "Vita Recharge",
-              "price": 397,
-              "period": "a month",
-              "unit": "20 hours, $19.85 an hour",
-              "note": "20 hours at our standard $100 rate is $2,000 of access.\nMember booking window. Founding rate locked."
+              "id": "vita-recharge", "name": "Vita Recharge", "price": 397, "per": "/month", "period": "a month",
+              "hours": "20 Lounge hours", "hoursNote": "(per month)", "rate": "$19.85 per hour*",
+              "features": ["Member booking window", "$2,000 at the standard hourly rate"],
+              "cta": "Choose Vita Recharge"
             },
             {
-              "id": "vita-restore",
-              "name": "Vita Restore",
-              "price": 597,
-              "period": "a month",
-              "unit": "36 hours, $16.58 an hour",
-              "default": true,
-              "note": "36 hours at our standard rate is $3,600 of access.\nPriority booking. One guest pass monthly. Founding rate locked."
+              "id": "vita-restore", "name": "Vita Restore", "price": 597, "per": "/month", "period": "a month",
+              "hours": "36 Lounge hours", "hoursNote": "(per month)", "rate": "$16.58 per hour*",
+              "features": ["Priority booking", "1 guest pass each month", "$3,600 at the standard hourly rate"],
+              "cta": "Choose Vita Restore", "emphasis": true
             },
             {
-              "id": "vita-radiate",
-              "name": "Vita Radiate",
-              "price": 897,
-              "period": "a month",
-              "unit": "Unlimited",
-              "note": "At three visits a week you're past $1,200 of access, and nowhere near a ceiling.\nFirst priority booking. Two guest passes monthly. First position in the delivery order."
+              "id": "vita-radiate", "name": "Vita Radiate", "price": 897, "per": "/month", "period": "a month",
+              "hours": "Unlimited Lounge hours", "hoursNote": "(per month)",
+              "features": ["First-priority booking", "2 guest passes each month", "Priority in the system delivery order†"],
+              "cta": "Choose Vita Radiate"
             }
+          ],
+          "footnotes": [
+            "*Hourly equivalents assume all included monthly hours are used. Standard access comparisons use $100/hour.",
+            "†Delivery priority applies to members purchasing a residential system."
           ]
         }
       ],
       "choices": [
-        { "label": "Start {offer}", "note": "{offerPrice} a month, six-month minimum", "link": "offer", "to": "S14", "weight": "primary" },
-        { "label": "I have a question first", "to": "S12" },
-        { "label": "Show me the hour packs instead", "to": "S9", "weight": "quiet" }
-      ]
+        { "label": "I have a question first", "to": "S12", "weight": "link" },
+        { "label": "Show me the hour packs instead", "to": "S9", "weight": "link" }
+      ],
+      "footer": "7110 Forest Road, Suite 103, Richmond, Virginia 23226"
     },
 
     "S11": {
@@ -656,12 +682,12 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
-          "text": "The same technology that's in the Lounge, in three residential configurations. Introductory pricing ends 31 October 2026."
+          "text": "The same technology that's in the Lounge, in three residential configurations."
         },
         {
           "type": "compare",
           "caption": "Plus applicable Virginia sales tax.",
-          "columns": ["", "Advanced", "Elite", "Elite II"],
+          "columns": ["", "Advance", "Elite", "Elite 2"],
           "rows": [
             ["Screens", "Four 27-inch", "Four 32-inch", "Eight 32-inch, stacked"],
             ["Surface", "~1,200 sq in", "~1,700 sq in", "~3,400 sq in"],
@@ -672,28 +698,28 @@ window.FUNNEL = {
         },
         {
           "type": "aside",
-          "text": "Elite II costs 25% more than Elite and delivers twice the screen surface. Per square inch, it's roughly half the cost of Advanced. If the room can take it, it's not a close call."
+          "text": "Elite 2 costs 25% more than Elite and delivers twice the screen surface. Per square inch, it's roughly half the cost of Advance. If the room can take it, it's not a close call."
         }
       ],
       "choices": [
-        { "label": "Advanced", "note": "$26,999", "to": "S11a", "set": { "system": "Advanced" } },
+        { "label": "Advance", "note": "$26,999", "to": "S11a", "set": { "system": "Advance" } },
         { "label": "Elite", "note": "$31,999", "to": "S11b", "set": { "system": "Elite" } },
-        { "label": "Elite II", "note": "$39,999, best value", "to": "S11c", "weight": "primary", "set": { "system": "Elite II" } },
-        { "label": "Book the three hours first, $157", "to": "S9", "weight": "quiet" }
+        { "label": "Elite 2", "note": "$39,999, best value", "to": "S11c", "weight": "primary", "set": { "system": "Elite 2" } },
+        { "label": "Experience the Lounge first", "to": "S9", "weight": "quiet" }
       ]
     },
 
     "S11a": {
-      "name": "Advanced",
+      "name": "Advance",
       "zone": "Offer",
-      "heading": "Advanced Residential System",
+      "heading": "Advance Residential System",
       "blocks": [
         { "type": "spec", "text": "Four 27-inch screens, around 1,200 square inches, built for medium rooms" },
         {
           "type": "price",
           "was": "MSRP $49,997",
           "now": "$26,999",
-          "sub": "You save $22,998. Ends 31 October 2026, plus Virginia sales tax."
+          "sub": "You save $22,998. Plus Virginia sales tax."
         },
         {
           "type": "prose",
@@ -701,18 +727,18 @@ window.FUNNEL = {
         },
         {
           "type": "aside",
-          "text": "Considering the step up? Elite II delivers nearly three times this screen surface for $13,000 more, at roughly half the cost per square inch."
+          "text": "Considering the step up? Elite 2 delivers nearly three times this screen surface for $13,000 more, at roughly half the cost per square inch."
         },
         {
           "type": "plates",
           "items": [
-            { "src": "assets/media/system-advanced.jpg", "whole": true, "alt": "The Advanced system: four 27-inch screens on stands, about 1,200 square inches of screen surface, $26,999 introductory, $22.50 per square inch." }
+            { "src": "assets/media/system-advanced.jpg", "whole": true, "alt": "The Advance system: four 27-inch screens on stands, about 1,200 square inches of screen surface, $26,999 introductory, $22.50 per square inch." }
           ]
         }
       ],
       "choices": [
-        { "label": "Book a call about Advanced", "link": "call", "to": "S16", "weight": "primary", "set": { "system": "Advanced" } },
-        { "label": "Compare with Elite II", "to": "S11c" }
+        { "label": "Book a call about Advance", "link": "call", "to": "S16", "weight": "primary", "set": { "system": "Advance" } },
+        { "label": "Compare with Elite 2", "to": "S11c" }
       ]
     },
 
@@ -726,15 +752,15 @@ window.FUNNEL = {
           "type": "price",
           "was": "MSRP $55,997",
           "now": "$31,999",
-          "sub": "You save $23,998. Ends 31 October 2026, plus Virginia sales tax."
+          "sub": "You save $23,998. Plus Virginia sales tax."
         },
         {
           "type": "prose",
-          "text": "Same four-screen architecture as Advanced, stepped up to 32-inch panels. About 40% more screen surface, for a room that can carry it."
+          "text": "Same four-screen architecture as Advance, stepped up to 32-inch panels. About 40% more screen surface, for a room that can carry it."
         },
         {
           "type": "aside",
-          "text": "Before you decide: Elite II is $8,000 more and delivers double this screen surface. If you have the room, it's the better buy, and we'd rather tell you that now."
+          "text": "Before you decide: Elite 2 is $8,000 more and delivers double this screen surface. If you have the room, it's the better buy, and we'd rather tell you that now."
         },
         {
           "type": "plates",
@@ -745,21 +771,21 @@ window.FUNNEL = {
       ],
       "choices": [
         { "label": "Book a call about Elite", "link": "call", "to": "S16", "weight": "primary", "set": { "system": "Elite" } },
-        { "label": "Show me Elite II", "to": "S11c" }
+        { "label": "Show me Elite 2", "to": "S11c" }
       ]
     },
 
     "S11c": {
-      "name": "Elite II",
+      "name": "Elite 2",
       "zone": "Offer",
-      "heading": "Elite II Residential System",
+      "heading": "Elite 2 Residential System",
       "blocks": [
         { "type": "spec", "text": "Eight 32-inch screens, double-stacked, around 3,400 square inches, extra-large rooms" },
         {
           "type": "price",
           "was": "MSRP $69,997",
           "now": "$39,999",
-          "sub": "You save $29,998. Ends 31 October 2026, plus Virginia sales tax."
+          "sub": "You save $29,998. Plus Virginia sales tax."
         },
         {
           "type": "prose",
@@ -767,18 +793,18 @@ window.FUNNEL = {
         },
         {
           "type": "aside",
-          "text": "The value case: $11.76 per square inch of screen surface, against $22.50 for Advanced. Elite II is the least expensive way to own this technology at scale."
+          "text": "The value case: $11.76 per square inch of screen surface, against $22.50 for Advance. Elite 2 is the least expensive way to own this technology at scale."
         },
         {
           "type": "plates",
           "items": [
-            { "src": "assets/media/system-elite-2.jpg", "whole": true, "alt": "The Elite II system: eight 32-inch screens stacked in a wall, about 3,400 square inches of screen surface, $39,999 introductory, $11.76 per square inch." }
+            { "src": "assets/media/system-elite-2.jpg", "whole": true, "alt": "The Elite 2 system: eight 32-inch screens stacked in a wall, about 3,400 square inches of screen surface, $39,999 introductory, $11.76 per square inch." }
           ]
         }
       ],
       "choices": [
-        { "label": "Book a call about Elite II", "link": "call", "to": "S16", "weight": "primary", "set": { "system": "Elite II" } },
-        { "label": "Book three hours in the Lounge first, $157", "to": "S9", "weight": "quiet" }
+        { "label": "Book a call about Elite 2", "link": "call", "to": "S16", "weight": "primary", "set": { "system": "Elite 2" } },
+        { "label": "Experience the Lounge first", "to": "S9", "weight": "quiet" }
       ]
     },
 
@@ -815,7 +841,7 @@ window.FUNNEL = {
         }
       ],
       "choices": [
-        { "label": "Book three hours, $157", "to": "S9", "weight": "primary" },
+        { "label": "View the Lounge Experience Passes", "to": "S9", "weight": "primary" },
         { "label": "See all three tiers", "to": "S10" },
         { "label": "Book a call", "link": "call", "to": "S16" }
       ]
@@ -847,17 +873,23 @@ window.FUNNEL = {
     "S13": {
       "name": "Reservation",
       "zone": "Capture",
-      "note": "Never pre-check the consent box. Room dimensions is the highest-value field on this branch — someone who can name a room has already picked it.",
-      "heading": "You're early. That's the whole advantage.",
+      "display": true,
+      "kicker": false,
+      "note": "Never pre-check the consent box. Room dimensions is the highest-value field on this branch — someone who can name a room has already picked it. 'REQUEST RECEIVED' shows only after the webhook accepts the submission (requireDelivery). The form records a request: it does not allocate a system, take payment or start a membership.",
+      "heading": "You're early.\nThat's the\n_whole advantage._",
       "blocks": [
         {
           "type": "prose",
-          "text": "Reserving now holds your delivery position and locks founding Lounge rates in the meantime."
+          "side": "head",
+          "lede": true,
+          "text": "Reserving now **holds your delivery position** and **locks founding Lounge rates** in the meantime."
         },
-        { "type": "summary" },
         {
           "type": "form",
           "role": "capture",
+          "panel": true,
+          "requireDelivery": true,
+          "title": "Reserve your place",
           "submit": "Hold my place",
           "consent": "Yes, contact me by phone, text and email. Message and data rates may apply. Reply STOP to opt out.",
           "consentRequired": true,
@@ -868,7 +900,7 @@ window.FUNNEL = {
             { "name": "mobile", "label": "Mobile", "type": "tel", "required": true },
             {
               "name": "system", "label": "Which system?", "type": "select",
-              "options": ["Not sure yet", "Advanced", "Elite", "Elite II"]
+              "options": ["Not sure yet", "Elite", "Elite 2", "Advance"]
             },
             {
               "name": "roomReady", "label": "Dedicated room in mind?", "type": "select",
@@ -876,12 +908,39 @@ window.FUNNEL = {
             },
             { "name": "roomSize", "label": "Room dimensions, roughly", "full": true }
           ],
-          "done": {
-            "heading": "Your place is held.",
-            "text": "Someone from the Richmond team will call within one business day to confirm the position and answer whatever's still open.",
-            "to": "S10",
-            "toLabel": "See the membership tiers while you wait"
-          }
+          "done": { "slide": "S13r" }
+        }
+      ]
+    },
+
+    "S13r": {
+      "name": "Request Received",
+      "zone": "Capture",
+      "display": true,
+      "kicker": false,
+      "requires": "S13",
+      "note": "Confirms receipt of a request - not payment, an active membership or an allocated system. Only reachable after S13 delivers. 'Explore all options' leads to the access hub for every offer.",
+      "eyebrow": "Request received",
+      "eyebrowMark": "check",
+      "heading": "Your next step.\n_Your choice._",
+      "blocks": [
+        {
+          "type": "prose",
+          "side": "head",
+          "lede": true,
+          "text": "Our Richmond team will call **within one business day** to confirm your position and answer your questions."
+        },
+        {
+          "type": "explore",
+          "title": "Explore Radiant Wave",
+          "intro": "Systems, visits and memberships—all in one place.",
+          "rows": [
+            { "h": "Residential systems", "t": "View details for Elite, Elite 2 and Advance." },
+            { "h": "One-hour Lounge visits", "t": "Choose a session that fits your schedule." },
+            { "h": "Lounge memberships", "t": "Explore monthly membership options." }
+          ],
+          "action": { "label": "Explore all options", "href": "https://access.radiantwavelounge.com" },
+          "caption": "access.radiantwavelounge.com"
         }
       ]
     },
@@ -937,9 +996,9 @@ window.FUNNEL = {
           "type": "compare",
           "columns": ["", "Today", "Then"],
           "rows": [
-            ["Advanced", "$13,499", "$4,500 × 3"],
+            ["Advance", "$13,499", "$4,500 × 3"],
             ["Elite", "$16,000", "$5,333 × 3"],
-            ["Elite II", "$20,001", "$6,666 × 3"]
+            ["Elite 2", "$20,001", "$6,666 × 3"]
           ]
         },
         {
@@ -977,7 +1036,7 @@ window.FUNNEL = {
             { "name": "mobile", "label": "Mobile", "type": "tel", "required": true },
             {
               "name": "system", "label": "System of interest", "type": "select",
-              "options": ["Not sure yet", "Advanced", "Elite", "Elite II"]
+              "options": ["Not sure yet", "Elite", "Elite 2", "Advance"]
             },
             {
               "name": "timeline", "label": "Timeline", "type": "select",
@@ -1047,7 +1106,7 @@ window.FUNNEL = {
         }
       ],
       "choices": [
-        { "label": "Book three hours first, $157", "to": "S9", "weight": "quiet" }
+        { "label": "Experience the Lounge first", "to": "S9", "weight": "quiet" }
       ]
     }
   }

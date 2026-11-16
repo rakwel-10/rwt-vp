@@ -170,6 +170,15 @@
         console.info('Paste the GoHighLevel webhook URL into config.js -> handoff.webhookUrl to send this.');
         console.groupEnd();
         showPayload(body);
+        /* A form marked "requireDelivery" promises the visitor their
+           request was received, so with nowhere to send it, it says it
+           was not. ?debug=1 lets a reviewer see the confirmation anyway. */
+        if (formBlock.requireDelivery && !DEBUG_ON) {
+          return Promise.resolve({
+            ok: false,
+            message: 'Your request could not be sent from this page yet. Please try again later.'
+          });
+        }
         return Promise.resolve({ ok: true, delivered: false });
       }
 
@@ -265,7 +274,8 @@
   }
 
   function ctx() {
-    return { record: Record, navigate: navigate, debug: debug, funnel: funnel, register: markRegistered };
+    return { record: Record, navigate: navigate, debug: debug, funnel: funnel, register: markRegistered,
+             leave: leaveFor, go: runAction, markDone: markDone, slideId: currentId };
   }
 
   /* ==================================================================
@@ -289,6 +299,14 @@
 
     if (slide.kind !== 'entry' && slideId !== funnel.meta.start && !isRegistered()) {
       navigate(funnel.meta.start);
+      return;
+    }
+
+    /* A confirmation screen ("requires": the form slide's id) only shows
+       once that form has actually been delivered in this browser tab -
+       a bookmarked #/S13r can't claim a request that was never sent. */
+    if (slide.requires && !isDone(slide.requires)) {
+      navigate(slide.requires);
       return;
     }
 
@@ -364,6 +382,8 @@
 
     var article = el('article', 'slide slide--' + layout +
       (slide.wide ? ' slide--wide' : '') +
+      (slide.split ? ' slide--split-' + slide.split : '') +
+      (slide.display ? ' slide--display' : '') +
       (slide.kind === 'entry' ? ' slide--entry' : ''));
     article.setAttribute('aria-labelledby', 'slide-head');
 
@@ -389,7 +409,13 @@
     }
 
     if (slide.eyebrow) {
-      var eb = el('p', 'eyebrow');
+      var eb = el('p', 'eyebrow' + (slide.eyebrowMark ? ' eyebrow--mark' : ''));
+      if (slide.eyebrowMark === 'check') {
+        var mk = el('span', 'eyebrow__mark');
+        mk.setAttribute('aria-hidden', 'true');
+        mk.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10.5"/><path d="M7.5 12.4l3 3 6-6.4"/></svg>';
+        eb.appendChild(mk);
+      }
       String(slide.eyebrow).split('\n').forEach(function (line, i) {
         if (i === 0) eb.appendChild(document.createTextNode(line));
         else eb.appendChild(el('span', null, line));
@@ -404,7 +430,7 @@
          own block, so only the lines after it need a <br> between them. */
       var headLines = String(slide.heading).split('\n');
       var bodyLines = headLines;
-      if (headLines.length > 1) {
+      if (headLines.length > 1 && slide.kicker !== false) {
         var lead = el('span', 'head__lead');
         lead.appendChild(B.richText(headLines[0]));
         h.appendChild(lead);
@@ -463,8 +489,11 @@
       var body = el('div', 'cols__body');
       while (host.firstChild) head.appendChild(host.firstChild);
 
+      /* "side":"head" keeps a block under the heading in the left
+         column - the reassurance under a question, the story beside
+         a form - instead of sending it down the right. */
       (slide.blocks || []).forEach(function (block) {
-        body.appendChild(B.render(block, ctx()));
+        (block.side === 'head' ? head : body).appendChild(B.render(block, ctx()));
       });
 
       liftLogo(body);
@@ -521,6 +550,10 @@
     if (slide.disclaimer) {
       (choiceHost || host).appendChild(el('p', 'disclaimer', slide.disclaimer));
     }
+    /* a closing line under everything - the Lounge's address */
+    if (slide.footer) {
+      (choiceHost || host).appendChild(el('p', 'slide__footer', slide.footer));
+    }
 
     stage.appendChild(article);
     if (back) back.hidden = Record.state.path.length < 2;
@@ -574,7 +607,12 @@
     /* How many there are decides whether they sit two, three or four
        across. Exits are pulled out of the count - they always get
        their own line. */
-    var acting = slide.choices.filter(function (c) { return (c.weight || 'secondary') !== 'quiet'; });
+    /* "quiet" and "link" are text links, not plates - they never count
+       toward the row and always take a line of their own. */
+    var acting = slide.choices.filter(function (c) {
+      var w = c.weight || 'secondary';
+      return w !== 'quiet' && w !== 'link';
+    });
     wrap.dataset.count = acting.length;
     wrap.dataset.longest = acting.reduce(function (n, c) {
       return Math.max(n, B.plainText(c.label).length);
@@ -600,7 +638,7 @@
       /* A choice that goes on to another slide gets a trailing arrow
          plate - the out-link ones already carry their own mark below. */
       if (weight !== 'quiet' && c.to && !c.link) {
-        var onward = el('span', 'choice__arrow', '→');
+        var onward = el('span', 'choice__arrow' + (weight === 'link' ? ' choice__arrow--bare' : ''), '→');
         onward.setAttribute('aria-hidden', 'true');
         btn.appendChild(onward);
       }
@@ -888,6 +926,38 @@
     return true;
   }
 
+  /* --- completed forms, per tab ---------------------------------- */
+  function markDone(slideId) {
+    try { sessionStorage.setItem('idecide:done:' + slideId, '1'); } catch (e) { /* private mode */ }
+  }
+  function isDone(slideId) {
+    try { return !!sessionStorage.getItem('idecide:done:' + slideId); } catch (e) { return false; }
+  }
+
+  /* A product button inside a block (a membership card, a pass
+     column): record which product it is, then leave for that
+     product's own page from config.js -> ghl.checkout. Returns false
+     when no page is configured, so the caller can fall back. */
+  function leaveFor(link, offer) {
+    if (offer) Record.setOffer(offer);
+    return goToGhl({ link: link });
+  }
+
+  /* One shape for every action a block can carry:
+       { "to": "S10" }            another slide
+       { "link": "pack-3" }       a product page from config.js
+       { "href": "https://..." }  a fixed outside address */
+  function runAction(a) {
+    if (!a) return;
+    if (a.link && leaveFor(a.link, a.offer)) return;
+    if (a.href) {
+      Record.note('left-for', a.href);
+      window.location.assign(withParams(a.href));
+      return;
+    }
+    if (a.to) navigate(a.to);
+  }
+
   function goBack() {
     if (Record.state.path.length > 1) window.history.back();
   }
@@ -928,6 +998,8 @@
         if (b.advanceTo) outs.push(b.advanceTo);
         if (b.skip && b.skip.to) outs.push(b.skip.to);
         if (b.done && b.done.to) outs.push(b.done.to);
+        if (b.done && b.done.slide) outs.push(b.done.slide);
+        if (b.action && b.action.to) outs.push(b.action.to);
       });
 
       outs.forEach(function (to) {
@@ -945,7 +1017,9 @@
         if (!known) problems.push(id + ' links to "' + c.link + '", which is not in config.js -> ghl.checkout');
       });
 
-      var hasForm = (s.blocks || []).some(function (b) { return b.type === 'form'; });
+      var hasForm = (s.blocks || []).some(function (b) {
+        return b.type === 'form' || (b.action && (b.action.href || b.action.link));
+      });
       if (!outs.filter(Boolean).length && !(s.choices || []).length && !hasForm) {
         problems.push(id + ' is a dead end: no choices, no form, nowhere to go');
       }

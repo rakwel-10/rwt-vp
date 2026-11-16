@@ -13,25 +13,26 @@
   color-scheme: light;
 
   /* ground */
-  --paper:#EFE9DC;
-  --paper-lift:#F6F2E9;      /* the warm side of the field */
-  --paper-deep:#E5DDCC;
-  --paper-sink:#DCD2BE;      /* the far corner of the field */
-  --paper-edge:#D3C8B2;
+  --paper:#F3EEE3;           /* warm cream ground */
+  --paper-lift:#FBF8F2;      /* warm ivory surfaces */
+  --paper-deep:#EAE2D3;
+  --paper-sink:#E9DCC8;
+  --paper-edge:#C7A984;      /* fine copper borders and separators */
+  --paper-edge-soft:#DDC9AE; /* the same line, one step quieter */
   --line:#00000012;
 
   /* ink */
-  --ink:#231B14;
-  --ink-mid:#5C4E42;
-  --ink-soft:#6E5F52;
+  --ink:#302922;             /* espresso */
+  --ink-mid:#4A4037;
+  --ink-soft:#6B5D50;
 
   /* copper and its patina */
-  --copper:#9A5527;
-  --copper-deep:#7E4218;
-  --copper-lift:#B96C34;
-  --copper-glow:#C8763C;
-  --copper-wash:#9A552710;
-  --copper-wash-2:#9A55271F;
+  --copper:#A97243;          /* copper-gold: headline accents */
+  --copper-deep:#8F5837;     /* small accents, filled buttons */
+  --copper-lift:#B98457;
+  --copper-glow:#D6A070;
+  --copper-wash:#A9724312;
+  --copper-wash-2:#A9724324;
   --patina:#4E6F66;
   --warn:#8E3B2A;
 
@@ -46,8 +47,8 @@
   --lift-2:0 2px 4px #3A200C0F, 0 10px 24px -14px #3A200C2E;
   --lift-3:0 4px 10px #3A200C14, 0 22px 48px -20px #3A200C3D;
 
-  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
-  --ui:"Karla",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Cormorant Garamond","Cormorant",Garamond,Georgia,"Times New Roman",serif;
+  --ui:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:ui-monospace,"Cascadia Code",Consolas,monospace;
 
   --measure:36rem;
@@ -2096,4 +2097,480 @@ body.is-dark .legal a:hover,body.is-dark .legal a:focus-visible{color:var(--copp
     scroll-behavior:auto !important;
   }
   .choice:hover,.choice--primary:hover,.tile:hover,.rung:hover,.btn:hover{translate:0}
+}
+
+/* ==================================================================
+   NOVEMBER 2026 DIRECTION
+   Plain warm cream, one soft copper glow low in the right corner,
+   Cormorant for headlines and plan names, Manrope for everything a
+   visitor reads or presses. Set last so it wins over the earlier
+   layers at equal specificity; the dark film slides keep their own
+   tokens and are untouched.
+   ================================================================== */
+
+body{font-family:var(--ui)}
+body:not(.is-dark){
+  background-color:var(--paper);
+  background-image:radial-gradient(55% 50% at 100% 100%, #D9A57A30 0%, #D9A57A10 50%, transparent 80%);
+}
+/* no grain, no texture: the ground is a plain surface */
+body:not(.is-dark)::after{display:none}
+
+/* --- headlines -------------------------------------------------- */
+.head{font-family:var(--serif);font-weight:500;letter-spacing:-.012em}
+.head .accent{color:var(--copper);font-style:italic;font-weight:500}
+.slide--display .head .accent{font-weight:600}
+/* Cormorant sets old-style figures by default; prices want even ones */
+.head,.offer__amount,.offer__name,.member-note__big,.explore__title,.form__title,.offers__title{
+  font-variant-numeric:lining-nums;
+  font-feature-settings:"lnum" 1;
+}
+
+/* sans accents run in the deeper copper: they are small text, and
+   #A97243 is too light to read comfortably at body size */
+.prose .accent,
+.choice__text .accent{color:var(--copper-deep);font-weight:700}
+.prose strong{font-weight:700;color:var(--ink)}
+
+.slide--display .head{
+  font-weight:600;
+  font-size:clamp(2.9rem,5.4vw + .4rem,6.1rem);
+  line-height:.98;
+  letter-spacing:-.018em;
+  color:var(--ink);
+  text-wrap:initial;
+}
+.slide--display .head__lead{
+  font-size:.56em;
+  line-height:1.15;
+  color:var(--ink);
+  font-weight:400;
+  letter-spacing:-.01em;
+  margin-bottom:.12em;
+}
+
+/* the short copper rule that opens each banner */
+.slide--display:not(.slide--banner) .cols__head::before{
+  content:"";
+  display:block;
+  width:clamp(3.5rem,6vw,5.5rem);
+  height:2px;
+  background:var(--copper);
+  margin-bottom:clamp(1.75rem,3.5vh,2.5rem);
+}
+
+.slide--display .eyebrow{
+  font-family:var(--ui);
+  font-size:clamp(.78rem,.25vw + .7rem,.95rem);
+  font-weight:600;
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:var(--copper-deep);
+  margin:0 0 clamp(1.25rem,2.5vh,1.75rem);
+}
+.eyebrow--mark{display:flex;align-items:center;gap:1rem}
+.eyebrow__mark{display:inline-grid;color:var(--copper-deep)}
+.eyebrow__mark svg{width:2.4rem;height:2.4rem}
+
+/* --- the two-column banner -------------------------------------- */
+@media (min-width:1000px){
+  .slide--display .cols{
+    grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
+    gap:clamp(3rem,6vw,7rem);
+    align-items:center;
+  }
+  .slide--display .cols__head{position:static}
+  /* passes: the hook takes a third, the three offers the rest */
+  .slide--display.slide--split-third .cols{
+    grid-template-columns:minmax(0,1fr) minmax(0,2.05fr);
+    gap:clamp(2.5rem,4.5vw,5rem);
+    align-items:center;
+  }
+  /* a third of the width: the hook steps down so each line holds */
+  .slide--split-third .head{font-size:clamp(2.5rem,2.9vw + .3rem,4.1rem)}
+  .slide--split-third .eyebrow{letter-spacing:.2em}
+}
+.slide--display .cols__head .prose--lede,
+.slide--display .cols__head .prose{
+  margin-top:clamp(1.5rem,3vh,2.25rem);
+  font-size:clamp(1.08rem,.45vw + .95rem,1.4rem);
+  line-height:1.55;
+  color:var(--ink);
+  max-width:34rem;
+}
+.slide--display .cols__body .prose--lede{font-size:clamp(1.05rem,.35vw + .95rem,1.3rem);color:var(--ink);line-height:1.5}
+
+.prose--benefit{font-weight:500}
+.prose--title{
+  font-family:var(--ui);
+  font-size:clamp(1.35rem,.7vw + 1.1rem,1.95rem);
+  font-weight:700;
+  line-height:1.25;
+  letter-spacing:-.01em;
+  color:var(--ink);
+  margin:0 0 .6rem;
+}
+.prose--fact{
+  border-top:1px solid var(--paper-edge);
+  padding-top:1.6rem;
+  margin-top:1.75rem;
+  color:var(--ink);
+  font-size:1.05rem;
+}
+
+/* --- answer cards and actions ----------------------------------- */
+.slide--display .cols__body .choices{grid-template-columns:minmax(0,1fr);gap:1rem}
+.slide--display .choice{border-radius:22px}
+.slide--display .choice--secondary{font-size:clamp(1.05rem,.45vw + .9rem,1.35rem);min-height:clamp(4.2rem,1.4vw + 3.6rem,5.4rem)}
+
+.choice--secondary{
+  background:var(--paper-lift);
+  border-color:var(--paper-edge);
+  box-shadow:0 1px 2px #3A200C0A,0 10px 26px -18px #3A200C33;
+  color:var(--ink);
+}
+.choice--secondary:hover{
+  background:#FFFDF9;
+  border-color:var(--copper-deep);
+  color:var(--ink);
+  box-shadow:0 2px 4px #3A200C0F,0 16px 34px -20px #3A200C47;
+}
+.choice__arrow{border-color:var(--copper-deep);color:var(--copper-deep);width:2.5rem;height:2.5rem;font-size:1.05rem}
+
+/* primary: matte deep copper */
+.choice--primary,
+.btn,
+.btn--fill{
+  background:var(--copper-deep);
+  border-color:var(--copper-deep);
+  color:#FFF8EF;
+  box-shadow:0 2px 4px #3A200C14,0 14px 28px -18px #5A2E1080;
+}
+.choice--primary:hover,
+.btn:hover{
+  background:#7D4B2E;
+  box-shadow:0 2px 4px #3A200C1A,0 18px 32px -18px #5A2E1099;
+}
+.choice--primary .choice__arrow{border-color:#FFF3E2B3;color:#FFF8EF}
+.choice--primary{font-weight:600}
+
+/* outlined secondary: warm ivory with a fine copper line */
+.choice--outline,
+.btn--outline{
+  background:var(--paper-lift);
+  border:1px solid var(--paper-edge);
+  color:var(--ink);
+  box-shadow:none;
+}
+.choice--outline{font-weight:600}
+.choice--outline:hover,
+.btn--outline:hover{
+  background:#FFFDF9;
+  border-color:var(--copper-deep);
+  color:var(--ink);
+  box-shadow:0 10px 24px -18px #3A200C47;
+}
+.choice--outline .choice__arrow{border:0;width:auto;height:auto;font-size:1.35rem}
+
+/* a text link with its arrow - tertiary */
+.choice--link{
+  grid-column:1/-1;
+  justify-content:flex-start;
+  gap:.6rem;
+  min-height:0;
+  width:auto;
+  padding:.5rem .1rem;
+  background:none;
+  border:0;
+  box-shadow:none;
+  color:var(--ink);
+  font-weight:500;
+}
+.choice--link .choice__text{flex:0 1 auto}
+.choice--link:hover{color:var(--copper-deep);translate:0;box-shadow:none;background:none}
+.choice--link:hover .choice__text{text-decoration:underline;text-underline-offset:4px}
+.choice__arrow--bare{border:0;width:auto;height:auto;font-size:1.2rem}
+
+.choice:focus-visible,
+.btn:focus-visible{outline:2px solid var(--copper-deep);outline-offset:3px}
+
+/* --- buttons ---------------------------------------------------- */
+.btn{
+  justify-content:center;
+  gap:.85rem;
+  border-radius:14px;
+  padding:1rem 1.6rem;
+  font-size:clamp(1rem,.2vw + .95rem,1.1rem);
+  font-weight:600;
+}
+.btn--outline{color:var(--ink)}
+.btn:disabled,.btn:disabled:hover{background:var(--paper-edge);border-color:var(--paper-edge);color:#FFF8EF;box-shadow:none}
+.btn--block{width:100%;position:relative;padding-block:1.15rem;font-size:clamp(1.05rem,.5vw + .9rem,1.35rem)}
+.btn--block .arrow--circle{position:absolute;right:1.25rem}
+.arrow{display:inline-grid;place-items:center;flex:0 0 auto}
+.arrow svg{width:1.25em;height:1.25em}
+.arrow--circle svg{width:2.1rem;height:2.1rem}
+
+/* --- the reservation form as a panel ----------------------------- */
+.form--panel{
+  margin:0;
+  background:var(--paper-lift);
+  border:1px solid var(--paper-edge);
+  border-radius:28px;
+  padding:clamp(1.5rem,3vw,2.6rem);
+  box-shadow:0 2px 6px #3A200C0A,0 30px 60px -40px #3A200C59;
+}
+.form--panel .form__title{
+  font-family:var(--serif);
+  font-size:clamp(2rem,2.4vw + .8rem,3rem);
+  font-weight:600;
+  line-height:1.05;
+  letter-spacing:-.015em;
+  margin:0 0 1.25rem;
+}
+.form--panel .form__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem 1.5rem}
+.form--panel .field label{font-size:.95rem;font-weight:600;color:var(--ink)}
+.form--panel .field input,
+.form--panel .field select{
+  background:#FFFEFB;
+  border-color:var(--paper-edge-soft);
+  border-radius:10px;
+  padding:.8rem .95rem;
+  font-family:var(--ui);
+  font-size:1rem;
+}
+.form--panel .field input:hover,
+.form--panel .field select:hover{border-color:var(--paper-edge)}
+.form--panel .field input:focus,
+.form--panel .field select:focus{border-color:var(--copper-deep);box-shadow:0 0 0 3px var(--copper-wash-2);background:#FFFEFB}
+.form--panel .consent{color:var(--ink-mid);font-size:.9rem;max-width:none}
+.form--panel .consent input{accent-color:var(--copper-deep);width:20px;height:20px}
+.form--panel .form__submit{margin-top:1.4rem}
+.form--panel .form__status{font-size:.95rem}
+@media (max-width:620px){
+  .form--panel .form__grid{grid-template-columns:minmax(0,1fr)}
+}
+
+/* --- Explore Radiant Wave panel ---------------------------------- */
+.explore{
+  background:var(--paper-lift);
+  border:1px solid var(--paper-edge);
+  border-radius:28px;
+  padding:clamp(1.6rem,3vw,2.75rem);
+  box-shadow:0 2px 6px #3A200C0A,0 30px 60px -40px #3A200C59;
+}
+.explore__title{
+  font-family:var(--serif);
+  font-size:clamp(2.2rem,2.6vw + .9rem,3.4rem);
+  font-weight:500;
+  line-height:1.02;
+  letter-spacing:-.015em;
+  margin:0 0 .4rem;
+  color:var(--ink);
+}
+.explore__intro{margin:0 0 1.4rem;font-size:clamp(1rem,.3vw + .92rem,1.2rem);color:var(--ink)}
+.explore__rows{margin:0 0 1.75rem}
+.explore__row{padding:.9rem 0}
+.explore__row + .explore__row{border-top:1px solid var(--paper-edge-soft)}
+.explore__row dt{font-weight:700;font-size:clamp(1.02rem,.3vw + .95rem,1.2rem);color:var(--ink)}
+.explore__row dd{margin:.15rem 0 0;color:var(--ink-mid)}
+.explore__caption{text-align:center;margin:.9rem 0 0;color:var(--ink);font-size:1rem;letter-spacing:.01em}
+
+/* --- membership note beside the passes --------------------------- */
+.member-note{
+  margin-top:clamp(1.75rem,3.5vh,2.5rem);
+  padding-top:1.5rem;
+  border-top:1px solid var(--paper-edge);
+  max-width:30rem;
+}
+.member-note__kicker{
+  font-family:var(--ui);
+  font-size:1rem;
+  font-weight:700;
+  color:var(--ink);
+  margin:0 0 .4rem;
+}
+.member-note__text{margin:0 0 1rem;color:var(--ink-mid);line-height:1.55}
+.member-note__save{margin:0 0 .85rem;line-height:1.15}
+.member-note__big{
+  display:block;
+  font-family:var(--serif);
+  font-size:clamp(2.1rem,2vw + 1.1rem,2.9rem);
+  font-weight:700;
+  color:var(--copper-deep);
+  letter-spacing:-.01em;
+}
+.member-note__vs{display:block;margin-top:.2rem;font-weight:600;color:var(--ink)}
+.member-note__detail{margin:0 0 1rem;color:var(--ink-mid);font-size:.97rem;line-height:1.55}
+.member-note__detail strong{color:var(--ink);font-weight:700}
+.member-note__italic{
+  font-family:var(--serif);
+  font-style:italic;
+  font-weight:500;
+  font-size:clamp(1.55rem,1vw + 1.1rem,2rem);
+  color:var(--copper);
+  margin:0 0 .6rem;
+  line-height:1.15;
+}
+.member-note__terms{margin:0 0 1.4rem;color:var(--ink);font-size:.97rem;line-height:1.6}
+.member-note__action{width:100%;justify-content:space-between}
+
+/* --- offers: membership cards and pass columns ------------------- */
+.offers{min-width:0}
+.offers__title{
+  font-family:var(--serif);
+  font-size:clamp(2rem,1.8vw + 1rem,2.8rem);
+  font-weight:600;
+  line-height:1.05;
+  letter-spacing:-.012em;
+  margin:0;
+  color:var(--ink);
+}
+.offers__intro{
+  margin:.35rem 0 0;
+  padding-bottom:1.25rem;
+  border-bottom:1px solid var(--paper-edge);
+  color:var(--copper-deep);
+  font-weight:600;
+}
+.offers__list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:grid;
+  grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));
+  grid-template-rows:repeat(var(--rows,8),auto);
+  column-gap:clamp(1rem,2vw,1.75rem);
+}
+.offer{
+  grid-row:span var(--rows,8);
+  display:grid;
+  grid-template-rows:subgrid;
+  row-gap:0;
+  min-width:0;
+}
+.offer__cell{margin:0}
+.offer__name{
+  font-family:var(--serif);
+  font-weight:600;
+  font-size:clamp(1.7rem,1.4vw + .9rem,2.4rem);
+  line-height:1.05;
+  letter-spacing:-.01em;
+  color:var(--ink);
+}
+.offer__price{display:flex;align-items:baseline;flex-wrap:wrap;gap:.45rem}
+.offer__amount{
+  font-family:var(--serif);
+  font-weight:700;
+  font-size:clamp(2.6rem,2vw + 1.6rem,3.6rem);
+  line-height:1;
+  letter-spacing:-.01em;
+  color:var(--ink);
+}
+.offer__per{font-size:1.05rem;color:var(--ink);font-weight:500}
+.offer__hours-main{display:block;font-weight:700;color:var(--copper-deep);font-size:clamp(1.15rem,.5vw + 1rem,1.45rem);line-height:1.25}
+.offer__hours-note{display:block;font-size:.95rem;font-weight:600;color:var(--ink);margin-top:.1rem}
+.offer__rate{color:var(--ink);font-size:1rem}
+.offer__text{color:var(--ink-mid);font-size:.98rem;line-height:1.5}
+.offer__validity{color:var(--ink);font-size:.95rem;font-weight:600}
+.offer__features{list-style:none;padding:0;color:var(--ink);font-size:.98rem;line-height:1.45}
+.offer__features li{position:relative;padding-left:1.7rem;margin:.45rem 0}
+.offer__features li::before{
+  content:"";
+  position:absolute;left:0;top:.2em;
+  width:1.05rem;height:1.05rem;
+  background:var(--copper-deep);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+.offer__action{align-self:end}
+.offer__action .btn{width:100%;padding:.85rem 1rem;white-space:nowrap;gap:.6rem}
+.offers--columns .offer__action .btn{font-size:clamp(.92rem,.25vw + .82rem,1.05rem)}
+
+/* cards: memberships */
+.offers--cards .offers__list{margin-top:clamp(1.5rem,3vh,2.25rem);row-gap:0}
+.offers--cards .offer{
+  background:var(--paper-lift);
+  border:1px solid var(--paper-edge-soft);
+  border-radius:24px;
+  padding:clamp(1.4rem,2vw,2rem) clamp(1.1rem,1.8vw,1.75rem);
+  text-align:center;
+  box-shadow:0 1px 3px #3A200C08,0 22px 44px -36px #3A200C40;
+}
+.offers--cards .offer--emphasis{
+  border:2px solid var(--copper-deep);
+  box-shadow:0 2px 6px #3A200C10,0 30px 50px -30px #5A2E1066;
+}
+.offers--cards .offer__name{padding-bottom:.9rem}
+.offers--cards .offer__price{justify-content:center;padding:.9rem 0;border-top:1px solid var(--paper-edge-soft)}
+.offers--cards .offer__hours{padding-top:.9rem;border-top:1px solid var(--paper-edge-soft)}
+.offers--cards .offer__rate{padding:.25rem 0 .9rem}
+.offers--cards .offer__features{text-align:left;border-top:1px solid var(--paper-edge-soft);padding-top:.75rem;margin-bottom:1.25rem}
+.offers__footnote{text-align:center;color:var(--ink-mid);font-size:.92rem;margin:.35rem 0 0;line-height:1.5}
+.offers--cards .offers__list + .offers__footnote{margin-top:1.4rem}
+
+/* columns: passes, open, divided by fine copper rules */
+.offers--columns .offers__list{column-gap:0;margin-top:1.75rem}
+.offers--columns .offer{padding:0 clamp(1rem,2vw,1.75rem)}
+.offers--columns .offer + .offer{border-left:1px solid var(--paper-edge)}
+.offers--columns .offer:first-child{padding-left:0}
+.offers--columns .offer:last-child{padding-right:0}
+.offers--columns .offer__name{font-size:clamp(1.5rem,1.1vw + .9rem,2.05rem);padding-bottom:.85rem}
+.offers--columns .offer__price{padding-bottom:.65rem}
+.offers--columns .offer__amount{font-size:clamp(2.4rem,1.8vw + 1.4rem,3.3rem)}
+.offers--columns .offer__hours{padding-bottom:.25rem}
+.offers--columns .offer__rate{padding-bottom:.8rem;color:var(--ink-mid)}
+.offers--columns .offer__text{padding-bottom:.8rem}
+.offers--columns .offer__validity{padding-bottom:1.4rem}
+
+/* Between tablet and a wide desktop a third is too narrow for the hook
+   and two thirds too narrow for three columns: the hook goes on top
+   and the passes keep the full width, still side by side. */
+@media (max-width:1399px) and (min-width:1000px){
+  .slide--display.slide--split-third .cols{grid-template-columns:minmax(0,1fr);gap:2.5rem}
+  .slide--split-third .member-note{max-width:40rem}
+}
+@media (max-width:760px){
+  .offers__list{grid-template-columns:minmax(0,1fr);row-gap:1.25rem}
+  .offer{grid-row:auto;display:flex;flex-direction:column}
+  .offers--columns .offer{padding:1.4rem 0 0}
+  .offers--columns .offer + .offer{border-left:0;border-top:1px solid var(--paper-edge)}
+  .offers--columns .offer__validity{padding-bottom:1rem}
+  .offers--cards .offers__list{row-gap:1.25rem}
+  .offer__action{align-self:stretch}
+}
+
+/* --- banner: one centred column (memberships) -------------------- */
+.slide--banner{max-width:84rem}
+.slide--banner .cols{grid-template-columns:minmax(0,1fr) !important;gap:clamp(.5rem,1.5vh,1rem)}
+.slide--banner .cols__head{text-align:center;position:static}
+.slide--banner .eyebrow{text-align:center}
+.slide--banner .head{font-size:clamp(2.6rem,4.4vw + .4rem,5.2rem);line-height:.98}
+.slide--banner .prose--center{text-align:center;margin-inline:auto;max-width:none}
+.slide--banner .prose--terms{text-align:center;margin:.35rem auto 0;font-weight:700;color:var(--ink);letter-spacing:.03em}
+.slide--display.slide--banner .cols__body .choices{display:flex;flex-wrap:wrap;justify-content:center;gap:.25rem 3.5rem;margin-top:1.1rem}
+/* the legal line is fixed low on the page; leave the address room */
+@media (min-width:720px){
+  .stage:has(.slide--banner){padding-bottom:clamp(4.5rem,9vh,6rem)}
+}
+.slide--banner .choice--link{color:var(--copper-deep);font-weight:600}
+.slide--banner .choice--link .choice__text{text-decoration:underline;text-underline-offset:4px}
+.slide--banner .choice--link .choice__arrow{display:none}
+.slide__footer{
+  text-align:center;
+  margin:1.25rem 0 0;
+  font-weight:600;
+  letter-spacing:.06em;
+  color:var(--ink);
+}
+
+/* phones: the banners stack in reading order and the headline steps down */
+@media (max-width:999px){
+  .slide--display .cols{gap:1.75rem}
+  .slide--display .cols__head{position:static}
+}
+@media (max-width:520px){
+  .slide--display .head{font-size:clamp(2.5rem,11vw,3.4rem)}
+  .slide--banner .head{font-size:clamp(2.2rem,9.5vw,3rem)}
+  .offers--cards .offer{padding:1.4rem 1.1rem}
 }

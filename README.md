@@ -136,7 +136,7 @@ sent before you wire it up.
   "identity": { "firstName": "...", "lastName": "...", "email": "...", "mobile": "..." },
   "tags": ["OWNER", "FOCUS_MENTAL"],
   "offer": { "id": "pack-3", "name": "Three-hour pack", "price": 157 },
-  "fields": { "system": "Elite II", "paymentPath": "Paid in full", "consent": true },
+  "fields": { "system": "Elite 2", "paymentPath": "Paid in full", "consent": true },
   "path": ["welcome", "S1", "S2", "S3", "S4", "S4b", "S9", "S14"],
   "choices": [{ "slide": "S3", "label": "...", "tag": "OWNER", "at": "..." }],
   "notes": [{ "kind": "opened", "detail": "$397 a month is a lot of money." }],
@@ -227,6 +227,13 @@ trailing commas, which strict JSON forbids.
   "surface": "dark",            // optional — the whole page goes dark
   "layout": "cinema",           // optional — "editorial" (default), "cinema" (full-bleed film), "hero" (sign-in)
   "wide": true,                 // optional — wider measure, for tables
+  "display": true,              // optional — banner-size headline and copper rule (S3, S4, S9, S10, S13, S13r)
+  "layout": "banner",           // optional — one centred column (S10's membership cards)
+  "split": "third",             // optional — heading column a third wide, body two thirds (S9)
+  "kicker": false,              // optional — every heading line full size, no small first line
+  "eyebrowMark": "check",       // optional — a circled check before the eyebrow (S13r)
+  "requires": "S13",            // optional — only shows once that slide's form was delivered this tab
+  "footer": "7110 Forest Road…",// optional — a closing line under everything
   "parked": true,               // optional — written but not wired up yet
   "note": "production note, only visible with ?debug=1",
   "eyebrow": "line one\nline two",   // on a film slide this is the title card
@@ -246,9 +253,9 @@ trailing commas, which strict JSON forbids.
   "label": "See the three residential systems",
   "note": "$26,999",                     // optional second line
   "to": "S11",                           // omit for a terminal choice
-  "weight": "primary",                   // primary | secondary (default) | quiet
+  "weight": "primary",                   // primary | secondary (default) | outline | link | quiet
   "tag": "OWNER",                        // added to the record
-  "set": { "system": "Elite II" },       // recorded as a field
+  "set": { "system": "Elite 2" },       // recorded as a field
   "handoff": false,                      // terminal only: do not send a payload
   "endHeading": "All set.",              // terminal only
   "endText": "..."
@@ -280,7 +287,7 @@ or sent to the CRM.
 
 | Type | What it is |
 |---|---|
-| `prose` | Paragraphs. `"lede": true` for the opening line. |
+| `prose` | Paragraphs. `"lede": true` for the opening line. `"style"`: `title` (a heading in the column), `benefit`, `fact`, `center`, `terms`. Any block can take `"side": "head"` to sit under the heading in the left column. |
 | `spec` | One line of hardware facts under a heading. |
 | `aside` | The bridge box — volunteered information that costs the seller something. |
 | `video` | Starts itself, with no title, duration or production chrome on screen. `"full": true` fills the screen; `"hold": true` keeps the slide's choices hidden until it finishes; `advanceTo` skips straight on instead. |
@@ -293,7 +300,10 @@ or sent to the CRM.
 | `summary` | What the visitor has picked, shown above a capture form so nobody submits wondering what they agreed to. |
 | `counter` | Real scarcity. Edit by hand, weekly. Never reset it. |
 | `compare` | A table. Put the slide on `"wide": true`. |
-| `form` | `role: "identity"` names the visitor; `role: "capture"` sends the payload. `title`, `intro` and `footnote` turn it into a labelled sign-in panel. |
+| `form` | `role: "identity"` names the visitor; `role: "capture"` sends the payload. `title`, `intro` and `footnote` turn it into a labelled sign-in panel; `"panel": true` gives the ivory reservation panel. `"requireDelivery": true` refuses to confirm unless the webhook accepted the submission (preview with `?debug=1`). `"done": { "slide": "S13r" }` moves to a confirmation slide instead of confirming in place. |
+| `offers` | Products side by side, each with its own button to its page in `config.js -> ghl.checkout`. `"variant": "cards"` (memberships, S10) or `"columns"` (open passes with fine dividers, S9). Rows line up across columns. |
+| `memberNote` | The membership worth knowing about beside the passes: saving, benchmark, full-use qualifier and terms kept together, plus one action button. |
+| `explore` | A panel with a heading, informational rows (not buttons) and one action — S13r's "Explore all options". |
 | `ghlForm` | A GoHighLevel-hosted form embedded as an iframe (`src`, `scriptSrc`, `formId`, `formName`, `height`). The lead is captured by GHL the instant it's submitted, independent of this funnel. Advances to `then` when the iframe posts what looks like a submit event — see the comment above `ghlForm` in `assets/js/blocks.js` for the caveat on that detection. Submitting sets `idecide:registered` in localStorage; until it is set, any slide past the welcome sends the visitor back to it (`REGISTRATION GATE` in `assets/js/engine.js`). Clear that key to test the gate again. |
 
 Full parameter lists are in the comment above each renderer in
@@ -312,7 +322,9 @@ slides that do not exist, dead ends, and unreachable slides. Slides marked
 | Where | What |
 |---|---|
 | `S6b` | `remaining: 11` — update weekly with the real count. Never reset it. |
-| `S11`, `S11a-c` | "Ends 31 October 2026" — the introductory pricing deadline. |
+| `S11`, `S11a-c` | System prices and the MSRP/introductory comparison — confirm they are current. The expired "Ends 31 October 2026" line was removed (November 2026). |
+| `S13` | Shows "Request received" only once the webhook in `config.js` accepts the submission. Until that URL is set, visitors see "could not be sent". |
+| `access.radiantwavelounge.com` | S13r's "Explore all options" points here. The domain does not resolve yet. |
 | Video weight | The four films are ~9.5 Mbps, about 3× what 1080p web delivery needs. Re-encoding at CRF 23 would take 120MB down to roughly 25MB with little visible loss. |
 | Music weight | `bgm/2.mp3` is 2h 17m and 89MB. It streams, so a visitor only downloads what they hear, but it is a third of the repository on its own. Worth trimming. |
 | Photography | The stills are borrowed from RhemaWave. Replace them with Richmond photographs when you have them: same `{ "src", "note" }` shape. |
