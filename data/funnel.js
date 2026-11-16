@@ -619,28 +619,16 @@ window.FUNNEL = {
     "S9": {
       "name": "Lounge Experience Passes",
       "zone": "Offer",
+      "layout": "banner",
       "display": true,
-      "split": "third",
       "kicker": false,
-      "note": "One-time passes on the right; the membership worth knowing about on the left. 'more than 1/2 OFF' compares the membership's full-use rate with the standard $100 hour only - never with the packs. No street address or domain on this screen.",
+      "note": "Same arrangement as S10: centred headline, the three passes as cards in the middle, the membership worth knowing about underneath. 'more than 1/2 OFF' compares the membership's full-use rate with the standard $100 hour only - never with the packs. No street address or domain on this screen.",
       "eyebrow": "Radiant Wave Lounge · Richmond, Virginia",
-      "heading": "Let the world wait.\nMake time\n_for yourself._",
+      "heading": "Let the world wait.\nMake time _for yourself._",
       "blocks": [
         {
-          "type": "memberNote",
-          "side": "head",
-          "kicker": "Worth knowing before you choose",
-          "text": "Vita Recharge membership is our limited-time thank-you to founding members.",
-          "big": "more than 1/2 OFF",
-          "bigAfter": "our standard $100 hourly rate.",
-          "detail": "**Discounted hourly rate:** $19.85/hour when all 20 monthly hours are used.",
-          "italic": "Try three hours, then decide.",
-          "terms": "$397/month for 20 Lounge hours.\nRenews monthly. Six-month minimum.",
-          "action": { "label": "Explore membership packages", "to": "S10" }
-        },
-        {
           "type": "offers",
-          "variant": "columns",
+          "variant": "cards",
           "title": "Lounge Experience Passes",
           "intro": "One-time purchases. No monthly renewal.",
           "items": [
@@ -666,6 +654,17 @@ window.FUNNEL = {
               "cta": "View ten-hour pack"
             }
           ]
+        },
+        {
+          "type": "memberNote",
+          "kicker": "Worth knowing before you choose",
+          "text": "Vita Recharge membership is our limited-time thank-you to founding members.",
+          "big": "more than 1/2 OFF",
+          "bigAfter": "our standard $100 hourly rate.",
+          "detail": "**Discounted hourly rate:** $19.85/hour when all 20 monthly hours are used.",
+          "italic": "Try three hours, then decide.",
+          "terms": "$397/month for 20 Lounge hours.\nRenews monthly. Six-month minimum.",
+          "action": { "label": "Explore membership packages", "to": "S10" }
         }
       ]
     },

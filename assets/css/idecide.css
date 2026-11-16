@@ -2958,3 +2958,73 @@ body:not(.is-dark)::after{display:none}
 @media (max-width:760px){
   .slide--split-third .offers--columns .offer--emphasis{border:2px solid var(--btn-low)}
 }
+
+/* ==================================================================
+   S9 AS A BANNER (same arrangement as S10)
+   ================================================================== */
+.slide--banner .offers__title{text-align:center;margin-top:clamp(.75rem,2vh,1.5rem)}
+.slide--banner .offers__intro{text-align:center;border-bottom:0;padding-bottom:0}
+/* pass cards: description and validity sit in the card's own rhythm */
+.offers--cards .offer__text{padding:.9rem 0 .35rem;border-top:1px solid var(--paper-edge-soft);color:var(--ink-mid);font-size:.97rem}
+.offers--cards .offer__validity{padding-bottom:1.2rem;color:var(--copper-deep);font-size:.93rem}
+.offers--cards .offer__hours-main + .offer__hours-note{margin-top:.1rem}
+
+/* the membership note under the cards: one calm band in two halves -
+   the saving on the left, the invitation and its button on the right */
+.slide--banner .member-note{
+  max-width:none;
+  margin:clamp(1.75rem,4vh,2.75rem) 0 0;
+  padding:clamp(1.4rem,2.6vh,1.9rem) 0 0;
+  border:0;
+  border-top:1px solid var(--paper-edge);
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+}
+@media (min-width:900px){
+  .slide--banner .member-note{
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+    grid-template-areas:
+      "kicker italic"
+      "text   terms"
+      "save   action"
+      "detail action";
+    column-gap:clamp(2rem,5vw,5rem);
+    align-items:start;
+  }
+  .slide--banner .member-note__kicker{grid-area:kicker}
+  .slide--banner .member-note__text{grid-area:text}
+  .slide--banner .member-note__save{grid-area:save}
+  .slide--banner .member-note__detail{grid-area:detail}
+  .slide--banner .member-note__italic{grid-area:italic;align-self:end}
+  .slide--banner .member-note__terms{grid-area:terms}
+  .slide--banner .member-note__action{grid-area:action;align-self:start;max-width:26rem}
+}
+.slide--banner .member-note__kicker{font-size:1rem;margin:0 0 .35rem}
+.slide--banner .member-note__text{margin:0 0 .8rem;font-size:1rem}
+.slide--banner .member-note__save{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.6rem;margin:0 0 .35rem}
+.slide--banner .member-note__big{display:inline;font-size:clamp(1.7rem,1vw + 1.15rem,2.3rem);line-height:1.1}
+.slide--banner .member-note__vs{display:inline;margin:0}
+.slide--banner .member-note__detail{font-size:.94rem;margin:0}
+.slide--banner .member-note__italic{font-size:clamp(1.45rem,.8vw + 1.05rem,1.9rem);margin:0 0 .35rem}
+.slide--banner .member-note__terms{font-size:.95rem;margin:0 0 1.1rem;color:var(--ink-mid)}
+/* the two halves replace the shared-row grid */
+@media (min-width:900px){
+  .slide--banner .member-note{
+    display:flex;
+    grid-template-areas:none;
+    justify-content:space-between;
+    align-items:center;
+    gap:clamp(2rem,5vw,5rem);
+  }
+  .slide--banner .member-note__half{flex:1 1 0;min-width:0}
+  .slide--banner .member-note__half--invite{flex:0 1 26rem}
+  .slide--banner .member-note__action{max-width:none;width:100%}
+}
+.slide--banner .member-note__half > *{grid-area:auto}
+.slide--banner .member-note__half--invite{margin-top:1.25rem}
+@media (min-width:900px){ .slide--banner .member-note__half--invite{margin-top:0} }
+@media (max-width:760px){
+  .offers__list{grid-template-rows:none}
+}

@@ -1334,6 +1334,14 @@
      ================================================================== */
   function memberNote(b, ctx) {
     var n = el('section', 'member-note');
+    /* two halves - the saving, then the invitation and its button - so a
+       wide layout can set them side by side without shared row heights */
+    var outer = n;
+    var first = el('div', 'member-note__half member-note__half--saving');
+    var second = el('div', 'member-note__half member-note__half--invite');
+    n.appendChild(first);
+    n.appendChild(second);
+    n = first;
     if (b.kicker) n.appendChild(el('h3', 'member-note__kicker', b.kicker));
     if (b.text) n.appendChild(paragraphs(b.text, 'member-note__text'));
     if (b.big) {
@@ -1343,10 +1351,11 @@
       n.appendChild(save);
     }
     if (b.detail) n.appendChild(paragraphs(b.detail, 'member-note__detail'));
+    n = second;
     if (b.italic) n.appendChild(el('p', 'member-note__italic', b.italic));
     if (b.terms) n.appendChild(paragraphs(b.terms, 'member-note__terms'));
     if (b.action) n.appendChild(actionButton(b.action, ctx, 'member-note__action'));
-    return n;
+    return outer;
   }
 
   /* ==================================================================
