@@ -42,8 +42,15 @@ jobs:
           printf 'machine %s login %s password %s\n' "$SERVER" "$USER" "$PASS" > "$RUNNER_TEMP/netrc"
           FTP="curl -sS --ssl-reqd --netrc-file $RUNNER_TEMP/netrc"
 
-          if ! LIST=$($FTP --list-only "ftp://$SERVER$DIR"); then
-            echo "::error::Could not log in and list $DIR over FTPS - check the FTP secrets."; exit 1
+          if ! LIST=$($FTP --list-only "ftp://$SERVER$DIR" 2>"$RUNNER_TEMP/err"); then
+            ERR=$(tr '\n' ' ' < "$RUNNER_TEMP/err")
+            echo "::error::Could not log in and list $DIR over FTPS. curl said: $ERR"
+            # Certificate trouble is the usual GoDaddy snag: show which names the
+            # server's certificate is actually issued to.
+            NAMES=$(echo | timeout 20 openssl s_client -starttls ftp -connect "$SERVER:21" -servername "$SERVER" 2>/dev/null \
+              | openssl x509 -noout -subject -ext subjectAltName 2>/dev/null | tr '\n' ' ')
+            echo "::error::Server certificate is issued to: ${NAMES:-could not read certificate (FTPS may not be supported)}"
+            exit 1
           fi
           echo "Folder contents:"; echo "$LIST"
 
