@@ -1,0 +1,61 @@
+# Deploys the funnel to radiantwavelounge.com (GoDaddy cPanel hosting) over FTPS
+# on every push to main, or by hand from the Actions tab ("Run workflow").
+#
+# Needs four repository secrets (Settings > Secrets and variables > Actions):
+#   FTP_SERVER      e.g. ftp.radiantwavelounge.com  (host only, no ftp://)
+#   FTP_USERNAME    the cPanel FTP account
+#   FTP_PASSWORD    its password
+#   FTP_SERVER_DIR  the site folder as FileZilla shows it, ending in a slash,
+#                   e.g. /public_html/radiantwavelounge.com/
+#
+# Only changed files are sent: the action keeps .ftp-deploy-sync-state.json on
+# the server to know what is already there. It never deletes files it did not
+# upload itself.
+
+name: Deploy to GoDaddy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-godaddy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # The same hosting account also serves bostonc.com. Refuse to deploy
+      # unless the target folder is clearly the radiantwavelounge.com one, so
+      # a mistyped secret can never overwrite the other site.
+      - name: Check target folder
+        env:
+          DIR: ${{ secrets.FTP_SERVER_DIR }}
+        run: |
+          case "$DIR" in
+            */radiantwavelounge.com/) echo "Deploying to $DIR" ;;
+            *) echo "::error::FTP_SERVER_DIR must end in /radiantwavelounge.com/ (got '$DIR')"; exit 1 ;;
+          esac
+
+      - uses: actions/checkout@v4
+
+      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          protocol: ftps
+          port: 21
+          timeout: 600000
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            footage-masters/**
+            tools/**
+            README.md
+            serve.js
+            serve.cmd
