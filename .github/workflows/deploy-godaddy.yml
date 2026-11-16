@@ -46,7 +46,7 @@ jobs:
           case "$DIR" in */) ;; *) DIR="$DIR/" ;; esac
           echo "::add-mask::$USER"; echo "::add-mask::$PASS"
           [ "$RAW" != "$SERVER" ] && echo "::notice::FTP_SERVER had extra characters (spaces, line breaks or ftp://) - tidied."
-          echo "FTP_SERVER is ${#SERVER} characters; ends in secureserver.net: $(case "$SERVER" in *.secureserver.net) echo yes;; *) echo no;; esac)"
+          echo "::notice::FTP_SERVER is ${#SERVER} characters (should be 42); ends in secureserver.net (should be yes): ends in secureserver.net: $(case "$SERVER" in *.secureserver.net) echo yes;; *) echo no;; esac)"
           {
             echo "FTP_HOST=$SERVER"
             echo "FTP_USER=$USER"
