@@ -384,6 +384,8 @@
       (slide.wide ? ' slide--wide' : '') +
       (slide.split ? ' slide--split-' + slide.split : '') +
       (slide.display ? ' slide--display' : '') +
+      (slide.choicesRow ? ' slide--choices-row' : '') +
+      (slide.tilesAcross ? ' slide--tiles-across' : '') +
       (slide.kind === 'entry' ? ' slide--entry' : ''));
     article.setAttribute('aria-labelledby', 'slide-head');
 
@@ -445,6 +447,7 @@
         return Math.max(n, B.plainText(line).length);
       }, 0);
       if (slide.display && longest > 21) h.classList.add('head--long');
+      if (slide.display && longest > 26) h.classList.add('head--xlong');
       h.id = 'slide-head';
       host.appendChild(h);
     }
@@ -506,8 +509,9 @@
       cols.appendChild(body);
       host.appendChild(cols);
       /* Actions belong at the foot of the column the visitor is
-         reading, not stranded under an empty half of the screen. */
-      choiceHost = body;
+         reading, not stranded under an empty half of the screen -
+         unless "choicesRow" asks for one row across the whole page. */
+      choiceHost = slide.choicesRow ? host : body;
     }
 
     /* Choices sit on whichever surface the slide is using, so a room

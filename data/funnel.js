@@ -436,9 +436,12 @@ window.FUNNEL = {
       "heading": "You don't just book an hour.\n_You choose what it's for._",
       "display": true,
       "kicker": false,
+      "tilesAcross": true,
+      "choicesRow": true,
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "Every hour is programmed to a focus you pick when you arrive.\n\nGeneral, a broad focus for the whole hour. Specific, narrowed to one area of your life. Precise, built around a single named goal you bring in."
         },
         {

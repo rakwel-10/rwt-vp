@@ -2758,3 +2758,32 @@ body:not(.is-dark)::after{display:none}
   .slide--display.slide--banner .head{font-size:clamp(2.2rem,9.5vw,3rem)}
 }
 .slide--display.slide--banner .cols__body .prose--center{max-width:none}
+
+/* --- the focus menu three across (S7: "tilesAcross") ----------- */
+.slide--tiles-across .fboard{grid-template-columns:minmax(0,1fr);margin-top:0}
+.slide--tiles-across .fscreen{position:relative;top:auto;order:-1;justify-self:start;width:min(100%,19rem)}
+.slide--tiles-across .fboard .tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:900px){
+  .slide--tiles-across .fboard .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .slide--tiles-across .fboard .tiles{grid-template-columns:minmax(0,1fr)}
+  .slide--tiles-across .fscreen{justify-self:center;width:min(100%,14rem)}
+}
+
+/* --- actions in one row across the page ("choicesRow") ---------- */
+.slide--choices-row > .choices,
+.slide--choices-row > .room > .choices{
+  grid-template-columns:repeat(var(--n,3),minmax(0,1fr));
+  margin-top:clamp(2rem,4vh,3rem);
+  gap:1rem;
+}
+.slide--choices-row > .choices[data-count="2"]{--n:2}
+.slide--choices-row > .choices[data-count="3"]{--n:3}
+.slide--choices-row > .choices[data-count="4"]{--n:4}
+.slide--choices-row.slide--display > .choices .choice{border-radius:26px;font-size:clamp(1.02rem,.45vw + .88rem,1.35rem)}
+@media (max-width:860px){
+  .slide--choices-row > .choices{grid-template-columns:minmax(0,1fr)}
+}
+.slide--display .head--xlong{font-size:clamp(2.1rem,2.45vw + .5rem,4rem)}
+@media (max-width:520px){ .slide--display .head--xlong{font-size:clamp(1.95rem,8vw,2.5rem)} }
