@@ -1071,8 +1071,9 @@
      since this.record never learns a name.
 
      GHL's form_embed.js does not publish a documented postMessage
-     contract, so the "form_submit" match below is the commonly
-     observed shape, not a guaranteed one. Every message from the
+     contract; the "set-sticky-contacts" match below comes from
+     reading that script, so recheck it if GHL changes the embed.
+     Every message from the
      form's iframe is logged to the console so a real submission
      can be checked against it. The dependable path is the form's
      own "redirect after submit" setting pointed at this funnel's
@@ -1127,8 +1128,18 @@
       console.log('[iDecide] message from GHL form', ev.origin, ev.data);
       if (advanced) return;
       var d = ev.data;
-      var text = typeof d === 'string' ? d : (function () { try { return JSON.stringify(d); } catch (e) { return ''; } })();
-      if (!/form[_-]?submit|submitted|submit[_-]?success/i.test(text || '')) return;
+      /* What a submission actually sends (read from form_embed.js):
+         ["set-sticky-contacts", "embedded_iframe_<id>" | "_ud", ...] -
+         GHL storing the new contact and flagging leadCollected. On
+         load the form only sends iframeLoaded / fetch-* messages, so
+         set-sticky-contacts is the submit signal. The text match is
+         kept as a fallback in case GHL adds an explicit event. */
+      var isSubmit = Array.isArray(d) && d[0] === 'set-sticky-contacts';
+      if (!isSubmit) {
+        var text = typeof d === 'string' ? d : (function () { try { return JSON.stringify(d); } catch (e) { return ''; } })();
+        isSubmit = /form[_-]?submit|submitted|submit[_-]?success/i.test(text || '');
+      }
+      if (!isSubmit) return;
       advanced = true;
       window.removeEventListener('message', onMessage);
       ctx.record.note('ghl-form-submit', b.formId);
