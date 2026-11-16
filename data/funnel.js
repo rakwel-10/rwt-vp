@@ -856,13 +856,16 @@ window.FUNNEL = {
       "heading": "What's holding\n_you back?_",
       "display": true,
       "kicker": false,
+      "choicesRow": true,
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "Pick the honest one. We'll answer it straight and you can decide."
         },
         {
           "type": "panels",
+          "open": true,
           "items": [
             {
               "q": "I don't know if it'll do anything for me.",

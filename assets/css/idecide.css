@@ -2787,3 +2787,31 @@ body:not(.is-dark)::after{display:none}
 }
 .slide--display .head--xlong{font-size:clamp(2.1rem,2.45vw + .5rem,4rem)}
 @media (max-width:520px){ .slide--display .head--xlong{font-size:clamp(1.95rem,8vw,2.5rem)} }
+
+/* --- objections as open questions and answers ("open": true) ------ */
+.qa{display:grid;gap:0}
+.qa__item{padding:clamp(1.4rem,2.6vh,2rem) 0;border-top:1px solid var(--paper-edge)}
+.qa__item:first-child{padding-top:0;border-top:0}
+.qa__q{
+  font-family:var(--serif);
+  font-optical-sizing:auto;
+  font-weight:400;
+  font-size:clamp(1.65rem,1.5vw + 1rem,2.6rem);
+  line-height:1.1;
+  letter-spacing:-.025em;
+  color:var(--ink);
+  margin:0 0 .75rem;
+}
+.qa__a p{
+  margin:0 0 .85rem;
+  font-size:clamp(1rem,.3vw + .92rem,1.18rem);
+  line-height:1.6;
+  color:var(--ink-mid);
+  max-width:42rem;
+}
+.qa__a p:last-child{margin-bottom:0}
+/* the left column holds while the answers scroll */
+@media (min-width:1000px){
+  .slide--display .cols:has(.qa){align-items:start}
+  .slide--display .cols:has(.qa) .cols__head{position:sticky;top:clamp(3.5rem,8vh,5.5rem)}
+}

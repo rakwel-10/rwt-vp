@@ -682,6 +682,22 @@
      { "type":"panels", "items":[{"q":"...","a":"..."}] }
      ================================================================== */
   function panels(b, ctx) {
+    /* "open": true lays them out as questions and answers, all showing -
+       for objections someone should be able to read without hunting. */
+    if (b.open) {
+      var qa = el('div', 'qa');
+      (b.items || []).forEach(function (item) {
+        var art = el('section', 'qa__item');
+        var q = el('h3', 'qa__q');
+        q.appendChild(richText(item.q));
+        art.appendChild(q);
+        var ans = el('div', 'qa__a');
+        ans.appendChild(paragraphs(item.a));
+        art.appendChild(ans);
+        qa.appendChild(art);
+      });
+      return qa;
+    }
     var wrap = el('div', 'panels');
     (b.items || []).forEach(function (item) {
       var d = el('details', 'panel');
