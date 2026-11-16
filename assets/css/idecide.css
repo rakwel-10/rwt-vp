@@ -2926,3 +2926,35 @@ body:not(.is-dark)::after{display:none}
 @media (max-width:699px){
   .slide--split-third .eyebrow{white-space:normal}
 }
+
+/* S9, revised: the three passes are boxed; the membership note is open */
+.slide--split-third .member-note{
+  padding:1.4rem 0 0;
+  border:0;
+  border-top:1px solid var(--paper-edge);
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+}
+.slide--split-third .offers--columns .offers__list{column-gap:clamp(.9rem,1.4vw,1.4rem)}
+.slide--split-third .offers--columns .offer,
+.slide--split-third .offers--columns .offer:first-child,
+.slide--split-third .offers--columns .offer:last-child{
+  padding:clamp(1.25rem,1.6vw,1.6rem) clamp(1.1rem,1.4vw,1.4rem);
+  background:var(--paper-lift);
+  border:1px solid var(--paper-edge-soft);
+  border-radius:22px;
+  box-shadow:0 1px 3px #3A200C08,0 22px 44px -36px #3A200C40;
+}
+.slide--split-third .offers--columns .offer + .offer{border-left:1px solid var(--paper-edge-soft)}
+.slide--split-third .offers--columns .offer--emphasis,
+.slide--split-third .offers--columns .offer--emphasis + .offer{border-left-width:1px}
+.slide--split-third .offers--columns .offer--emphasis{border:2px solid var(--btn-low);box-shadow:0 2px 6px #3A200C10,0 30px 50px -30px #5A2E1066}
+.slide--split-third .offers--columns .offer__validity{padding-bottom:1.1rem}
+@media (max-width:760px){
+  .slide--split-third .offers--columns .offers__list{row-gap:1rem}
+  .slide--split-third .offers--columns .offer + .offer{border-top:1px solid var(--paper-edge-soft)}
+}
+@media (max-width:760px){
+  .slide--split-third .offers--columns .offer--emphasis{border:2px solid var(--btn-low)}
+}
