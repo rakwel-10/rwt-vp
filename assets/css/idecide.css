@@ -2871,3 +2871,58 @@ body:not(.is-dark)::after{display:none}
 .counter__n{font-family:var(--serif);font-weight:500;color:var(--copper);letter-spacing:-.03em;font-variant-numeric:lining-nums}
 .counter__n small{font-family:var(--ui);color:var(--ink-mid);font-weight:500}
 .counter__label{color:var(--ink-mid)}
+
+/* ==================================================================
+   S9, CALMER
+   One big moment (the headline), one quiet card (the membership
+   worth knowing about), one row of three passes that starts level
+   with the headline. Same words, fonts and colours.
+   ================================================================== */
+@media (min-width:1400px){
+  .slide--display.slide--split-third .cols{align-items:start;row-gap:0}
+  /* the passes begin level with the headline, not floating mid-page */
+  .slide--split-third .cols__body{padding-top:clamp(4.6rem,4vw + 1.6rem,5.6rem)}
+}
+
+/* the place line fits on one line */
+.slide--split-third .eyebrow{letter-spacing:.17em;font-size:clamp(.74rem,.18vw + .68rem,.86rem);white-space:nowrap}
+
+/* the membership note becomes one card with an order inside it */
+.slide--split-third .member-note{
+  margin-top:clamp(1.75rem,3.5vh,2.5rem);
+  padding:clamp(1.3rem,1.6vw,1.75rem);
+  border:1px solid var(--paper-edge-soft);
+  border-radius:22px;
+  background:var(--paper-lift);
+  box-shadow:0 1px 3px #3A200C08,0 22px 44px -36px #3A200C40;
+  max-width:32rem;
+}
+.slide--split-third .member-note__kicker{font-size:.95rem;margin:0 0 .3rem}
+.slide--split-third .member-note__text{font-size:.98rem;margin:0 0 1rem;color:var(--ink-mid)}
+/* the saving and what it is measured against read as one line */
+.slide--split-third .member-note__save{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.55rem;margin:0 0 .35rem}
+.slide--split-third .member-note__big{display:inline;font-size:clamp(1.65rem,1vw + 1.1rem,2.15rem);line-height:1.1}
+.slide--split-third .member-note__vs{display:inline;margin:0;font-size:1rem}
+.slide--split-third .member-note__detail{font-size:.92rem;margin:0 0 1.1rem}
+/* a fine rule, then the invitation and its terms */
+.slide--split-third .member-note__italic{
+  font-size:clamp(1.35rem,.7vw + 1rem,1.7rem);
+  margin:0 0 .35rem;
+  padding-top:1rem;
+  border-top:1px solid var(--paper-edge-soft);
+}
+.slide--split-third .member-note__terms{font-size:.92rem;margin:0 0 1.2rem;color:var(--ink-mid)}
+.slide--split-third .member-note__action{padding-block:.9rem}
+
+/* passes: even rhythm down each column */
+.slide--split-third .offers__intro{padding-bottom:1rem}
+.slide--split-third .offers--columns .offers__list{margin-top:1.5rem}
+.slide--split-third .offers--columns .offer__name{padding-bottom:.6rem}
+.slide--split-third .offers--columns .offer__price{padding-bottom:.9rem}
+.slide--split-third .offers--columns .offer__hours{padding-bottom:.15rem}
+.slide--split-third .offers--columns .offer__rate{padding-bottom:1rem;font-size:.95rem}
+.slide--split-third .offers--columns .offer__text{padding:1rem 0 .4rem;border-top:1px solid var(--paper-edge-soft);font-size:.95rem}
+.slide--split-third .offers--columns .offer__validity{padding-bottom:1.3rem;font-size:.92rem;color:var(--copper-deep)}
+@media (max-width:699px){
+  .slide--split-third .eyebrow{white-space:normal}
+}
