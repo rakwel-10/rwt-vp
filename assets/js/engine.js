@@ -388,6 +388,8 @@
       (slide.tilesAcross ? ' slide--tiles-across' : '') +
       (slide.kind === 'entry' ? ' slide--entry' : ''));
     article.setAttribute('aria-labelledby', 'slide-head');
+    /* lets the stylesheet adjust one slide without touching its siblings */
+    article.dataset.slide = slideId;
 
     if (debug.showSlideIds) {
       article.appendChild(el('p', 'slideid', slideId + '  ' + (slide.zone || '')));

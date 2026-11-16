@@ -3028,3 +3028,9 @@ body:not(.is-dark)::after{display:none}
 @media (max-width:760px){
   .offers__list{grid-template-rows:none}
 }
+
+/* S9 pass cards: one fine line only - between the price and the details */
+[data-slide="S9"] .offers--cards .offer__price{border-top:0;padding-top:.2rem}
+[data-slide="S9"] .offers--cards .offer__name{padding-bottom:.35rem}
+[data-slide="S9"] .offers--cards .offer__text{border-top:0;padding-top:.6rem}
+[data-slide="S9"] .offers--cards .offer__rate{padding-bottom:.4rem}
