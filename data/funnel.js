@@ -715,6 +715,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "The same technology that's in the Lounge, in three residential configurations."
         },
         {
@@ -731,6 +732,7 @@ window.FUNNEL = {
         },
         {
           "type": "aside",
+          "side": "head",
           "text": "Elite 2 costs 25% more than Elite and delivers twice the screen surface. Per square inch, it's roughly half the cost of Advance. If the room can take it, it's not a close call."
         }
       ],
