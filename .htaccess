@@ -1,0 +1,17 @@
+# Radiant Wave Lounge funnel — GoDaddy (Apache) settings.
+
+# Pages, scripts and styles change with every deploy: make browsers check
+# for a newer copy each visit (an unchanged file comes back as a quick
+# "not modified", so this costs almost nothing). Images, video and music
+# keep normal caching.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|css|json)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+# The deploy keeps its own record of uploaded files here; nobody needs to
+# read it over the web.
+<Files ".ftp-deploy-sync-state.json">
+  Require all denied
+</Files>
