@@ -39,14 +39,20 @@ jobs:
         run: |
           trim() { printf '%s' "$1" | tr -d '\r\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//'; }
           RAW="$SERVER"
-          SERVER=$(trim "$SERVER" | sed 's#^[a-zA-Z]*://##; s#/.*$##; s#:21$##')
+          # A host name is only letters, digits, dots and hyphens; anything else
+          # (invisible non-breaking or zero-width spaces from a copy-paste) goes.
+          SERVER=$(trim "$SERVER" | sed 's#^[a-zA-Z]*://##; s#/.*$##; s#:21$##' | LC_ALL=C tr -cd 'A-Za-z0-9.-' | tr 'A-Z' 'a-z')
           USER=$(trim "$USER"); PASS=$(printf '%s' "$PASS" | tr -d '\r\n')
-          DIR=$(trim "$DIR"); [ -z "$DIR" ] && DIR=/
+          DIR=$(trim "$DIR" | LC_ALL=C tr -cd 'A-Za-z0-9._/-'); [ -z "$DIR" ] && DIR=/
           case "$DIR" in /*) ;; *) DIR="/$DIR" ;; esac
           case "$DIR" in */) ;; *) DIR="$DIR/" ;; esac
           echo "::add-mask::$USER"; echo "::add-mask::$PASS"
-          [ "$RAW" != "$SERVER" ] && echo "::notice::FTP_SERVER had extra characters (spaces, line breaks or ftp://) - tidied."
-          echo "::notice::FTP_SERVER is ${#SERVER} characters (should be 42); ends in secureserver.net (should be yes): ends in secureserver.net: $(case "$SERVER" in *.secureserver.net) echo yes;; *) echo no;; esac)"
+          [ "$RAW" != "$SERVER" ] && echo "::notice::FTP_SERVER had extra or invisible characters - tidied (${#RAW} -> ${#SERVER} characters)."
+          case "$SERVER" in
+            p3plzcpnl505168.prod.phx3.secureserver.net) echo "::notice::FTP_SERVER is the GoDaddy server name - good." ;;
+            radiantwavelounge.com) echo "::notice::FTP_SERVER is radiantwavelounge.com - reachable, but its certificate is for *.prod.phx3.secureserver.net, so use p3plzcpnl505168.prod.phx3.secureserver.net." ;;
+            *) echo "::warning::FTP_SERVER is ${#SERVER} characters and is not the expected server name (expected 42: p3plzcpnl505168.prod.phx3.secureserver.net)." ;;
+          esac
           {
             echo "FTP_HOST=$SERVER"
             echo "FTP_USER=$USER"
