@@ -256,6 +256,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "You're not looking for a wellness journey. You're looking for one hour where nothing is on fire and nobody needs you.\n\nWe have that hour. It's in Richmond. You can have it this week.\n\nThat's the whole offer. There isn't a catch."
         },
         {
@@ -364,6 +365,7 @@ window.FUNNEL = {
       "blocks": [
         {
           "type": "prose",
+          "side": "head",
           "text": "Richmond, Virginia. Eleven seats, eight of them recliners.\n\nNot a marketing number — the room. And we aren't adding chairs.\n\nFounding Members stay two hours. Everyone else gets one. First call on every hour, and your rate holds for as long as you're a member.\n\nEvery founding seat takes twice the room, so the class is capped. There is no second Founding Class at these prices."
         }
       ],
