@@ -633,24 +633,24 @@ window.FUNNEL = {
           "intro": "One-time purchases. No monthly renewal.",
           "items": [
             {
-              "id": "hour-1", "name": "One-Hour Pass", "price": 100, "per": "total",
+              "id": "hour-1", "name": "One-Hour Experience", "price": 100, "per": "total",
               "hours": "1 Lounge hour",
-              "text": "An introduction to the Lounge.",
-              "validity": "Use within 60 days of purchase",
-              "cta": "View one-hour pass"
+              "text": "An introduction to the Lounge. Schedule before arriving.",
+              "validity": "Use within 90 days of purchase",
+              "cta": "View one-hour experience"
             },
             {
               "id": "pack-3", "name": "Three-Hour Pack", "price": 157, "per": "total",
               "hours": "3 Lounge hours", "rate": "About $52.33 per hour",
-              "text": "More time to explore the experience.",
-              "validity": "Use within 90 days",
+              "text": "More time to explore the experience. Schedule before arriving.",
+              "validity": "Use within 90 days of purchase",
               "cta": "View three-hour pack", "emphasis": true
             },
             {
               "id": "pack-10", "name": "Ten-Hour Pack", "price": 379, "per": "total",
               "hours": "10 Lounge hours", "rate": "$37.90 per hour",
-              "text": "The lowest hourly rate of these packs.",
-              "validity": "Use within 90 days",
+              "text": "The lowest hourly rate. Walk-ins welcome during Lounge hours, subject to room availability.",
+              "validity": "Use within 90 days of purchase",
               "cta": "View ten-hour pack"
             }
           ]
