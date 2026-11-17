@@ -364,6 +364,8 @@
 
     /* surface:dark takes the whole page, not just a panel. */
     document.body.classList.toggle('is-dark', slide.surface === 'dark');
+    /* the end card's full-screen waves belong to the film that ended */
+    Array.prototype.forEach.call(document.querySelectorAll('.endwaves--stage'), function (n) { n.remove(); });
 
     /* Default layout is two columns: the heading holds the left, and
        everything the visitor reads or touches runs down the right.
@@ -534,7 +536,16 @@
         choices.setAttribute('aria-live', 'polite');
         article.addEventListener('film:end', function () {
           if (window.Music) window.Music.duck(false);
-          if (film) film.classList.add('is-ended');
+          if (film) {
+            film.classList.add('is-ended');
+            var screenEl = film.querySelector('.reel__screen') || film;
+            if (!screenEl.querySelector('.endwaves')) screenEl.appendChild(endWaves());
+            if (!document.querySelector('.endwaves--stage')) {
+              var wide = endWaves();
+              wide.classList.add('endwaves--stage');
+              document.body.insertBefore(wide, document.body.firstChild);
+            }
+          }
           choices.hidden = false;
           choices.classList.add('choices--revealed');
         }, { once: true });
@@ -611,6 +622,47 @@
     var live = !!ghlUrl(o.choice.link);
     o.btn.classList.toggle('choice--out', live);
     o.arrow.hidden = !live;
+  }
+
+  /* The end card's ground: wide, slow light waves drifting across the
+     frame behind the button. Each wave is drawn twice its visible
+     width with a period that divides the visible width, so sliding it
+     left by half loops without a seam. */
+  function endWaves() {
+    var NS = 'http://www.w3.org/2000/svg';
+    var host = document.createElement('div');
+    host.className = 'endwaves';
+    host.setAttribute('aria-hidden', 'true');
+    var waves = [
+      // [amplitude, period, second amplitude, second period, y, stroke width, class]
+      [46, 1200, 14, 400, 50, 1.4, 'w1'],
+      [34, 600, 18, 1200, 46, 1, 'w2'],
+      [58, 1200, 10, 300, 55, 2.2, 'w3'],
+      [26, 400, 22, 1200, 52, .8, 'w4'],
+      [70, 1200, 16, 600, 48, 14, 'w5']
+    ];
+    waves.forEach(function (w, i) {
+      var svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('viewBox', '0 0 2400 200');
+      svg.setAttribute('preserveAspectRatio', 'none');
+      svg.setAttribute('class', 'endwave endwave--' + w[6]);
+      var d = '', phase = i * 1.3;
+      for (var x = 0; x <= 2400; x += 12) {
+        var y = 100 + w[0] * Math.sin(2 * Math.PI * x / w[1] + phase) +
+                      w[2] * Math.sin(2 * Math.PI * x / w[3] + phase * 2);
+        d += (x ? 'L' : 'M') + x + ' ' + y.toFixed(1);
+      }
+      var path = document.createElementNS(NS, 'path');
+      path.setAttribute('d', d);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-width', w[5]);
+      path.setAttribute('vector-effect', 'non-scaling-stroke');
+      svg.appendChild(path);
+      svg.style.top = (w[4] - 22) + '%';
+      host.appendChild(svg);
+    });
+    host.appendChild(Object.assign(document.createElement('span'), { className: 'endwaves__halo' }));
+    return host;
   }
 
   function renderChoices(slideId, slide) {

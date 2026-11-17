@@ -3034,3 +3034,165 @@ body:not(.is-dark)::after{display:none}
 [data-slide="S9"] .offers--cards .offer__name{padding-bottom:.35rem}
 [data-slide="S9"] .offers--cards .offer__text{border-top:0;padding-top:.6rem}
 [data-slide="S9"] .offers--cards .offer__rate{padding-bottom:.4rem}
+
+/* ==================================================================
+   END CARD, NOVEMBER 2026
+   When a film ends the picture sinks into near-black and wide, slow
+   waves of copper light drift across it behind the button. The button
+   is a lit pill rather than a brown plate: it breathes a soft glow and
+   sends out a ripple every few seconds, the only thing on screen that
+   moves with any purpose.
+   ================================================================== */
+.film.is-ended .reel__screen::after{
+  background:
+    radial-gradient(60% 55% at 50% 50%,#1A0F0899 0%,transparent 70%),
+    linear-gradient(180deg,#070403E6 0%,#0B0604D9 50%,#070403EB 100%);
+  animation:scrim 900ms var(--ease) both;
+}
+.endwaves{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  overflow:hidden;
+  border-radius:inherit;
+  pointer-events:none;
+  animation:endwaves-in 1600ms var(--ease) both;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 82%,transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 82%,transparent 100%);
+}
+@keyframes endwaves-in{from{opacity:0}to{opacity:1}}
+.endwave{
+  position:absolute;
+  left:0;
+  width:200%;
+  height:44%;
+  overflow:visible;
+  animation:endwave-drift 40s linear infinite;
+  will-change:transform;
+}
+.endwave path{stroke-linecap:round}
+.endwave--w1{animation-duration:34s}
+.endwave--w1 path{stroke:#F2B77C;opacity:.55}
+.endwave--w2{animation-duration:26s;animation-direction:reverse}
+.endwave--w2 path{stroke:#FFD9AE;opacity:.35}
+.endwave--w3{animation-duration:48s;filter:blur(1.5px)}
+.endwave--w3 path{stroke:#D9894A;opacity:.5}
+.endwave--w4{animation-duration:21s;animation-direction:reverse}
+.endwave--w4 path{stroke:#F7CFA0;opacity:.28}
+.endwave--w5{animation-duration:62s;filter:blur(14px)}
+.endwave--w5 path{stroke:#C8692E;opacity:.55}
+@keyframes endwave-drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* the light the button sits in */
+.endwaves__halo{
+  position:absolute;
+  left:50%;top:50%;
+  width:min(58%,40rem);
+  aspect-ratio:2.4;
+  translate:-50% -50%;
+  border-radius:50%;
+  background:radial-gradient(closest-side,#E08A4A59 0%,#B8602A26 45%,transparent 100%);
+  filter:blur(18px);
+  animation:endhalo 5.6s ease-in-out infinite;
+}
+@keyframes endhalo{0%,100%{opacity:.7;scale:.94}50%{opacity:1;scale:1.06}}
+
+/* the button */
+.slide--cinema .choices--revealed .choice--primary{
+  position:relative;
+  overflow:visible;
+  min-width:min(19rem,100%);
+  padding:1.05rem 1.15rem 1.05rem 2rem;
+  gap:1.4rem;
+  border-radius:999px;
+  border:1px solid #FFD5A666;
+  background:
+    linear-gradient(180deg,#FFFFFF2E 0%,#FFFFFF00 48%),
+    linear-gradient(115deg,#E9A266 0%,#C8773D 42%,#A1562A 100%);
+  color:#FFFFFF;
+  font-weight:600;
+  letter-spacing:.01em;
+  text-shadow:0 1px 2px #4A200A66;
+  box-shadow:
+    inset 0 1px 0 #FFE6C8B3,
+    inset 0 -10px 22px -8px #5A240A80,
+    0 0 0 1px #00000040,
+    0 22px 44px -16px #000000D9,
+    0 0 28px 2px #E2904F59;
+  animation:
+    endcard 420ms var(--ease) both,
+    endglow 3s ease-in-out 700ms infinite;
+}
+.slide--cinema .choices--revealed .choice--primary:hover{
+  translate:0 -2px;
+  background:
+    linear-gradient(180deg,#FFFFFF3D 0%,#FFFFFF00 48%),
+    linear-gradient(115deg,#F0AE72 0%,#D0814A 42%,#AB5F30 100%);
+}
+.slide--cinema .choices--revealed .choice--primary:focus-visible{outline:2px solid #FFE1BD;outline-offset:6px}
+@keyframes endglow{
+  0%,100%{box-shadow:inset 0 1px 0 #FFE6C8B3,inset 0 -10px 22px -8px #5A240A80,0 0 0 1px #00000040,0 22px 44px -16px #000000D9,0 0 24px 0 #E2904F4D}
+  50%    {box-shadow:inset 0 1px 0 #FFE6C8B3,inset 0 -10px 22px -8px #5A240A80,0 0 0 1px #00000040,0 22px 44px -16px #000000D9,0 0 52px 8px #EE9C5A8C}
+}
+/* two rings that leave the button in turn and fade as they widen */
+.slide--cinema .choices--revealed .choice--primary::before,
+.slide--cinema .choices--revealed .choice--primary::after{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  z-index:-1;
+  border-radius:inherit;
+  border:1.5px solid #F4BC86;
+  pointer-events:none;
+  opacity:0;
+  animation:endripple 3s cubic-bezier(.2,.6,.3,1) 900ms infinite;
+}
+.slide--cinema .choices--revealed .choice--primary::after{animation-delay:2.4s}
+@keyframes endripple{
+  0%  {inset:-1px;opacity:.75}
+  100%{inset:-26px -34px;opacity:0}
+}
+.slide--cinema .choices--revealed .choice--primary .choice__arrow{
+  width:2.6rem;height:2.6rem;
+  border:0;
+  background:#FFFFFF2B;
+  box-shadow:inset 0 0 0 1.5px #FFFFFFB3;
+  color:#FFFFFF;
+}
+
+@media (max-width:640px){
+  .endwave{height:60%}
+  .slide--cinema .choices--revealed .choice--primary{min-width:0;padding:.9rem .95rem .9rem 1.5rem;gap:1rem;font-size:1rem}
+  .slide--cinema .choices--revealed .choice--primary .choice__arrow{width:2.2rem;height:2.2rem}
+  @keyframes endripple{0%{inset:-1px;opacity:.7}100%{inset:-16px -20px;opacity:0}}
+}
+@media (prefers-reduced-motion:reduce){
+  .endwave,.endwaves__halo{animation:none}
+  .slide--cinema .choices--revealed .choice--primary::before,
+  .slide--cinema .choices--revealed .choice--primary::after{display:none}
+}
+/* the same waves across the whole screen, behind the framed film, so
+   the room around the picture is not left as a flat brown field */
+.endwaves--stage{
+  position:fixed;
+  z-index:0;
+  border-radius:0;
+  opacity:.75;
+}
+.endwaves--stage .endwave{height:36%}
+.endwaves--stage .endwaves__halo{display:none}
+body:has(.endwaves--stage) .stage{position:relative;z-index:1}
+@media (max-width:640px){
+  .endwaves--stage{opacity:1}
+  .endwaves--stage .endwave{height:22%}
+}
+/* on a phone the framed film is a small band in a tall dark screen:
+   the waves fill the space above and below it instead */
+@media (max-width:640px){
+  .endwaves--stage .endwave{height:16%}
+  .endwaves--stage .endwave:nth-child(1){top:16% !important}
+  .endwaves--stage .endwave:nth-child(2){top:24% !important}
+  .endwaves--stage .endwave:nth-child(3){top:62% !important}
+  .endwaves--stage .endwave:nth-child(4){top:70% !important}
+  .endwaves--stage .endwave:nth-child(5){top:20% !important}
+}
