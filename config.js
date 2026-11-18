@@ -38,12 +38,12 @@ window.IDECIDE_CONFIG = {
      The keys match the offer ids in data/funnel.js. */
   ghl: {
     checkout: {
-      'hour-1':        'ghl-placeholder.html?for=hour-1',         // One-Hour Experience, $100 total, use within 90 days of purchase
-      'pack-3':        'ghl-placeholder.html?for=pack-3',         // Three-Hour Pack, $157 total, use within 90 days
-      'pack-10':       'ghl-placeholder.html?for=pack-10',        // Ten-Hour Pack, $379 total, use within 90 days
-      'vita-recharge': 'ghl-placeholder.html?for=vita-recharge',  // Vita Recharge, $397 a month
-      'vita-restore':  'ghl-placeholder.html?for=vita-restore',   // Vita Restore, $597 a month
-      'vita-radiate':  'ghl-placeholder.html?for=vita-radiate'    // Vita Radiate, $897 a month
+      'hour-1':        'https://access.radiantwavelounge.com/hour-1',         // One-Hour Experience, $100 total, use within 90 days of purchase
+      'pack-3':        'https://access.radiantwavelounge.com/hour-3',         // Three-Hour Pack, $157 total, use within 90 days
+      'pack-10':       'https://access.radiantwavelounge.com/hour-10',        // Ten-Hour Pack, $379 total, use within 90 days
+      'vita-recharge': 'https://access.radiantwavelounge.com/vita-recharge',  // Vita Recharge, $397 a month
+      'vita-restore':  'https://access.radiantwavelounge.com/vita-restore',   // Vita Restore, $597 a month
+      'vita-radiate':  'https://access.radiantwavelounge.com/vita-radiate'    // Vita Radiate, $897 a month
     },
     call: 'ghl-placeholder.html?for=call',                         // GHL calendar: system sales calls and questions
     /* Append first_name, last_name, email and phone (whatever the
